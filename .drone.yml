@@ -1,0 +1,104 @@
+---
+kind: pipeline
+type: docker
+name: pull_request
+
+steps:
+  - name: build
+    image: maven:3-openjdk-15
+    volumes:
+      - name: mvn
+        path: /root/.m2/settings.xml
+    environment:
+      NEXUS_USER:
+        from_secret: NEXUS_USER
+      NEXUS_PW:
+        from_secret: NEXUS_PW
+    commands:
+      - mvn clean install -Pvalidate -DskipTests=true -Dmaven.javadoc.skip=true -V
+
+volumes:
+  - name: mvn
+    host:
+      path: /srv/drone/.m2/settings.xml
+
+trigger:
+  event:
+    - pull_request
+
+---
+kind: pipeline
+type: docker
+name: master
+
+steps:
+  - name: deploy_maven
+    image: maven:3-openjdk-15
+    volumes:
+      - name: mvn
+        path: /root/.m2/settings.xml
+    environment:
+      NEXUS_USER:
+        from_secret: NEXUS_USER
+      NEXUS_PW:
+        from_secret: NEXUS_PW
+    commands:
+      - mvn clean deploy -Pvalidate -Pmig-maven-repo -DskipTests=true -Dmaven.javadoc.skip=true -V
+
+volumes:
+  - name: mvn
+    host:
+      path: /srv/drone/.m2/settings.xml
+
+trigger:
+  event:
+    - push
+  branch:
+    - master
+
+---
+kind: pipeline
+type: docker
+name: develop
+
+steps:
+  - name: gate
+    image: maven:3-openjdk-15
+    volumes:
+      - name: mvn
+        path: /root/.m2/settings.xml
+    environment:
+      NEXUS_USER:
+        from_secret: NEXUS_USER
+      NEXUS_PW:
+        from_secret: NEXUS_PW
+    commands:
+      - if echo $(mvn -q -Dexec.executable=echo -Dexec.args='$${project.version}' --non-recursive exec:exec) | grep -i "SNAPSHOT"; then touch SNAPSHOT; fi
+
+  - name: deploy_maven
+    image: maven:3-openjdk-15
+    volumes:
+      - name: mvn
+        path: /root/.m2/settings.xml
+    environment:
+      NEXUS_USER:
+        from_secret: NEXUS_USER
+      NEXUS_PW:
+        from_secret: NEXUS_PW
+    commands:
+      - if [ -f SNAPSHOT ]; then
+      -   mvn clean deploy -Pvalidate -Pmig-maven-repo -DskipTests=true -Dmaven.javadoc.skip=true -V
+      - else
+      -   echo "No SNAPSHOT, skipping ..."
+      - fi
+
+volumes:
+  - name: mvn
+    host:
+      path: /srv/drone/.m2/settings.xml
+
+trigger:
+  event:
+    - push
+  branch:
+    - develop

@@ -1,0 +1,1417 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "DataElementHub Rest API",
+    "contact": {
+      "name": "Medical Informatics Group",
+      "url": "http://www.mig-frankfurt.de",
+      "email": "vengadeswaran@med.uni-frankfurt.de"
+    },
+    "description": "REST API Documentation!\n\n  Github repositories:\n\n<https://github.com/mig-frankfurt/dataelementhub.dal>\n\n<https://github.com/mig-frankfurt/dataelementhub.model>\n\n<https://github.com/mig-frankfurt/dataelementhub.rest>\n\n<https://github.com/mig-frankfurt/dataelementhub.gui>\n\nContact:\n\n",
+    "version": "1.0.0",
+    "license": {
+      "url": "https://www.gnu.org/licenses/agpl-3.0.de.html",
+      "name": "License: AGPLv3"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8090",
+      "description": "Generated server url"
+    }
+  ],
+  "paths": {
+    "/element/{urn}/release": {
+      "patch": {
+        "tags": [
+          "Element"
+        ],
+        "summary": "Release Element by URN.",
+        "operationId": "release",
+        "parameters": [
+          {
+            "name": "urn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/element/{urn}": {
+      "get": {
+        "tags": [
+          "Element"
+        ],
+        "summary": "Get Element by URN.",
+        "operationId": "read",
+        "parameters": [
+          {
+            "name": "urn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Accept-Language",
+            "type": "string",
+            "required": false,
+            "example": "de-DE"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Element"
+        ],
+        "summary": "Update an Element with one of the models Dataelement, Dataelementgroup or Record",
+        "operationId": "update",
+        "parameters": [
+          {
+            "name": "urn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "default response",
+          "content": {
+            "*/*": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/DataElement"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DataElementGroup"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Record"
+                  }
+                ]
+              },
+              "examples": {
+                "DATAELEMENT": {
+                  "description": "DATAELEMENT",
+                  "value": {
+                    "definitions": [
+                      {
+                        "designation": "Geschlecht",
+                        "definition": "Geschlecht des Patienten",
+                        "language": "de"
+                      },
+                      {
+                        "designation": "gender",
+                        "definition": "patient´s gender",
+                        "language": "en"
+                      }
+                    ],
+                    "valueDomain": {
+                      "type": "STRING",
+                      "text": {
+                        "useRegEx": false,
+                        "regEx": null,
+                        "useMaximumLength": false
+                      }
+                    },
+                    "slots": [
+                      {
+                        "name": "slot_name",
+                        "value": "slot_value"
+                      }
+                    ],
+                    "conceptAssociations": [
+                      {
+                        "conceptId": 1,
+                        "system": "ca_system",
+                        "sourceId": 1,
+                        "version": "ca_version",
+                        "term": "ca_term",
+                        "text": "ca_text",
+                        "linktype": "undefined",
+                        "scopedIdentifierId": 1
+                      }
+                    ]
+                  }
+                },
+                "DATAELEMENTGROUP": {
+                  "description": "DATAELEMENTGROUP",
+                  "value": {
+                    "definitions": [
+                      {
+                        "designation": "people",
+                        "definition": "smartphone",
+                        "language": "de"
+                      }
+                    ],
+                    "members": {
+                      "dataElementGroups": [],
+                      "dataElements": [
+                        "urn:1:dataelement:1:1"
+                      ],
+                      "records": []
+                    },
+                    "slots": [
+                      {
+                        "name": "slot_DEG",
+                        "value": "slot_value"
+                      }
+                    ]
+                  }
+                },
+                "RECORD": {
+                  "description": "RECORD",
+                  "value": {
+                    "definitions": [
+                      {
+                        "designation": "people",
+                        "definition": "smartphone",
+                        "language": "de"
+                      }
+                    ],
+                    "members": {
+                      "dataElementGroups": [],
+                      "dataElements": [
+                        "urn:1:dataelement:1:1"
+                      ],
+                      "records": []
+                    },
+                    "slots": [
+                      {
+                        "name": "slot_DEG",
+                        "value": "slot_value"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Element"
+        ],
+        "summary": "Delete Element by URN.",
+        "operationId": "delete",
+        "parameters": [
+          {
+            "name": "urn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/element/{urn}/valuedomain": {
+      "get": {
+        "tags": [
+          "Element"
+        ],
+        "summary": "Get ValueDomain from a specified Element.",
+        "operationId": "release",
+        "parameters": [
+          {
+            "name": "urn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/element/{urn}/definitions": {
+      "get": {
+        "tags": [
+          "Element"
+        ],
+        "summary": "Get Definitions from a specified Element.",
+        "operationId": "release",
+        "parameters": [
+          {
+            "name": "urn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/element/{urn}/slots": {
+      "get": {
+        "tags": [
+          "Element"
+        ],
+        "summary": "Get Slots from a specified Element.",
+        "operationId": "release",
+        "parameters": [
+          {
+            "name": "urn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/element/{urn}/validation": {
+      "get": {
+        "tags": [
+          "Element"
+        ],
+        "summary": "Get Validation from a specified Element.",
+        "operationId": "release",
+        "parameters": [
+          {
+            "name": "urn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/element/{urn}/identification": {
+      "get": {
+        "tags": [
+          "Element"
+        ],
+        "summary": "Get Identification from a specified Element.",
+        "operationId": "release",
+        "parameters": [
+          {
+            "name": "urn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/element/{urn}/conceptassociation": {
+      "get": {
+        "tags": [
+          "Element"
+        ],
+        "summary": "Get ConceptsAssociations from a specified Element.",
+        "operationId": "release",
+        "parameters": [
+          {
+            "name": "urn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/element": {
+      "post": {
+        "tags": [
+          "Element"
+        ],
+        "summary": "Create an Element with one of the models Dataelement, Dataelementgroup or Record",
+        "operationId": "create",
+        "requestBody": {
+          "description": "default response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/DataElement"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DataElementGroup"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Record"
+                  }
+                ]
+              },
+              "examples": {
+                "DATAELEMENT": {
+                  "description": "DATAELEMENT",
+                  "value": {
+                    "identification": {
+                      "elementType": "DATAELEMENT",
+                      "namespaceId": 1,
+                      "namespaceUrn": "urn:1:namespace:1:1",
+                      "status": "RELEASED"
+                    },
+                    "definitions": [
+                      {
+                        "designation": "Geschlecht",
+                        "definition": "Geschlecht des Patienten",
+                        "language": "de"
+                      },
+                      {
+                        "designation": "gender",
+                        "definition": "patient´s gender",
+                        "language": "en"
+                      }
+                    ],
+                    "valueDomain": {
+                      "type": "STRING",
+                      "text": {
+                        "useRegEx": false,
+                        "regEx": null,
+                        "useMaximumLength": false
+                      }
+                    },
+                    "slots": [
+                      {
+                        "name": "slot_name",
+                        "value": "slot_value"
+                      }
+                    ],
+                    "conceptAssociations": [
+                      {
+                        "conceptId": 1,
+                        "system": "ca_system",
+                        "sourceId": 1,
+                        "version": "ca_version",
+                        "term": "ca_term",
+                        "text": "ca_text",
+                        "linktype": "undefined",
+                        "scopedIdentifierId": 1
+                      }
+                    ]
+                  }
+                },
+                "DATAELEMENTGROUP": {
+                  "description": "DATAELEMENTGROUP",
+                  "value": {
+                    "identification": {
+                      "elementType": "DATAELEMENTGROUP",
+                      "namespaceId": 1,
+                      "status": "RELEASED"
+                    },
+                    "definitions": [
+                      {
+                        "designation": "people",
+                        "definition": "smartphone",
+                        "language": "de"
+                      }
+                    ],
+                    "members": {
+                      "dataElementGroups": [],
+                      "dataElements": [
+                        "urn:1:dataelement:1:1"
+                      ],
+                      "records": []
+                    },
+                    "slots": [
+                      {
+                        "name": "slot_DEG",
+                        "value": "slot_value"
+                      }
+                    ]
+                  }
+                },
+                "RECORD": {
+                  "description": "RECORD",
+                  "value": {
+                    "identification": {
+                      "elementType": "RECORD",
+                      "namespaceId": 1,
+                      "status": "RELEASED"
+                    },
+                    "definitions": [
+                      {
+                        "designation": "people",
+                        "definition": "smartphone",
+                        "language": "de"
+                      }
+                    ],
+                    "members": {
+                      "dataElementGroups": [],
+                      "dataElements": [
+                        "urn:1:dataelement:1:1"
+                      ],
+                      "records": []
+                    },
+                    "slots": [
+                      {
+                        "name": "slot_DEG",
+                        "value": "slot_value"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "CREATED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/namespaces/{namespaceId}/release": {
+      "patch": {
+        "tags": [
+          "Namespace"
+        ],
+        "summary": "Release Namespace by id.",
+        "operationId": "release_1",
+        "parameters": [
+          {
+            "name": "namespaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/namespaces/?scope={scope}": {
+      "get": {
+        "tags": [
+          "Namespace"
+        ],
+        "summary": "Get all Namespaces with specified scope.",
+        "operationId": "",
+        "parameters": [
+          {
+            "name": "scope",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["read", "write", "admin"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/namespaces/{namespaceId}": {
+      "get": {
+        "tags": [
+          "Namespace"
+        ],
+        "summary": "Get Namespace by id.",
+        "operationId": "read_1",
+        "parameters": [
+          {
+            "name": "namespaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Accept-Language",
+            "type": "string",
+            "required": false,
+            "example": "de-DE"
+          }
+
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Namespace"
+        ],
+        "operationId": "update_1",
+        "parameters": [
+          {
+            "name": "namespaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Namespace"
+        ],
+        "summary": "Delete Namespace by id.",
+        "operationId": "delete_1",
+        "parameters": [
+          {
+            "name": "namespaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/namespaces": {
+      "post": {
+        "tags": [
+          "Namespace"
+        ],
+        "operationId": "create_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              },
+              "examples": {
+                "NAMESPACE": {
+                  "description": "NAMESPACE",
+                  "value": {
+                    "identification": {
+                      "elementType": "NAMESPACE",
+                      "hideNamespace": false,
+                      "status": "RELEASED"
+                    },
+                    "definitions": [
+                      {
+                        "designation": "Namespace designation",
+                        "definition": "Namespace definition",
+                        "language": "en"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/tree/{nodeId}": {
+      "get": {
+        "operationId": "get",
+        "parameters": [
+          {
+            "name": "nodeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "DRAFT",
+                  "RELEASED",
+                  "OUTDATED",
+                  "STAGED"
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TreeNode"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/version": {
+      "get": {
+        "operationId": "getVersion",
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuildInformation"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ConceptAssociation": {
+        "type": "object",
+        "properties": {
+          "conceptId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "system": {
+            "type": "string"
+          },
+          "sourceId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "version": {
+            "type": "string"
+          },
+          "term": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "linktype": {
+            "type": "string",
+            "enum": [
+              "undefined",
+              "equal",
+              "equivalent",
+              "wider",
+              "subsumes",
+              "narrower",
+              "specializes",
+              "inexact"
+            ]
+          },
+          "scopedIdentifierId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DataElement": {
+        "type": "object",
+        "properties": {
+          "identification": {
+            "$ref": "#/components/schemas/Identification"
+          },
+          "definitions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Definition"
+            }
+          },
+          "slots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Slot"
+            }
+          },
+          "valueDomain": {
+            "$ref": "#/components/schemas/ValueDomain"
+          },
+          "conceptAssociations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConceptAssociation"
+            }
+          }
+        }
+      },
+      "Datetime": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string"
+          },
+          "time": {
+            "type": "string"
+          },
+          "hourFormat": {
+            "type": "string"
+          }
+        }
+      },
+      "Definition": {
+        "type": "object",
+        "properties": {
+          "designation": {
+            "type": "string"
+          },
+          "definition": {
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          }
+        }
+      },
+      "Identification": {
+        "type": "object",
+        "properties": {
+          "elementType": {
+            "type": "string",
+            "enum": [
+              "DATAELEMENTGROUP",
+              "RECORD",
+              "DATAELEMENT",
+              "CATALOG",
+              "CODE",
+              "NAMESPACE",
+              "ENUMERATED_VALUE_DOMAIN",
+              "DESCRIBED_VALUE_DOMAIN",
+              "CATALOG_VALUE_DOMAIN",
+              "PERMISSIBLE_VALUE"
+            ]
+          },
+          "namespaceId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "RELEASED",
+              "OUTDATED",
+              "STAGED"
+            ]
+          },
+          "identifier": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "revision": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "urn": {
+            "type": "string"
+          },
+          "hideNamespace": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Numeric": {
+        "type": "object",
+        "properties": {
+          "useMinimum": {
+            "type": "boolean"
+          },
+          "useMaximum": {
+            "type": "boolean"
+          },
+          "minimum": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maximum": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unitOfMeasure": {
+            "type": "string"
+          }
+        }
+      },
+      "PermittedValue": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "meanings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Definition"
+            }
+          }
+        }
+      },
+      "Slot": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      "Text": {
+        "type": "object",
+        "properties": {
+          "useRegEx": {
+            "type": "boolean"
+          },
+          "regEx": {
+            "type": "string"
+          },
+          "useMaximumLength": {
+            "type": "boolean"
+          },
+          "maximumLength": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ValueDomain": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "text": {
+            "$ref": "#/components/schemas/Text"
+          },
+          "permittedValues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PermittedValue"
+            }
+          },
+          "numeric": {
+            "$ref": "#/components/schemas/Numeric"
+          },
+          "datetime": {
+            "$ref": "#/components/schemas/Datetime"
+          }
+        }
+      },
+      "DataElementGroup": {
+        "type": "object",
+        "properties": {
+          "identification": {
+            "$ref": "#/components/schemas/Identification"
+          },
+          "definitions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Definition"
+            }
+          },
+          "slots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Slot"
+            }
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Member"
+            }
+          }
+        }
+      },
+      "Member": {
+        "type": "object",
+        "properties": {
+          "elementUrn": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "RELEASED",
+              "OUTDATED",
+              "STAGED"
+            ]
+          },
+          "order": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "Record": {
+        "type": "object",
+        "properties": {
+          "identification": {
+            "$ref": "#/components/schemas/Identification"
+          },
+          "definitions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Definition"
+            }
+          },
+          "slots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Slot"
+            }
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Member"
+            }
+          }
+        }
+      },
+      "Namespace": {
+        "type": "object",
+        "properties": {
+          "identification": {
+            "$ref": "#/components/schemas/Identification"
+          },
+          "definitions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Definition"
+            }
+          },
+          "slots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Slot"
+            }
+          }
+        }
+      },
+      "AttributesList": {
+        "type": "object",
+        "properties": {
+          "attributes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ITree": {
+        "type": "object",
+        "properties": {
+          "icon": {
+            "type": "string"
+          },
+          "state": {
+            "$ref": "#/components/schemas/State"
+          },
+          "a": {
+            "$ref": "#/components/schemas/AttributesList"
+          },
+          "li": {
+            "$ref": "#/components/schemas/AttributesList"
+          }
+        }
+      },
+      "State": {
+        "type": "object",
+        "properties": {
+          "checked": {
+            "type": "boolean"
+          },
+          "collapsed": {
+            "type": "boolean"
+          },
+          "draggable": {
+            "type": "boolean"
+          },
+          "editable": {
+            "type": "boolean"
+          },
+          "focused": {
+            "type": "boolean"
+          },
+          "hidden": {
+            "type": "boolean"
+          },
+          "indeterminate": {
+            "type": "boolean"
+          },
+          "loading": {
+            "type": "boolean"
+          },
+          "matched": {
+            "type": "boolean"
+          },
+          "removed": {
+            "type": "boolean"
+          },
+          "rendered": {
+            "type": "boolean"
+          },
+          "selectable": {
+            "type": "boolean"
+          },
+          "selected": {
+            "type": "boolean"
+          },
+          "drop-target": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TreeNode": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "itree": {
+            "$ref": "#/components/schemas/ITree"
+          },
+          "children": {
+            "type": "boolean"
+          }
+        }
+      },
+      "BuildInformation": {
+        "type": "object",
+        "properties": {
+          "buildVersion": {
+            "type": "string"
+          },
+          "buildDate": {
+            "type": "string"
+          },
+          "buildBranch": {
+            "type": "string"
+          },
+          "buildHash": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "basicAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

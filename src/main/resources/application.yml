@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${DB_HOST}/${DB_NAME}
+    username: ${DB_USER_NAME}
+    password: ${DB_USER_PW}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${ISSUER_URI}
+          jwk-set-uri: ${JWK_SET_URI}
+
+springdoc:
+  swagger-ui:
+    url: /api-docs.json
+
+server:
+  port: 8090
