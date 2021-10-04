@@ -66,8 +66,8 @@ public class ElementController {
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity create(@RequestBody String content,
       UriComponentsBuilder uriComponentsBuilder,
-      @RequestHeader(HttpHeaders.HOST) String host,
-      @RequestHeader("x-forwarded-proto") String scheme) {
+      @RequestHeader(value = HttpHeaders.HOST, required = false) String host,
+      @RequestHeader(value = "x-forwarded-proto", required = false) String scheme) {
     try {
       jsonValidationService.validate(content);
       Element element = Deserializer.getElement(content);
@@ -80,11 +80,11 @@ public class ElementController {
             uriComponentsBuilder.path("/v1/element/{urn}")
                 .host(host)
                 .scheme(scheme)
-                .buildAndExpand(scopedIdentifier.getIdentifier());
+                .buildAndExpand(IdentificationHandler.toUrn(scopedIdentifier));
       } else {
         uriComponents =
             uriComponentsBuilder.path("/v1/element/{urn}")
-                .buildAndExpand(scopedIdentifier.getIdentifier());
+                .buildAndExpand(IdentificationHandler.toUrn(scopedIdentifier));
       }
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.setLocation(uriComponents.toUri());
@@ -125,8 +125,8 @@ public class ElementController {
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity update(@RequestBody String content, @PathVariable("urn") String oldUrn,
       UriComponentsBuilder uriComponentsBuilder,
-      @RequestHeader(HttpHeaders.HOST) String host,
-      @RequestHeader("x-forwarded-proto") String scheme) {
+      @RequestHeader(value = HttpHeaders.HOST, required = false) String host,
+      @RequestHeader(value = "x-forwarded-proto", required = false) String scheme) {
     Identification oldIdentification = IdentificationHandler.fromUrn(oldUrn);
     if (oldIdentification == null) {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);

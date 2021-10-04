@@ -78,8 +78,8 @@ public class SourceController {
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity addSource(@RequestBody Source source,
       UriComponentsBuilder uriComponentsBuilder,
-      @RequestHeader(HttpHeaders.HOST) String host,
-      @RequestHeader("x-forwarded-proto") String scheme) {
+      @RequestHeader(value = HttpHeaders.HOST, required = false) String host,
+      @RequestHeader(value = "x-forwarded-proto", required = false) String scheme) {
     try {
       int sourceId = sourceService.create(source);
       UriComponents uriComponents;
