@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2021-10-04
+### Fixed
+- x-forwarded-proto header and host header are optional
+### Security
+- update commons.fileupload due to [CVE-2016-1000031](https://github.com/advisories/GHSA-7x9j-7223-rg5m)
+
 ## [1.0.0] - 2021-09-24
 ### Added
 - initial version
