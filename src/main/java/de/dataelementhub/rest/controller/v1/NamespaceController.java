@@ -121,8 +121,8 @@ public class NamespaceController {
   @PostMapping
   public ResponseEntity create(@RequestBody String content,
       UriComponentsBuilder uriComponentsBuilder,
-      @RequestHeader(HttpHeaders.HOST) String host,
-      @RequestHeader("x-forwarded-proto") String scheme) {
+      @RequestHeader(value = HttpHeaders.HOST, required = false) String host,
+      @RequestHeader(value = "x-forwarded-proto", required = false) String scheme) {
     try {
       jsonValidationService.validate(content);
       Element element = Deserializer.getElement(content);
@@ -210,8 +210,8 @@ public class NamespaceController {
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity update(@PathVariable(value = "namespaceId") String oldNamespaceId,
       @RequestBody String content, UriComponentsBuilder uriComponentsBuilder,
-      @RequestHeader(HttpHeaders.HOST) String host,
-      @RequestHeader("x-forwarded-proto") String scheme) {
+      @RequestHeader(value = HttpHeaders.HOST, required = false) String host,
+      @RequestHeader(value = "x-forwarded-proto", required = false) String scheme) {
     Element element = Deserializer.getElement(content);
     Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
     Element oldNamespace = elementService
