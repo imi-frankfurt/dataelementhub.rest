@@ -14,14 +14,8 @@
       "name": "License: AGPLv3"
     }
   },
-  "servers": [
-    {
-      "url": "http://localhost:8090",
-      "description": "Generated server url"
-    }
-  ],
   "paths": {
-    "/element/{urn}/release": {
+    "/v1/element/{urn}/release": {
       "patch": {
         "tags": [
           "Element"
@@ -52,12 +46,15 @@
         },
         "security": [
           {
+            "oauth2": []
+          },
+          {
             "basicAuth": []
           }
         ]
       }
     },
-    "/element/{urn}": {
+    "/v1/element/{urn}": {
       "get": {
         "tags": [
           "Element"
@@ -95,6 +92,9 @@
         },
         "security": [
           {
+            "oauth2": []
+          },
+          {
             "basicAuth": []
           }
         ]
@@ -118,7 +118,7 @@
         "requestBody": {
           "description": "default response",
           "content": {
-            "*/*": {
+            "application/json": {
               "schema": {
                 "oneOf": [
                   {
@@ -186,13 +186,7 @@
                         "language": "de"
                       }
                     ],
-                    "members": {
-                      "dataElementGroups": [],
-                      "dataElements": [
-                        "urn:1:dataelement:1:1"
-                      ],
-                      "records": []
-                    },
+                    "members": [],
                     "slots": [
                       {
                         "name": "slot_DEG",
@@ -211,13 +205,7 @@
                         "language": "de"
                       }
                     ],
-                    "members": {
-                      "dataElementGroups": [],
-                      "dataElements": [
-                        "urn:1:dataelement:1:1"
-                      ],
-                      "records": []
-                    },
+                    "members": [],
                     "slots": [
                       {
                         "name": "slot_DEG",
@@ -243,6 +231,9 @@
           }
         },
         "security": [
+          {
+            "oauth2": []
+          },
           {
             "basicAuth": []
           }
@@ -278,12 +269,15 @@
         },
         "security": [
           {
+            "oauth2": []
+          },
+          {
             "basicAuth": []
           }
         ]
       }
     },
-    "/element/{urn}/valuedomain": {
+    "/v1/element/{urn}/valuedomain": {
       "get": {
         "tags": [
           "Element"
@@ -314,12 +308,15 @@
         },
         "security": [
           {
+            "oauth2": []
+          },
+          {
             "basicAuth": []
           }
         ]
       }
     },
-    "/element/{urn}/definitions": {
+    "/v1/element/{urn}/definitions": {
       "get": {
         "tags": [
           "Element"
@@ -350,12 +347,15 @@
         },
         "security": [
           {
+            "oauth2": []
+          },
+          {
             "basicAuth": []
           }
         ]
       }
     },
-    "/element/{urn}/slots": {
+    "/v1/element/{urn}/slots": {
       "get": {
         "tags": [
           "Element"
@@ -386,12 +386,15 @@
         },
         "security": [
           {
+            "oauth2": []
+          },
+          {
             "basicAuth": []
           }
         ]
       }
     },
-    "/element/{urn}/validation": {
+    "/v1/element/{urn}/validation": {
       "get": {
         "tags": [
           "Element"
@@ -422,12 +425,15 @@
         },
         "security": [
           {
+            "oauth2": []
+          },
+          {
             "basicAuth": []
           }
         ]
       }
     },
-    "/element/{urn}/identification": {
+    "/v1/element/{urn}/identification": {
       "get": {
         "tags": [
           "Element"
@@ -458,12 +464,15 @@
         },
         "security": [
           {
+            "oauth2": []
+          },
+          {
             "basicAuth": []
           }
         ]
       }
     },
-    "/element/{urn}/conceptassociation": {
+    "/v1/element/{urn}/conceptassociation": {
       "get": {
         "tags": [
           "Element"
@@ -494,12 +503,15 @@
         },
         "security": [
           {
+            "oauth2": []
+          },
+          {
             "basicAuth": []
           }
         ]
       }
     },
-    "/element": {
+    "/v1/element": {
       "post": {
         "tags": [
           "Element"
@@ -579,6 +591,7 @@
                     "identification": {
                       "elementType": "DATAELEMENTGROUP",
                       "namespaceId": 1,
+                      "namespaceUrn": "urn:1:namespace:1:1",
                       "status": "RELEASED"
                     },
                     "definitions": [
@@ -588,13 +601,7 @@
                         "language": "de"
                       }
                     ],
-                    "members": {
-                      "dataElementGroups": [],
-                      "dataElements": [
-                        "urn:1:dataelement:1:1"
-                      ],
-                      "records": []
-                    },
+                    "members": [],
                     "slots": [
                       {
                         "name": "slot_DEG",
@@ -609,6 +616,7 @@
                     "identification": {
                       "elementType": "RECORD",
                       "namespaceId": 1,
+                      "namespaceUrn": "urn:1:namespace:1:1",
                       "status": "RELEASED"
                     },
                     "definitions": [
@@ -618,13 +626,7 @@
                         "language": "de"
                       }
                     ],
-                    "members": {
-                      "dataElementGroups": [],
-                      "dataElements": [
-                        "urn:1:dataelement:1:1"
-                      ],
-                      "records": []
-                    },
+                    "members": [],
                     "slots": [
                       {
                         "name": "slot_DEG",
@@ -651,12 +653,15 @@
         },
         "security": [
           {
+            "oauth2": []
+          },
+          {
             "basicAuth": []
           }
         ]
       }
     },
-    "/namespaces/{namespaceId}/release": {
+    "/v1/namespaces/{namespaceId}/release": {
       "patch": {
         "tags": [
           "Namespace"
@@ -687,12 +692,15 @@
         },
         "security": [
           {
+            "oauth2": []
+          },
+          {
             "basicAuth": []
           }
         ]
       }
     },
-    "/namespaces/?scope={scope}": {
+    "/v1/namespaces/?scope={scope}": {
       "get": {
         "tags": [
           "Namespace"
@@ -724,12 +732,15 @@
         },
         "security": [
           {
+            "oauth2": []
+          },
+          {
             "basicAuth": []
           }
         ]
       }
     },
-    "/namespaces/{namespaceId}": {
+    "/v1/namespaces/{namespaceId}": {
       "get": {
         "tags": [
           "Namespace"
@@ -768,6 +779,9 @@
         },
         "security": [
           {
+            "oauth2": []
+          },
+          {
             "basicAuth": []
           }
         ]
@@ -789,7 +803,7 @@
         ],
         "requestBody": {
           "content": {
-            "*/*": {
+            "application/json": {
               "schema": {
                 "type": "string"
               }
@@ -809,6 +823,9 @@
           }
         },
         "security": [
+          {
+            "oauth2": []
+          },
           {
             "basicAuth": []
           }
@@ -844,12 +861,15 @@
         },
         "security": [
           {
+            "oauth2": []
+          },
+          {
             "basicAuth": []
           }
         ]
       }
     },
-    "/namespaces": {
+    "/v1/namespaces": {
       "post": {
         "tags": [
           "Namespace"
@@ -896,6 +916,9 @@
           }
         },
         "security": [
+          {
+            "oauth2": []
+          },
           {
             "basicAuth": []
           }
@@ -1407,6 +1430,16 @@
       }
     },
     "securitySchemes": {
+      "oauth2": {
+        "type": "oauth2",
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://auth.dev.osse-register.de/auth/realms/dehub-demo/protocol/openid-connect/auth",
+            "scopes": {
+            }
+          }
+        }
+      },
       "basicAuth": {
         "type": "http",
         "scheme": "bearer",
