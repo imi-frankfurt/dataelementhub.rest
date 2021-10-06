@@ -258,7 +258,7 @@ public class NamespaceController {
       return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
     } catch (NoSuchMethodException e) {
       return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-    } catch (IOException e) {
+    } catch (IOException | IllegalStateException e) {
       return new ResponseEntity<>(e.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
     }
   }
