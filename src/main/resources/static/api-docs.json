@@ -136,6 +136,11 @@
                 "DATAELEMENT": {
                   "description": "DATAELEMENT",
                   "value": {
+                    "identification": {
+                      "elementType": "DATAELEMENT",
+                      "namespaceUrn": "urn:1:namespace:1:1",
+                      "status": "RELEASED"
+                    },
                     "definitions": [
                       {
                         "designation": "Geschlecht",
@@ -179,6 +184,11 @@
                 "DATAELEMENTGROUP": {
                   "description": "DATAELEMENTGROUP",
                   "value": {
+                    "identification": {
+                      "elementType": "DATAELEMENTGROUP",
+                      "namespaceUrn": "urn:1:namespace:1:1",
+                      "status": "RELEASED"
+                    },
                     "definitions": [
                       {
                         "designation": "people",
@@ -198,6 +208,11 @@
                 "RECORD": {
                   "description": "RECORD",
                   "value": {
+                    "identification": {
+                      "elementType": "RECORD",
+                      "namespaceUrn": "urn:1:namespace:1:1",
+                      "status": "RELEASED"
+                    },
                     "definitions": [
                       {
                         "designation": "people",
@@ -541,7 +556,6 @@
                   "value": {
                     "identification": {
                       "elementType": "DATAELEMENT",
-                      "namespaceId": 1,
                       "namespaceUrn": "urn:1:namespace:1:1",
                       "status": "RELEASED"
                     },
@@ -590,7 +604,6 @@
                   "value": {
                     "identification": {
                       "elementType": "DATAELEMENTGROUP",
-                      "namespaceId": 1,
                       "namespaceUrn": "urn:1:namespace:1:1",
                       "status": "RELEASED"
                     },
@@ -615,7 +628,6 @@
                   "value": {
                     "identification": {
                       "elementType": "RECORD",
-                      "namespaceId": 1,
                       "namespaceUrn": "urn:1:namespace:1:1",
                       "status": "RELEASED"
                     },
