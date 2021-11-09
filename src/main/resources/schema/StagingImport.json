@@ -1,0 +1,422 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://example.com/stagedElement.json",
+  "type": "object",
+  "title": "The DEHUB-stagedElement Schema",
+  "required": [
+    "ns2.import"
+  ],
+  "properties": {
+    "label": {
+      "$id": "#/properties/label",
+      "type": "string",
+      "title": "The Label Schema"
+    },
+    "stagedElement": {
+      "$id": "#/properties/stagedElement",
+      "type": "object",
+      "title": "The StagedElement Schema",
+      "items": {
+        "$id": "#/properties/stagedElement/items",
+        "type": "object",
+        "title": "The Items Schema",
+        "required": [
+          "identification"
+        ],
+        "properties": {
+          "identification": {
+            "type": "object",
+            "properties": {
+              "elementType": {
+                "type": "string",
+                "required": ["namespaceUrn"],
+                "enum": [
+                  "DATAELEMENT",
+                  "DATAELEMENTGROUP",
+                  "RECORD",
+                  "NAMESPACE",
+                  "DESCRIBED_VALUE_DOMAIN",
+                  "ENUMERATED_VALUE_DOMAIN",
+                  "PERMISSIBLE_VALUE"
+                ]
+              },
+              "hideNamespace": {
+                "type": "boolean",
+                "default": false
+              },
+              "identifier": {
+                "type": "integer"
+              },
+              "namespaceId": {
+                "type": "integer"
+              },
+              "namespaceUrn": {
+                "type": "string"
+              },
+              "revision": {
+                "type": "integer"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "DRAFT",
+                  "RELEASED",
+                  "OUTDATED",
+                  "STAGED"
+                ]
+              },
+              "urn": {
+                "type": "string"
+              }
+            }
+          },
+          "definitions": {
+            "title": "Definitions",
+            "description": "",
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "title": "The Items Schema",
+              "description": "",
+              "type": "object",
+              "required": [
+                "designation",
+                "language"
+              ],
+              "properties": {
+                "designation": {
+                  "title": "Designation",
+                  "description": "",
+                  "type": "string"
+                },
+                "definition": {
+                  "title": "Definition",
+                  "description": "",
+                  "type": "string"
+                },
+                "language": {
+                  "title": "Language",
+                  "description": "",
+                  "enum": [
+                    "en",
+                    "bg",
+                    "es",
+                    "cz",
+                    "da",
+                    "de",
+                    "et",
+                    "el",
+                    "fr",
+                    "ga",
+                    "hr",
+                    "it",
+                    "lv",
+                    "lt",
+                    "hu",
+                    "mt",
+                    "nl",
+                    "pl",
+                    "pt",
+                    "ro",
+                    "sk",
+                    "sl",
+                    "fi",
+                    "sv"
+                  ]
+                }
+              }
+            }
+          },
+          "slots": {
+            "title": "Slots",
+            "description": "",
+            "type": "array",
+            "items": {
+              "title": "The Items Schema",
+              "description": "",
+              "type": "object",
+              "required": [
+                "name",
+                "value"
+              ],
+              "properties": {
+                "slot_name": {
+                  "title": "name",
+                  "description": "",
+                  "type": "string"
+                },
+                "slot_value": {
+                  "title": "value",
+                  "description": "",
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "conceptAssociations": {
+            "title": "conceptAssociations",
+            "description": "",
+            "type": "array",
+            "items": {
+
+              "title": "The Items Schema",
+              "description": "",
+              "type": "object",
+              "required": [
+                "system",
+                "version",
+                "term",
+                "text",
+                "linktype"
+              ],
+              "properties": {
+                "system": {
+                  "title": "system",
+                  "description": "",
+                  "type": "string"
+                },
+                "version": {
+                  "title": "version",
+                  "description": "",
+                  "type": "string"
+                },
+                "term": {
+                  "title": "term",
+                  "description": "",
+                  "type": "string"
+                },
+                "text": {
+                  "title": "text",
+                  "description": "",
+                  "type": "string"
+                },
+                "linktype": {
+                  "title": "linktype",
+                  "description": "",
+                  "enum": [
+                    "undefined",
+                    "equal",
+                    "equivalent",
+                    "wider",
+                    "subsumes",
+                    "narrower",
+                    "specializes",
+                    "inexact"
+                  ]
+                }
+              }
+            }
+          },
+          "valueDomainUrn": {
+            "type": "string"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["elementUrn"],
+              "properties": {
+                "elementUrn": {
+                  "type": "string"
+                },
+                "order": {
+                  "type": "integer"
+                },
+                "status": {
+                  "$ref": "#/properties/stagedElement/items/properties/identification/properties/status"
+                }
+              }
+            }
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "BOOLEAN",
+              "NUMERIC",
+              "STRING",
+              "ENUMERATED",
+              "DATE",
+              "DATETIME",
+              "TIME",
+              "TBD"
+            ]
+          },
+          "urn": {
+            "type": "string"
+          },
+          "text": {
+            "title": "text",
+            "description": "",
+            "type": "object",
+            "required": [
+              "useRegEx",
+              "useMaximumLength"
+            ],
+            "properties": {
+              "useRegEx": {
+                "title": "useRegEx",
+                "description": "",
+                "type": "boolean"
+              },
+              "useMaximumLength": {
+                "title": "useMaximumLength",
+                "description": "",
+                "type": "boolean"
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": { "useRegEx": { "const": true } }
+                },
+                "then": {
+                  "required": ["regEx"],
+                  "properties": {
+                    "regEx": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": { "useMaximumLength": { "const": true } }
+                },
+                "then": {
+                  "required": ["maximumLength"],
+                  "properties": {
+                    "maximumLength": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "value": {
+            "type": "string"
+          },
+          "dateTime": {
+            "title": "dateTime",
+            "description": "",
+            "type": "object",
+            "required": [],
+            "properties": {
+              "date": {
+                "title": "date",
+                "description": "",
+                "oneOf": [
+                  { "type": "string", "pattern": "^YYYY-MM-DD$" },
+                  { "type": "string", "pattern": "^YYYY-MM$" },
+                  { "type": "string", "pattern": "^DD.MM.YYYY$" },
+                  { "type": "string", "pattern": "^MM.YYYY$" }
+                ]
+              },
+              "time": {
+                "title": "time",
+                "description": "",
+                "oneOf": [
+                  { "type": "string", "pattern": "^hh:mm:ss$" },
+                  { "type": "string", "pattern": "^hh:mm$" }
+                ]
+              },
+              "hourFormat": {
+                "title": "hourFormat",
+                "description": "",
+                "type": "string",
+                "pattern": "^24h|12h$"
+              }
+            }
+          },
+          "numeric": {
+            "title": "numeric",
+            "description": "",
+            "type": "object",
+            "required": ["type"],
+            "properties": {
+              "type": { "type":  "string"},
+              "useMinimum": { "type": "boolean" },
+              "useMaximum": { "type": "boolean" },
+              "unitOfMeasure": { "type": "string" }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": { "useMinimum": { "const": true } }
+                },
+                "then": {
+                  "required": ["minimum"],
+                  "properties": {
+                    "minimum": {
+                      "type": "number"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": { "useMaximum": { "const": true } }
+                },
+                "then": {
+                  "required": ["maximum"],
+                  "properties": {
+                    "maximum": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "permittedValues": {
+            "title": "permittedValues",
+            "description": "",
+            "type": "array",
+            "items": {
+              "title": "The Items Schema",
+              "description": "",
+              "type": "object",
+              "properties": {
+                "identification": {
+                  "$ref": "#/"
+                },
+                "definitions": {
+                  "$ref": "#/properties/stagedElement/items/properties/definitions"
+                },
+                "slots": {
+                  "$ref": "#/properties/stagedElement/items/properties/slots"
+                },
+                "value": {
+                  "title": "value",
+                  "description": "",
+                  "type": "string"
+                },
+                "urn": {
+                  "title": "urn",
+                  "description": "",
+                  "type": "string"
+                },
+                "conceptAssociations": {
+                  "$ref": "#/properties/stagedElement/items/properties/conceptAssociations"
+                }
+              },
+              "oneOf": [
+                {
+                  "required": [
+                    "definitions",
+                    "value"
+                  ]
+                },
+                {
+                  "required": [
+                    "urn"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

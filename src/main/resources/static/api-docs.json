@@ -15,6 +15,209 @@
     }
   },
   "paths": {
+    "/v1/export/?format={format}&fullExport={fullExport}": {
+      "post": {
+        "tags": [
+          "Import-Export"
+        ],
+        "summary": "Export DEHUB Elements in JSON or XML format.",
+        "operationId": "export",
+        "parameters": [
+          {
+            "name": "format",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["JSON", "XML"]
+            }
+          },
+          {
+            "name": "fullExport",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "exportDto",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "examples": {
+                "EXPORT": {
+                  "description": "EXPORT",
+                  "value": {
+                    "export": "first export",
+                    "elements": [
+                      "urn:1:namespace:1:1",
+                      "urn:1:dataelement:1:1"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/export/{exportId}": {
+      "get": {
+        "tags": [
+          "Import-Export"
+        ],
+        "summary": "Check Export Status and return export file if done.",
+        "operationId": "export",
+        "parameters": [
+          {
+            "name": "exportId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/import/?namespaceUrn={namespaceUrn}": {
+      "post": {
+        "tags": [
+          "Import-Export"
+        ],
+        "summary": "Import stagedElements into DEHUB.",
+        "operationId": "import",
+        "parameters": [
+          {
+            "name": "namespaceUrn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "importDto",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/import/{importId}": {
+      "get": {
+        "tags": [
+          "Import-Export"
+        ],
+        "summary": "Get Import Status by Id.",
+        "operationId": "import",
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
     "/v1/element/{urn}/release": {
       "patch": {
         "tags": [
