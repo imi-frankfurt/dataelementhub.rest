@@ -15,6 +15,284 @@
     }
   },
   "paths": {
+    "/v1/relations?type={type}": {
+      "get": {
+        "tags": [
+          "Element Relations"
+        ],
+        "summary": "Get Element Relations.",
+        "operationId": "relations",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "example": ["undefined", "equal", "equivalent", "wider", "subsumes",
+                "narrower", "specializes", "inexact", "supersedes"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/relations/update": {
+      "put": {
+        "tags": [
+          "Element Relations"
+        ],
+        "summary": "Update Element Relation.",
+        "operationId": "update relations",
+        "requestBody": {
+          "description": "default response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              },
+              "examples": {
+                "ElementRelations": {
+                  "description": "Update Element Relation.",
+                  "value": {
+                      "leftUrn": "urn:1:dataelement:1:1",
+                      "leftSource": 1,
+                      "rightUrn": "urn:1:dataelement:2:1",
+                      "rightSource": 1,
+                      "relation": "equal"
+                    }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/relations/delete": {
+      "delete": {
+        "tags": [
+          "Element Relations"
+        ],
+        "summary": "Delete Element Relation.",
+        "operationId": "delete relations",
+        "requestBody": {
+          "description": "default response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              },
+              "examples": {
+                "ElementRelations": {
+                  "description": "Update Element Relation.",
+                  "value": {
+                    "leftUrn": "urn:1:dataelement:1:1",
+                    "leftSource": 1,
+                    "rightUrn": "urn:1:dataelement:2:1",
+                    "rightSource": 1,
+                    "relation": "equal"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/relations": {
+      "post": {
+        "tags": [
+          "Element Relations"
+        ],
+        "summary": "Create Element Relations.",
+        "operationId": "create relations",
+        "requestBody": {
+          "description": "default response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              },
+              "examples": {
+                "ElementRelations": {
+                  "description": "ElementRelations",
+                  "value": [
+                    {
+                      "leftUrn": "urn:1:dataelement:1:1",
+                      "leftSource": 1,
+                      "rightUrn": "urn:1:dataelement:2:1",
+                      "rightSource": 1,
+                      "relation": "equal"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/search?query={query}&type={type}&status={status}&section={section}": {
+      "get": {
+        "tags": [
+          "Search"
+        ],
+        "summary": "Search for an Element.",
+        "operationId": "search",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "path",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "example": ["DATAELEMENTGROUP", "RECORD", "DATAELEMENT", "NAMESPACE",
+                "ENUMERATED_VALUE_DOMAIN", "DESCRIBED_VALUE_DOMAIN", "DEFINED_VALUE_DOMAIN",
+                "CATALOG_VALUE_DOMAIN", "PERMISSIBLE_VALUE"]
+            }
+          },
+          {
+            "name": "status",
+            "in": "path",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "example": ["RELEASED", "OUTDATED", "STAGED", "DRAFT"]
+            }
+          },
+          {
+            "name": "section",
+            "in": "path",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "example": ["definition", "designation", "slotKey", "slotValue",
+                "conceptAssociationSystem", "conceptAssociationTerm", "conceptAssociationText",
+                "dataType", "valueDomainDescription", "unitOfMeasure", "format"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
     "/v1/element/{urn}/release": {
       "patch": {
         "tags": [
