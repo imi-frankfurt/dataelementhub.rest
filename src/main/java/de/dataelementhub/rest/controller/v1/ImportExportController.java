@@ -2,7 +2,9 @@ package de.dataelementhub.rest.controller.v1;
 
 import de.dataelementhub.dal.jooq.enums.GrantType;
 import de.dataelementhub.model.DaoUtil;
+import de.dataelementhub.model.dto.importexport.ExportDescription;
 import de.dataelementhub.model.dto.importexport.ExportDto;
+import de.dataelementhub.model.dto.importexport.ImportDescription;
 import de.dataelementhub.model.service.ImportExportService;
 import de.dataelementhub.rest.DataElementHubRestApplication;
 import java.sql.Timestamp;
@@ -36,8 +38,32 @@ public class ImportExportController {
     this.importExportService = importExportService;
   }
 
-  public static String importDirectory = System.getProperty("user.dir") + "/uploads/import";
-  public static String exportDirectory = System.getProperty("user.dir") + "/uploads/export";
+  public static String importDirectory = System.getProperty("user.dir") + "/uploads/import/";
+  public static String exportDirectory = System.getProperty("user.dir") + "/uploads/export/";
+
+  /**
+   * .
+   * @return
+   */
+  @Order(SecurityProperties.BASIC_AUTH_ORDER)
+  @GetMapping(value = "/import")
+  public ResponseEntity<List<ImportDescription>> allImports() throws Exception {
+    Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
+    List<ImportDescription> importDescriptions = importExportService.allImports(userId, importDirectory);
+    return new ResponseEntity<List<ImportDescription>>(importDescriptions, HttpStatus.ACCEPTED);
+  }
+
+  /**
+   * .
+   * @return
+   */
+  @Order(SecurityProperties.BASIC_AUTH_ORDER)
+  @GetMapping(value = "/export")
+  public ResponseEntity<List<ExportDescription>> allExports() throws Exception {
+    Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
+    List<ExportDescription> exportDescriptions = importExportService.allExports(userId, exportDirectory);
+    return new ResponseEntity<List<ExportDescription>>(exportDescriptions, HttpStatus.ACCEPTED);
+  }
 
   /**
    * Upload import files to server and return import id.
@@ -70,7 +96,7 @@ public class ImportExportController {
   public ResponseEntity<String> importStatus(
       @PathVariable(value = "importId") String importId) throws Exception {
     Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
-    switch (importExportService.checkStatus(importId, userId).toUpperCase()) {
+    switch (importExportService.checkStatus(importId, userId, "import").toUpperCase()) {
       case "NOT DEFINED":
         return new ResponseEntity<>("Import ID: "
             + importId + " is not defined!", HttpStatus.NOT_ACCEPTABLE);
@@ -79,7 +105,7 @@ public class ImportExportController {
       case "PROCESSING":
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
       default:
-        throw new Exception(importExportService.checkStatus(importId, userId));
+        throw new Exception(importExportService.checkStatus(importId, userId, "import"));
     }
   }
 
@@ -94,13 +120,13 @@ public class ImportExportController {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     String timestamp =
             new Timestamp(System.currentTimeMillis()).toString().replaceAll("[ \\.\\-\\:]", "_");
-    if (auth != null && auth.getAuthorities().stream()
-        .anyMatch(a -> a.getAuthority().equals("SCOPE_importExport"))) {
-      importExportService.exportService(exportDto, userId, format, fullExport, timestamp);
+//    if (auth != null && auth.getAuthorities().stream()
+//        .anyMatch(a -> a.getAuthority().equals("SCOPE_importExport"))) {
+      importExportService.exportService(exportDto, userId, format, fullExport, timestamp, exportDirectory);
       return new ResponseEntity<>(timestamp, HttpStatus.ACCEPTED);
-    } else {
-      return new ResponseEntity<>("Import and Export access is not granted.", HttpStatus.FORBIDDEN);
-    }
+//    } else {
+//      return new ResponseEntity<>("Import and Export access is not granted.", HttpStatus.FORBIDDEN);
+//    }
   }
 
 
@@ -114,8 +140,8 @@ public class ImportExportController {
           throws Exception {
     Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
     String file = System.getProperty("user.dir")
-        + "/uploads/export/" + userId + "/" + exportId + "_export.zip";
-    switch (importExportService.checkStatus(exportId, userId).toUpperCase()) {
+        + "/uploads/export/" + userId + "/" + exportId + "/" + exportId + ".zip";
+    switch (importExportService.checkStatus(exportId, userId, "export").toUpperCase()) {
       case "NOT DEFINED":
         return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
       case "DONE":
@@ -125,7 +151,7 @@ public class ImportExportController {
       case "PROCESSING":
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
       default:
-        throw new Exception(importExportService.checkStatus(exportId, userId));
+        throw new Exception(importExportService.checkStatus(exportId, userId, "export"));
     }
   }
 }

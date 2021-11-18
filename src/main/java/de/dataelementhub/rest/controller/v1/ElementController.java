@@ -107,8 +107,7 @@ public class ElementController {
   public ResponseEntity read(@PathVariable(value = "urn") String urn,
       @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String languages) {
     try {
-      Element element = elementService
-          .read(DataElementHubRestApplication.getCurrentUser().getId(), urn);
+      Element element = elementService.read(DataElementHubRestApplication.getCurrentUser().getId(), urn);
       if (languages != null) {
         element.applyLanguageFilter(languages);
       }

@@ -159,8 +159,7 @@ public class NamespaceController {
   public ResponseEntity read(@PathVariable(value = "namespaceId") String namespaceId,
       @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String languages) {
     try {
-      Element element = elementService
-          .read(DataElementHubRestApplication.getCurrentUser().getId(), namespaceId);
+      Element element = elementService.read(DataElementHubRestApplication.getCurrentUser().getId(), namespaceId);
       if (languages != null) {
         element.applyLanguageFilter(languages);
       }
