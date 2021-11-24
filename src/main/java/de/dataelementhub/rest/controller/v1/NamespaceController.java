@@ -178,14 +178,19 @@ public class NamespaceController {
   public ResponseEntity readNamespaceMembers(
       @PathVariable(value = "namespaceId") Integer namespaceId,
       @RequestParam(value = "elementType", required = false) List<String> elementTypes,
+      @RequestParam(value = "hideSubElements", required = false) Boolean hideSubElements,
       @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String languages,
       @RequestHeader(value = HttpHeaders.ACCEPT, required = false) String responseType) {
     try {
+      if (hideSubElements == null) {
+        hideSubElements = false;
+      }
       if (responseType != null && responseType
           .equalsIgnoreCase(MediaType.JSON_LIST_VIEW.getLiteral())) {
 
         List<NamespaceMember> namespaceMembers = elementService.getNamespaceMembersListview(
-            DataElementHubRestApplication.getCurrentUser().getId(), namespaceId, elementTypes);
+            DataElementHubRestApplication.getCurrentUser().getId(),
+            namespaceId, elementTypes, hideSubElements);
 
         namespaceMembers.forEach(nsm -> {
           nsm.applyLanguageFilter(languages);
@@ -195,7 +200,8 @@ public class NamespaceController {
       } else {
         List<Member> namespaceMembers =
             elementService.readNamespaceMembers(
-                DataElementHubRestApplication.getCurrentUser().getId(), namespaceId, elementTypes);
+                DataElementHubRestApplication.getCurrentUser().getId(), namespaceId, elementTypes,
+                hideSubElements);
         return new ResponseEntity<>(namespaceMembers, HttpStatus.OK);
       }
     } catch (NoSuchElementException e) {
