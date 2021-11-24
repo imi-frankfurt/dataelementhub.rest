@@ -1030,6 +1030,86 @@
         ]
       }
     },
+    "/v1/namespaces/{namespaceId}/members?elementType={elementType}&hideSubElements={hideSubElements}": {
+      "get": {
+        "tags": [
+          "Namespace"
+        ],
+        "summary": "Get Namespace Members.",
+        "operationId": "Get Namespace Members",
+        "parameters": [
+          {
+            "name": "namespaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Accept-Language",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "example": "de-DE"
+          },
+          {
+            "in": "header",
+            "name": "Accept",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "example": "application/vnd+de.dataelementhub.listview+json"
+          },
+          {
+            "name": "elementType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "example": ["DATAELEMENTGROUP", "RECORD", "DATAELEMENT", "NAMESPACE",
+                "ENUMERATED_VALUE_DOMAIN", "DESCRIBED_VALUE_DOMAIN", "DEFINED_VALUE_DOMAIN",
+                "CATALOG_VALUE_DOMAIN", "PERMISSIBLE_VALUE"]
+            }
+          },
+          {
+            "in": "path",
+            "name": "hideSubElements",
+            "schema": {
+              "type": "boolean",
+              "enum": [false, true]
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
     "/v1/namespaces/{namespaceId}": {
       "get": {
         "tags": [
