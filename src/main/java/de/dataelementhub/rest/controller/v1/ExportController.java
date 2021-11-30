@@ -1,18 +1,32 @@
 package de.dataelementhub.rest.controller.v1;
 
+
 import de.dataelementhub.model.dto.export.ExportInfo;
 import de.dataelementhub.model.dto.export.ExportRequest;
 import de.dataelementhub.model.service.ExportService;
 import de.dataelementhub.rest.DataElementHubRestApplication;
+import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,11 +42,16 @@ public class ExportController {
   private final ExportService exportService;
 
   @Autowired
-  public ExportController(ExportService exportService) {
+  public ExportController(ExportService exportService, Environment env) {
     this.exportService = exportService;
   }
 
-  public static String exportDirectory = System.getProperty("user.dir") + "/uploads/export/";
+  @Value("${export.exportDirectory}")
+  public String exportDirectory;
+
+  @Value("${export.expirationPeriodInDays}")
+  private int expirationPeriodInDays;
+
 
   /**
    * Return an overview of all exports.
@@ -42,7 +61,7 @@ public class ExportController {
   public ResponseEntity<List<ExportInfo>> allExports() {
     Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
     List<ExportInfo> exportDescriptions = exportService.allExports(userId, exportDirectory);
-    return new ResponseEntity<List<ExportInfo>>(exportDescriptions, HttpStatus.ACCEPTED);
+    return new ResponseEntity<List<ExportInfo>>(exportDescriptions, HttpStatus.OK);
   }
 
   /**
@@ -56,7 +75,7 @@ public class ExportController {
         .map(e -> e.split(":")[1]).collect(Collectors.toSet()).size();
     if (numberOfNamespacesExportedFrom > 1) {
       return new ResponseEntity<>("Export from more than one namespace is forbidden",
-          HttpStatus.NOT_ACCEPTABLE);
+          HttpStatus.BAD_REQUEST);
     }
     Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
     String timestamp = new Timestamp(System.currentTimeMillis())
@@ -70,27 +89,83 @@ public class ExportController {
   /**
    * Returns export file if done otherwise returns export status.
    */
-  @GetMapping(produces = "application/zip", value = "/export/{exportId}")
+  @GetMapping(value = "/export/{exportId}")
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity exportStatus(
-      @PathVariable(value = "exportId") String exportId)
+      @PathVariable(value = "exportId") String exportId,
+      @RequestParam(value = "onlyUrns", required = false, defaultValue = "false") Boolean onlyUrns)
       throws Exception {
     Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
-    ExportInfo exportInfo = exportService.exportInfo(exportId, userId, "export");
+    ExportInfo exportInfo = exportService.exportInfo(exportId, userId, exportDirectory);
     switch (exportInfo.getStatus()) {
       case "NOT DEFINED":
-        return new ResponseEntity<>(exportInfo.toString(), HttpStatus.NOT_ACCEPTABLE);
+        return new ResponseEntity<>(exportInfo.toString(), HttpStatus.NOT_FOUND);
       case "DONE":
-        String file = System.getProperty("user.dir")
-            + "/uploads/export/" + userId + "/" + exportId + "-"
-            + exportInfo.getFormat().toLowerCase() + "-done/" + exportId + ".zip";
+        String file;
+        if (onlyUrns) {
+          file = exportDirectory + "/" + userId + "/" + exportId + "-"
+              + exportInfo.getFormat().toLowerCase() + "-done/" + "exportedElements.txt";
+        } else {
+          file = exportDirectory + "/" + userId + "/" + exportId + "-"
+              + exportInfo.getFormat().toLowerCase() + "-done/" + exportId + ".zip";
+        }
         return ResponseEntity.ok()
-            .header("Content-Disposition", "attachment; filename=" + "export.zip")
+            .header("Content-Disposition", "attachment; filename="
+                + new FileSystemResource(file).getFilename())
             .body(new FileSystemResource(file));
+      case "EXPIRED":
+        if (onlyUrns) {
+          file = exportDirectory + "/" + userId + "/" + exportId + "-"
+              + exportInfo.getFormat().toLowerCase() + "-expired/" + "exportedElements.txt";
+          return ResponseEntity.ok()
+              .header("Content-Disposition", "attachment; filename="
+                  + new FileSystemResource(file).getFilename())
+              .body(new FileSystemResource(file));
+        } else {
+          return new ResponseEntity<>("This Export has expired on: " + exportInfo
+              .getTimestamp().toLocalDateTime().plusDays(expirationPeriodInDays),
+              HttpStatus.NOT_FOUND);
+        }
       case "PROCESSING":
         return new ResponseEntity<>(exportInfo.toString(), HttpStatus.ACCEPTED);
       default:
-        throw new Exception(String.valueOf(exportService.exportInfo(exportId, userId, "export")));
+        throw new Exception(String.valueOf(exportService
+            .exportInfo(exportId, userId, exportDirectory)));
     }
+  }
+
+
+  /** Delete all Imports/Exports older than 7 Days. */
+  @Scheduled(fixedRateString = "${export.expiredExportsCheckRate}")
+  @PostConstruct
+  public void deleteExpiredExports() throws IOException {
+    final Instant retentionFilePeriod = ZonedDateTime.now()
+        .minusDays(expirationPeriodInDays).toInstant();
+    final AtomicInteger countDeletedFiles = new AtomicInteger();
+    List<String> parentDirs = new ArrayList<>();
+    Files.find(
+            Paths.get(exportDirectory),
+            6,
+        (path, basicFileAttrs) ->
+            basicFileAttrs.creationTime().toInstant().isBefore(retentionFilePeriod)
+                & path.toString().endsWith(".zip"))
+        .forEach(
+            fileToDelete -> {
+              try {
+                if (!Files.isDirectory(fileToDelete)) {
+                  Files.delete(fileToDelete);
+                  countDeletedFiles.incrementAndGet();
+                }
+              } catch (IOException e) {
+                throw new UncheckedIOException(e);
+              }
+              parentDirs.add(fileToDelete.getParent().toString());
+            });
+    for (String parentDir : parentDirs.stream().distinct().collect(Collectors.toList())) {
+      File file = new File(parentDir);
+      File newFile = new File(file.getAbsolutePath().replace("-done", "-expired"));
+      file.renameTo(newFile);
+    }
+    countDeletedFiles.get();
   }
 }

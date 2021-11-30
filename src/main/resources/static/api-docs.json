@@ -21,7 +21,7 @@
           "Import-Export"
         ],
         "summary": "Export DEHUB Elements in JSON or XML format.",
-        "operationId": "export",
+        "operationId": "Export DEHUB Elements in JSON or XML format.",
         "parameters": [
           {
             "name": "format",
@@ -85,13 +85,13 @@
         ]
       }
     },
-    "/v1/export/{exportId}": {
+    "/v1/export/{exportId}?onlyUrns={onlyUrns}": {
       "get": {
         "tags": [
           "Import-Export"
         ],
-        "summary": "Check Export Status and return export file if done.",
-        "operationId": "export",
+        "summary": "Get export file/exported elements if done otherwise get export status.",
+        "operationId": "Check Export Status and return export file if done.",
         "parameters": [
           {
             "name": "exportId",
@@ -100,16 +100,34 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "onlyUrns",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "boolean",
+              "enum": [true, false]
+            }
           }
         ],
         "responses": {
+          "default": {
+            "x-is-file": true,
+            "description": "default response",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
           "200": {
             "description": "default response",
             "content": {
               "*/*": {
-                "schema": {
-                  "type": "string"
-                }
               }
             }
           }
@@ -129,7 +147,7 @@
         "tags": [
           "Import-Export"
         ],
-        "summary": "All Exports.",
+        "summary": "Get all Exports.",
         "operationId": "All Exports",
         "responses": {
           "200": {
