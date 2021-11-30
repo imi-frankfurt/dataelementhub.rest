@@ -89,7 +89,7 @@ public class ExportController {
   /**
    * Returns export file if done otherwise returns export status.
    */
-  @GetMapping(value = "/export/{exportId}")
+  @GetMapping(produces={"application/zip", "text/plain"}, value = "/export/{exportId}")
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity exportStatus(
       @PathVariable(value = "exportId") String exportId,
@@ -135,7 +135,7 @@ public class ExportController {
   }
 
 
-  /** Delete all Imports/Exports older than 7 Days. */
+  /** Delete all expired exports. */
   @Scheduled(fixedRateString = "${export.expiredExportsCheckRate}")
   @PostConstruct
   public void deleteExpiredExports() throws IOException {
