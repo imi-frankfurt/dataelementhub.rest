@@ -15,6 +15,162 @@
     }
   },
   "paths": {
+    "/v1/export/?format={format}&fullExport={fullExport}": {
+      "post": {
+        "tags": [
+          "Import-Export"
+        ],
+        "summary": "Export DEHUB Elements in JSON or XML format.",
+        "operationId": "Export DEHUB Elements in JSON or XML format.",
+        "parameters": [
+          {
+            "name": "format",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["JSON", "XML"]
+            }
+          },
+          {
+            "name": "fullExport",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "exportDto",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "examples": {
+                "EXPORT": {
+                  "description": "EXPORT",
+                  "value": {
+                    "label": "first export",
+                    "elementUrns": [
+                      "urn:1:namespace:1:1",
+                      "urn:1:dataelement:1:1"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/export/{exportId}?onlyUrns={onlyUrns}": {
+      "get": {
+        "tags": [
+          "Import-Export"
+        ],
+        "summary": "Get export file/exported elements if done otherwise get export status.",
+        "operationId": "Check Export Status and return export file if done.",
+        "parameters": [
+          {
+            "name": "exportId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "onlyUrns",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "boolean",
+              "enum": [true, false]
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "x-is-file": true,
+            "description": "default response",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/export": {
+      "get": {
+        "tags": [
+          "Import-Export"
+        ],
+        "summary": "Get all Exports.",
+        "operationId": "All Exports",
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
     "/v1/relations?type={type}": {
       "get": {
         "tags": [

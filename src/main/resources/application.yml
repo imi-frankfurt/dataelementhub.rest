@@ -17,3 +17,8 @@ springdoc:
 
 server:
   port: 8090
+
+export:
+  exportDirectory: ${EXPORT_DIR}
+  expirationPeriodInDays: ${EXPORT_EXPIRATION_PERIOD_IN_DAYS:7}
+  expiredExportsCheckRate: ${EXPIRED_EXPORTS_CHECK_RATE_IN_MILLISECONDS:3600000} // default = 1 hour
