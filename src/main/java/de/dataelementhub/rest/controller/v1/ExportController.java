@@ -141,6 +141,7 @@ public class ExportController {
   @Scheduled(fixedRateString = "${export.expiredExportsCheckRate}")
   @PostConstruct
   public void deleteExpiredExports() throws IOException {
+    Files.createDirectories(Paths.get(exportDirectory));
     final Instant retentionFilePeriod = ZonedDateTime.now()
         .minusDays(expirationPeriodInDays).toInstant();
     final AtomicInteger countDeletedFiles = new AtomicInteger();
