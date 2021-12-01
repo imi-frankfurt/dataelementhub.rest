@@ -70,7 +70,9 @@ public class ExportController {
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   @PostMapping(value = "/export")
   public ResponseEntity<String> export(@RequestBody ExportRequest exportRequest,
-      @RequestParam String format, @RequestParam Boolean fullExport) {
+      @RequestParam(value = "format", required = false, defaultValue = "JSON") String format,
+      @RequestParam(value = "fullExport", required = false,
+          defaultValue = "true") Boolean fullExport) {
     int numberOfNamespacesExportedFrom = exportRequest.getElementUrns().stream()
         .map(e -> e.split(":")[1]).collect(Collectors.toSet()).size();
     if (numberOfNamespacesExportedFrom > 1) {
