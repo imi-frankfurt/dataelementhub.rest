@@ -1,6 +1,6 @@
 package de.dataelementhub.rest.controller.v1;
 
-import de.dataelementhub.dal.jooq.enums.GrantType;
+import de.dataelementhub.dal.jooq.enums.AccessLevelType;
 import de.dataelementhub.dal.jooq.enums.Status;
 import de.dataelementhub.dal.jooq.tables.pojos.ScopedIdentifier;
 import de.dataelementhub.model.Deserializer;
@@ -79,16 +79,16 @@ public class NamespaceController {
       @RequestHeader(value = HttpHeaders.ACCEPT, required = false) String responseType,
       @RequestParam(name = "scope", required = false) String scope) {
 
-    Map<GrantType, List<Namespace>> namespaceMap;
+    Map<AccessLevelType, List<Namespace>> namespaceMap;
 
     if (scope == null) {
       namespaceMap = elementService
           .readNamespaces(DataElementHubRestApplication.getCurrentUser().getId());
     } else {
       try {
-        GrantType scopeGrantType = GrantType.valueOf(scope.toUpperCase());
+        AccessLevelType scopeAccessLevel = AccessLevelType.valueOf(scope.toUpperCase());
         namespaceMap = elementService
-            .readNamespaces(DataElementHubRestApplication.getCurrentUser().getId(), scopeGrantType);
+            .readNamespaces(DataElementHubRestApplication.getCurrentUser().getId(), scopeAccessLevel);
       } catch (IllegalAccessException e) {
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
       } catch (IllegalArgumentException e) {
@@ -101,7 +101,7 @@ public class NamespaceController {
     }
     if (responseType != null && responseType
         .equalsIgnoreCase(MediaType.JSON_LIST_VIEW.getLiteral())) {
-      Map<GrantType, List<de.dataelementhub.model.dto.listviews.Namespace>> namespaceListViewMap
+      Map<AccessLevelType, List<de.dataelementhub.model.dto.listviews.Namespace>> namespaceListViewMap
           = new HashMap<>();
       namespaceMap.entrySet().stream()
           .forEach(es -> {
