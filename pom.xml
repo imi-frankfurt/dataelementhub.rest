@@ -8,7 +8,7 @@
 		<version>11.0.0</version>
 	</parent>
 	<artifactId>dehub-rest</artifactId>
-	<version>1.2.0</version>
+	<version>1.2.1</version>
 	<name>DataElementHub REST Application</name>
 
   <properties>
@@ -50,7 +50,7 @@
 		<dependency>
 			<groupId>de.dataelementhub</groupId>
 			<artifactId>dehub-model</artifactId>
-			<version>1.2.0</version>
+			<version>1.2.1</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.apache.logging.log4j</groupId>
