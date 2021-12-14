@@ -8,7 +8,7 @@
 		<version>11.0.0</version>
 	</parent>
 	<artifactId>dehub-rest</artifactId>
-	<version>1.2.1</version>
+	<version>1.2.2</version>
 	<name>DataElementHub REST Application</name>
 
   <properties>
@@ -111,6 +111,16 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.logging.log4j</groupId>
+					<artifactId>log4j-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.logging.log4j</groupId>
+					<artifactId>log4j-to-slf4j</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
