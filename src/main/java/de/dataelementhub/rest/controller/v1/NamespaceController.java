@@ -379,11 +379,13 @@ public class NamespaceController {
           .read(DataElementHubRestApplication.getCurrentUser().getId(), namespaceIdentifier);
       userService.revokeAccessToNamespace(DataElementHubRestApplication.getCurrentUser().getId(),
           Integer.parseInt(namespaceIdentifier), userAuthId);
-      return new ResponseEntity(HttpStatus.NO_CONTENT);
+      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     } catch (IllegalAccessException e) {
-      return new ResponseEntity(HttpStatus.FORBIDDEN);
+      return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     } catch (NoSuchElementException nse) {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    } catch (IllegalArgumentException e) {
+      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
   }
 
