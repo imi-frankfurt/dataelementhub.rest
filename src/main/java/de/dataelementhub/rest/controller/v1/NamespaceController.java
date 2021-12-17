@@ -49,6 +49,9 @@ public class NamespaceController {
   private UserService userService;
   private JsonValidationService jsonValidationService;
 
+  /**
+   * Create a new NamespaceController.
+   */
   @Autowired
   public NamespaceController(ElementService elementService, UserService userService,
       JsonValidationService jsonValidationService) {
@@ -88,7 +91,8 @@ public class NamespaceController {
       try {
         AccessLevelType scopeAccessLevel = AccessLevelType.valueOf(scope.toUpperCase());
         namespaceMap = elementService
-            .readNamespaces(DataElementHubRestApplication.getCurrentUser().getId(), scopeAccessLevel);
+            .readNamespaces(DataElementHubRestApplication.getCurrentUser().getId(),
+                scopeAccessLevel);
       } catch (IllegalAccessException e) {
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
       } catch (IllegalArgumentException e) {
@@ -101,8 +105,8 @@ public class NamespaceController {
     }
     if (responseType != null && responseType
         .equalsIgnoreCase(MediaType.JSON_LIST_VIEW.getLiteral())) {
-      Map<AccessLevelType, List<de.dataelementhub.model.dto.listviews.Namespace>> namespaceListViewMap
-          = new HashMap<>();
+      Map<AccessLevelType, List<de.dataelementhub.model.dto.listviews.Namespace>>
+          namespaceListViewMap = new HashMap<>();
       namespaceMap.entrySet().stream()
           .forEach(es -> {
             List<de.dataelementhub.model.dto.listviews.Namespace> nsviews = new ArrayList<>();
@@ -312,9 +316,15 @@ public class NamespaceController {
     }
   }
 
+  /**
+   * Read user access to namespace by namespace identifier.
+   */
   @GetMapping("/{namespaceIdentifier}/access")
   public ResponseEntity readAccessGrants(
       @PathVariable(value = "namespaceIdentifier") String namespaceIdentifier) {
+    if (DataElementHubRestApplication.getCurrentUser().getId() < 0) {
+      return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+    }
     try {
       elementService
           .read(DataElementHubRestApplication.getCurrentUser().getId(), namespaceIdentifier);
@@ -330,6 +340,9 @@ public class NamespaceController {
     }
   }
 
+  /**
+   * Update user access to namespace.
+   */
   @PutMapping("/{namespaceIdentifier}/access")
   public ResponseEntity changeAccessGrants(
       @PathVariable(value = "namespaceIdentifier") String namespaceIdentifier,
