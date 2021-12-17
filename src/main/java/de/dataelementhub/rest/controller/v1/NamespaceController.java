@@ -320,7 +320,8 @@ public class NamespaceController {
    * Read user access to namespace by namespace identifier.
    */
   @GetMapping("/{namespaceIdentifier}/access")
-  public ResponseEntity readAccessGrants(
+  @Order(SecurityProperties.BASIC_AUTH_ORDER)
+  public ResponseEntity readAccessLevels(
       @PathVariable(value = "namespaceIdentifier") String namespaceIdentifier) {
     if (DataElementHubRestApplication.getCurrentUser().getId() < 0) {
       return new ResponseEntity(HttpStatus.UNAUTHORIZED);
@@ -343,8 +344,9 @@ public class NamespaceController {
   /**
    * Update user access to namespace.
    */
-  @PutMapping("/{namespaceIdentifier}/access")
-  public ResponseEntity changeAccessGrants(
+  @PatchMapping("/{namespaceIdentifier}/access")
+  @Order(SecurityProperties.BASIC_AUTH_ORDER)
+  public ResponseEntity changeAccessLevels(
       @PathVariable(value = "namespaceIdentifier") String namespaceIdentifier,
       @RequestBody List<DeHubUserPermission> permissions) {
 
@@ -358,6 +360,8 @@ public class NamespaceController {
       return new ResponseEntity(HttpStatus.FORBIDDEN);
     } catch (NoSuchElementException nse) {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    } catch (IllegalArgumentException e) {
+      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -365,7 +369,8 @@ public class NamespaceController {
    * Remove user access from namespace.
    */
   @DeleteMapping("/{namespaceIdentifier}/access/{userAuthId}")
-  public ResponseEntity changeAccessGrants(
+  @Order(SecurityProperties.BASIC_AUTH_ORDER)
+  public ResponseEntity deleteAccessLevels(
       @PathVariable(value = "namespaceIdentifier") String namespaceIdentifier,
       @PathVariable(value = "userAuthId") String userAuthId) {
 
