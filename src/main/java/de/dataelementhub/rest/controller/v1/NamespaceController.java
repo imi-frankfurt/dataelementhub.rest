@@ -361,4 +361,25 @@ public class NamespaceController {
     }
   }
 
+  /**
+   * Remove user access from namespace.
+   */
+  @DeleteMapping("/{namespaceIdentifier}/access/{userAuthId}")
+  public ResponseEntity changeAccessGrants(
+      @PathVariable(value = "namespaceIdentifier") String namespaceIdentifier,
+      @PathVariable(value = "userAuthId") String userAuthId) {
+
+    try {
+      elementService
+          .read(DataElementHubRestApplication.getCurrentUser().getId(), namespaceIdentifier);
+      userService.revokeAccessToNamespace(DataElementHubRestApplication.getCurrentUser().getId(),
+          Integer.parseInt(namespaceIdentifier), userAuthId);
+      return new ResponseEntity(HttpStatus.NO_CONTENT);
+    } catch (IllegalAccessException e) {
+      return new ResponseEntity(HttpStatus.FORBIDDEN);
+    } catch (NoSuchElementException nse) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+  }
+
 }
