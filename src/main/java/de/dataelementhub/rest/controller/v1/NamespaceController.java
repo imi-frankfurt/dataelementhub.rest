@@ -1,10 +1,11 @@
 package de.dataelementhub.rest.controller.v1;
 
-import de.dataelementhub.dal.jooq.enums.GrantType;
+import de.dataelementhub.dal.jooq.enums.AccessLevelType;
 import de.dataelementhub.dal.jooq.enums.Status;
 import de.dataelementhub.dal.jooq.tables.pojos.ScopedIdentifier;
 import de.dataelementhub.model.Deserializer;
 import de.dataelementhub.model.MediaType;
+import de.dataelementhub.model.dto.DeHubUserPermission;
 import de.dataelementhub.model.dto.element.Element;
 import de.dataelementhub.model.dto.element.Namespace;
 import de.dataelementhub.model.dto.element.section.Identification;
@@ -12,10 +13,9 @@ import de.dataelementhub.model.dto.element.section.Member;
 import de.dataelementhub.model.dto.listviews.NamespaceMember;
 import de.dataelementhub.model.service.ElementService;
 import de.dataelementhub.model.service.JsonValidationService;
+import de.dataelementhub.model.service.UserService;
 import de.dataelementhub.rest.DataElementHubRestApplication;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,12 +46,17 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class NamespaceController {
 
   private ElementService elementService;
+  private UserService userService;
   private JsonValidationService jsonValidationService;
 
+  /**
+   * Create a new NamespaceController.
+   */
   @Autowired
-  public NamespaceController(ElementService elementService,
+  public NamespaceController(ElementService elementService, UserService userService,
       JsonValidationService jsonValidationService) {
     this.elementService = elementService;
+    this.userService = userService;
     this.jsonValidationService = jsonValidationService;
   }
 
@@ -77,16 +82,17 @@ public class NamespaceController {
       @RequestHeader(value = HttpHeaders.ACCEPT, required = false) String responseType,
       @RequestParam(name = "scope", required = false) String scope) {
 
-    Map<GrantType, List<Namespace>> namespaceMap;
+    Map<AccessLevelType, List<Namespace>> namespaceMap;
 
     if (scope == null) {
       namespaceMap = elementService
           .readNamespaces(DataElementHubRestApplication.getCurrentUser().getId());
     } else {
       try {
-        GrantType scopeGrantType = GrantType.valueOf(scope.toUpperCase());
+        AccessLevelType scopeAccessLevel = AccessLevelType.valueOf(scope.toUpperCase());
         namespaceMap = elementService
-            .readNamespaces(DataElementHubRestApplication.getCurrentUser().getId(), scopeGrantType);
+            .readNamespaces(DataElementHubRestApplication.getCurrentUser().getId(),
+                scopeAccessLevel);
       } catch (IllegalAccessException e) {
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
       } catch (IllegalArgumentException e) {
@@ -99,8 +105,8 @@ public class NamespaceController {
     }
     if (responseType != null && responseType
         .equalsIgnoreCase(MediaType.JSON_LIST_VIEW.getLiteral())) {
-      Map<GrantType, List<de.dataelementhub.model.dto.listviews.Namespace>> namespaceListViewMap
-          = new HashMap<>();
+      Map<AccessLevelType, List<de.dataelementhub.model.dto.listviews.Namespace>>
+          namespaceListViewMap = new HashMap<>();
       namespaceMap.entrySet().stream()
           .forEach(es -> {
             List<de.dataelementhub.model.dto.listviews.Namespace> nsviews = new ArrayList<>();
@@ -307,6 +313,79 @@ public class NamespaceController {
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (NoSuchElementException nse) {
       return new ResponseEntity<>(nse.getMessage(), HttpStatus.NOT_FOUND);
+    }
+  }
+
+  /**
+   * Read user access to namespace by namespace identifier.
+   */
+  @GetMapping("/{namespaceIdentifier}/access")
+  @Order(SecurityProperties.BASIC_AUTH_ORDER)
+  public ResponseEntity readAccessLevels(
+      @PathVariable(value = "namespaceIdentifier") String namespaceIdentifier) {
+    if (DataElementHubRestApplication.getCurrentUser().getId() < 0) {
+      return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+    }
+    try {
+      elementService
+          .read(DataElementHubRestApplication.getCurrentUser().getId(), namespaceIdentifier);
+      List<DeHubUserPermission> userPermissions = elementService.readUserAccessList(
+          DataElementHubRestApplication.getCurrentUser().getId(),
+          Integer.parseInt(namespaceIdentifier));
+
+      return new ResponseEntity(userPermissions, HttpStatus.OK);
+    } catch (IllegalAccessException e) {
+      return new ResponseEntity(HttpStatus.FORBIDDEN);
+    } catch (NoSuchElementException nse) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+  }
+
+  /**
+   * Update user access to namespace.
+   */
+  @PatchMapping("/{namespaceIdentifier}/access")
+  @Order(SecurityProperties.BASIC_AUTH_ORDER)
+  public ResponseEntity changeAccessLevels(
+      @PathVariable(value = "namespaceIdentifier") String namespaceIdentifier,
+      @RequestBody List<DeHubUserPermission> permissions) {
+
+    try {
+      elementService
+          .read(DataElementHubRestApplication.getCurrentUser().getId(), namespaceIdentifier);
+      userService.grantAccessToNamespace(DataElementHubRestApplication.getCurrentUser().getId(),
+          Integer.parseInt(namespaceIdentifier), permissions);
+      return new ResponseEntity(HttpStatus.NO_CONTENT);
+    } catch (IllegalAccessException e) {
+      return new ResponseEntity(HttpStatus.FORBIDDEN);
+    } catch (NoSuchElementException nse) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    } catch (IllegalArgumentException e) {
+      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  /**
+   * Remove user access from namespace.
+   */
+  @DeleteMapping("/{namespaceIdentifier}/access/{userAuthId}")
+  @Order(SecurityProperties.BASIC_AUTH_ORDER)
+  public ResponseEntity deleteAccessLevels(
+      @PathVariable(value = "namespaceIdentifier") String namespaceIdentifier,
+      @PathVariable(value = "userAuthId") String userAuthId) {
+
+    try {
+      elementService
+          .read(DataElementHubRestApplication.getCurrentUser().getId(), namespaceIdentifier);
+      userService.revokeAccessToNamespace(DataElementHubRestApplication.getCurrentUser().getId(),
+          Integer.parseInt(namespaceIdentifier), userAuthId);
+      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    } catch (IllegalAccessException e) {
+      return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    } catch (NoSuchElementException nse) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    } catch (IllegalArgumentException e) {
+      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
   }
 

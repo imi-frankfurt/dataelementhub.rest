@@ -91,7 +91,7 @@ public class ExportController {
   /**
    * Returns export file if done otherwise returns export status.
    */
-  @GetMapping(produces={"application/zip", "text/plain"}, value = "/export/{exportId}")
+  @GetMapping(produces = {"application/zip", "text/plain"}, value = "/export/{exportId}")
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity exportStatus(
       @PathVariable(value = "exportId") String exportId,
