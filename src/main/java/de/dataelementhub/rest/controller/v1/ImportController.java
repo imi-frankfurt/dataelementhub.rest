@@ -1,6 +1,5 @@
 package de.dataelementhub.rest.controller.v1;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import de.dataelementhub.dal.jooq.enums.GrantType;
 import de.dataelementhub.model.DaoUtil;
 import de.dataelementhub.model.dto.importdto.ImportInfo;
@@ -11,14 +10,18 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
 import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,6 +30,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
 @RequestMapping("/v1")
@@ -34,10 +39,10 @@ public class ImportController {
 
   public String importDirectory = System.getProperty("java.io.tmpdir") + "/uploads";
 
-  private ImportService importService;
+  private final ImportService importService;
 
   @Autowired
-  public void ImportExportController(ImportService importService) {
+  public ImportController(ImportService importService) {
     this.importService = importService;
   }
 
@@ -48,8 +53,8 @@ public class ImportController {
   @GetMapping(value = "/import")
   public ResponseEntity<List<ImportInfo>> allImports() {
     Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
-    List<ImportInfo> importDescriptions = importService.allImports(userId);
-    return new ResponseEntity<List<ImportInfo>>(importDescriptions, HttpStatus.OK);
+    List<ImportInfo> importInfoList = importService.allImports(userId);
+    return new ResponseEntity<List<ImportInfo>>(importInfoList, HttpStatus.OK);
   }
 
   /**
@@ -58,7 +63,8 @@ public class ImportController {
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   @PostMapping(consumes = {"multipart/form-data", "application/json"}, value = "/import")
   public ResponseEntity<String> importFiles(@RequestBody List<MultipartFile> file,
-      @RequestParam("namespaceUrn") String namespaceUrn) {
+      @RequestParam("namespaceUrn") String namespaceUrn,
+      UriComponentsBuilder uriComponentsBuilder) {
     Integer namespaceIdentifier = Integer.valueOf(namespaceUrn.split(":")[1]);
     Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
     String timestamp = new Timestamp(System.currentTimeMillis())
@@ -71,29 +77,34 @@ public class ImportController {
     }
     int importId = importService
         .generateImportId(namespaceUrn, userId, file, importDirectory, timestamp);
+    UriComponents uriComponents =
+        uriComponentsBuilder.path("/v1/import/{importId}")
+            .buildAndExpand(importId);
     if (importId > -1) {
       importService.importService(file, importDirectory, userId, importId, timestamp);
-      return new ResponseEntity(importId, HttpStatus.ACCEPTED);
+      HttpHeaders httpHeaders = new HttpHeaders();
+      httpHeaders.setLocation(uriComponents.toUri());
+      return new ResponseEntity(httpHeaders, HttpStatus.ACCEPTED);
     } else {
       return new ResponseEntity(HttpStatus.BAD_REQUEST);
     }
   }
 
   /**
-   * Check import status and return it.
+   * Get import info by ID.
    */
   @GetMapping(value = "/import/{importId}")
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
-  public ResponseEntity<String> importStatus(
+  public ResponseEntity<String> importInfo(
       @PathVariable(value = "importId") String importId) {
     Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
-    switch (importService.checkStatus(importId, userId)) {
-      case DONE:
-        return new ResponseEntity<>("IMPORT COMPLETED", HttpStatus.OK);
+    ImportInfo importInfo = importService.getImportInfo(importId, userId);
+    switch (importInfo.getStatus()) {
+      case COMPLETED:
+        return new ResponseEntity(importInfo, HttpStatus.OK);
       case PROCESSING:
-        return new ResponseEntity<>("PROCESSING", HttpStatus.ACCEPTED);
       case INTERRUPTED:
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity(importInfo, HttpStatus.ACCEPTED);
       default:
         return new ResponseEntity<>("Import ID: "
             + importId + " is not defined!", HttpStatus.NOT_FOUND);
@@ -110,8 +121,14 @@ public class ImportController {
           Boolean hideSubElements,
       @PathVariable(value = "importId") Integer importId) {
     Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
-    List<StagedElement> stagedElements =
-        importService.getImportMembersListView(importId, userId, hideSubElements);
+    List<StagedElement> stagedElements = new ArrayList<>();
+    try {
+      stagedElements = importService.getImportMembersListView(importId, userId, hideSubElements);
+    } catch (IllegalAccessException e) {
+      return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    } catch (NoSuchElementException ex) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
     return new ResponseEntity(stagedElements, HttpStatus.OK);
   }
 
@@ -124,12 +141,11 @@ public class ImportController {
       @PathVariable(value = "importId") Integer importId,
       @PathVariable(value = "stagedElementId") String stagedElementId) {
     Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
-    de.dataelementhub.model.dto.element.StagedElement stagedElement =
-        null;
+    de.dataelementhub.model.dto.element.StagedElement stagedElement = null;
     try {
       stagedElement = importService.getStagedElement(importId, userId, stagedElementId);
-    } catch (JsonProcessingException e) {
-      e.printStackTrace();
+    } catch (IllegalAccessException e) {
+      return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
     if (stagedElement == null) {
       return new ResponseEntity(stagedElement, HttpStatus.NOT_FOUND);
@@ -147,8 +163,46 @@ public class ImportController {
       @PathVariable(value = "stagedElementId") String stagedElementId) {
     Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
     List<StagedElement> stagedElements =
-        importService.getStagedElementMembers(importId, userId, stagedElementId);
+        null;
+    try {
+      stagedElements = importService.getStagedElementMembers(importId, userId, stagedElementId);
+    } catch (IllegalAccessException e) {
+      return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    } catch (NoSuchElementException ex) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
     return new ResponseEntity(stagedElements, HttpStatus.OK);
+  }
+
+  /**
+   * Convert stagedElements to Drafts.
+   */
+  @PostMapping(value = "/import/{importId}/convert")
+  @Order(SecurityProperties.BASIC_AUTH_ORDER)
+  public ResponseEntity convertStagedElementsToDrafts(
+      @PathVariable(value = "importId") Integer importId,
+      @RequestBody List<String> stagedElementsUrns) throws Exception {
+    Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
+    importService.convertToDraft(stagedElementsUrns, userId, importId);
+    return new ResponseEntity(HttpStatus.OK);
+  }
+
+  /**
+   * Check user grants then delete staged import.
+   */
+  @DeleteMapping(value = "/import/{importId}")
+  @Order(SecurityProperties.BASIC_AUTH_ORDER)
+  public ResponseEntity deleteStagedImport(
+      @PathVariable(value = "importId") Integer importId) {
+    try {
+      Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
+      importService.deleteStagedImport(userId, importId);
+      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    } catch (IllegalAccessException ie) {
+      return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    } catch (NoSuchElementException ne) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
   }
 
   @PostConstruct

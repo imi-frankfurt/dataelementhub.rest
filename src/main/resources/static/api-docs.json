@@ -15,10 +15,370 @@
     }
   },
   "paths": {
+    "/v1/import": {
+      "get": {
+        "tags": [
+          "Import and StagedElement Management"
+        ],
+        "summary": "Get an overview of all Imports.",
+        "operationId": "Get an overview of all Imports.",
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/import/?namespaceUrn={namespaceUrn}": {
+      "post": {
+        "tags": [
+          "Import and StagedElement Management"
+        ],
+        "summary": "Import stagedElements into DEHUB.",
+        "operationId": "import",
+        "parameters": [
+          {
+            "name": "namespaceUrn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "importDto",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/import/{importId}": {
+      "delete": {
+        "tags": [
+          "Import and StagedElement Management"
+        ],
+        "summary": "Delete an Import by ID.",
+        "operationId": "Delete an Import by ID.",
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Import and StagedElement Management"
+        ],
+        "summary": "Get Import Info by ID.",
+        "operationId": "Get Import Info by ID.",
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/import/{importId}/members?hideSubElements={hideSubElements}": {
+      "get": {
+        "tags": [
+          "Import and StagedElement Management"
+        ],
+        "summary": "Get All Import Members.",
+        "operationId": "Get All Import Members.",
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "hideSubElements",
+            "in": "path",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/import/{importId}/{stagedElementId}": {
+      "get": {
+        "tags": [
+          "Import and StagedElement Management"
+        ],
+        "summary": "Get StagedElement from a specified Import by ID.",
+        "operationId": "Get StagedElement from a specified Import by ID.",
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "stagedElementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/import/{importId}/{stagedElementId}/members": {
+      "get": {
+        "tags": [
+          "Import and StagedElement Management"
+        ],
+        "summary": "Get StagedElement Members from a specified Import by ID.",
+        "operationId": "Get StagedElement Members from a specified Import by ID.",
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "stagedElementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/import/{importId}/convert": {
+      "post": {
+        "tags": [
+          "Import and StagedElement Management"
+        ],
+        "summary": "Get StagedElement from a specified Import to Draft.",
+        "operationId": "Get StagedElement from a specified Import to Draft.",
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "description": "Elements to convert.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "examples": {
+                "Convert Elements": {
+                  "description": "Elements to convert.",
+                  "value":
+[
+  "urn:1:dataelement:1:1"
+]
+}
+}
+}
+}
+},
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
     "/v1/export/?format={format}&fullExport={fullExport}": {
       "post": {
         "tags": [
-          "Import-Export"
+          "Export"
         ],
         "summary": "Export DEHUB Elements in JSON or XML format.",
         "operationId": "Export DEHUB Elements in JSON or XML format.",
@@ -88,7 +448,7 @@
     "/v1/export/{exportId}?onlyUrns={onlyUrns}": {
       "get": {
         "tags": [
-          "Import-Export"
+          "Export"
         ],
         "summary": "Get export file/exported elements if done otherwise get export status.",
         "operationId": "Check Export Status and return export file if done.",
@@ -145,7 +505,7 @@
     "/v1/export": {
       "get": {
         "tags": [
-          "Import-Export"
+          "Export"
         ],
         "summary": "Get all Exports.",
         "operationId": "All Exports",
