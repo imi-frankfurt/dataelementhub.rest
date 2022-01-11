@@ -75,8 +75,13 @@ public class ImportController {
           "Only users with WRITE or ADMIN Grant can import to this namespace.",
           HttpStatus.UNAUTHORIZED);
     }
-    int importId = importService
-        .generateImportId(namespaceUrn, userId, file, importDirectory, timestamp);
+    int importId = 0;
+    try {
+      importId = importService
+          .generateImportId(namespaceUrn, userId, file, importDirectory, timestamp);
+    } catch (IOException e) {
+      return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+    }
     UriComponents uriComponents =
         uriComponentsBuilder.path("/v1/import/{importId}")
             .buildAndExpand(importId);
