@@ -1,6 +1,6 @@
 package de.dataelementhub.rest.controller.v1;
 
-import de.dataelementhub.dal.jooq.enums.GrantType;
+import de.dataelementhub.dal.jooq.enums.AccessLevelType;
 import de.dataelementhub.model.DaoUtil;
 import de.dataelementhub.model.dto.importdto.ImportInfo;
 import de.dataelementhub.model.dto.listviews.StagedElement;
@@ -70,10 +70,15 @@ public class ImportController {
     String timestamp = new Timestamp(System.currentTimeMillis())
         .toString().replaceAll("[ \\.\\-\\:]", "_");
     if (!DaoUtil.checkGrants(namespaceIdentifier, userId,
-        Arrays.asList(GrantType.ADMIN, GrantType.WRITE))) {
+        Arrays.asList(AccessLevelType.ADMIN, AccessLevelType.WRITE))) {
       return new ResponseEntity<>(
           "Only users with WRITE or ADMIN Grant can import to this namespace.",
           HttpStatus.UNAUTHORIZED);
+    }
+    if (file == null) {
+      return new ResponseEntity<>(
+          "Uploaded File is not Valid.",
+          HttpStatus.BAD_REQUEST);
     }
     int importId = 0;
     try {
@@ -102,17 +107,14 @@ public class ImportController {
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity<String> importInfo(
       @PathVariable(value = "importId") String importId) {
-    Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
-    ImportInfo importInfo = importService.getImportInfo(importId, userId);
-    switch (importInfo.getStatus()) {
-      case COMPLETED:
-        return new ResponseEntity(importInfo, HttpStatus.OK);
-      case PROCESSING:
-      case INTERRUPTED:
-        return new ResponseEntity(importInfo, HttpStatus.ACCEPTED);
-      default:
-        return new ResponseEntity<>("Import ID: "
-            + importId + " is not defined!", HttpStatus.NOT_FOUND);
+    try {
+      Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
+      ImportInfo importInfo = importService.getImportInfo(Integer.parseInt(importId), userId);
+      return new ResponseEntity(importInfo, HttpStatus.OK);
+    } catch (NoSuchElementException ex) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    } catch (IllegalAccessException e) {
+      return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
   }
 
