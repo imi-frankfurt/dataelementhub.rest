@@ -70,7 +70,8 @@
                 "properties": {
                   "file": {
                     "type": "string",
-                    "format": "binary"
+                    "format": "binary",
+                    "required": true
                   }
                 }
               }
@@ -175,7 +176,7 @@
         ]
       }
     },
-    "/v1/import/{importId}/members?hideSubElements={hideSubElements}": {
+    "/v1/import/{importId}/members?hideSubElements={hideSubElements}&onlyConverted={onlyConverted}": {
       "get": {
         "tags": [
           "Import and StagedElement Management"
@@ -193,6 +194,15 @@
           },
           {
             "name": "hideSubElements",
+            "in": "path",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "onlyConverted",
             "in": "path",
             "required": false,
             "schema": {
@@ -270,7 +280,7 @@
         ]
       }
     },
-    "/v1/import/{importId}/{stagedElementId}/members": {
+    "/v1/import/{importId}/{stagedElementId}/members?onlyConverted={onlyConverted}": {
       "get": {
         "tags": [
           "Import and StagedElement Management"
@@ -292,6 +302,15 @@
             "required": true,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "onlyConverted",
+            "in": "path",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": false
             }
           }
         ],

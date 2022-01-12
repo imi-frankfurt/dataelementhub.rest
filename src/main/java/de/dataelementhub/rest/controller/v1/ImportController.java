@@ -124,11 +124,14 @@ public class ImportController {
   public ResponseEntity getStagedElementsListView(
       @RequestParam(value = "hideSubElements", required = false, defaultValue = "false")
           Boolean hideSubElements,
+      @RequestParam(value = "onlyConverted", required = false, defaultValue = "false")
+          Boolean onlyConverted,
       @PathVariable(value = "importId") Integer importId) {
     Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
     List<StagedElement> stagedElements = new ArrayList<>();
     try {
-      stagedElements = importService.getImportMembersListView(importId, userId, hideSubElements);
+      stagedElements = importService.getImportMembersListView(importId, userId, hideSubElements,
+          onlyConverted);
     } catch (IllegalAccessException e) {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     } catch (NoSuchElementException ex) {
@@ -164,13 +167,16 @@ public class ImportController {
   @GetMapping(value = "/import/{importId}/{stagedElementId}/members")
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity getStagedElementMembers(
+      @RequestParam(value = "onlyConverted", required = false, defaultValue = "false")
+          Boolean onlyConverted,
       @PathVariable(value = "importId") Integer importId,
       @PathVariable(value = "stagedElementId") String stagedElementId) {
     Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
     List<StagedElement> stagedElements =
         null;
     try {
-      stagedElements = importService.getStagedElementMembers(importId, userId, stagedElementId);
+      stagedElements = importService.getStagedElementMembers(
+          importId, userId, stagedElementId, onlyConverted);
     } catch (IllegalAccessException e) {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     } catch (NoSuchElementException ex) {
