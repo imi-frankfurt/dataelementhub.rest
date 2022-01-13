@@ -355,4 +355,30 @@ public class ElementController {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
   }
+
+  /**
+   * Update dataElementGroup or record members.
+   * If changes acquired return the new location otherwise return the old one.
+   */
+  @PutMapping("/{urn}/members")
+  @Order(SecurityProperties.BASIC_AUTH_ORDER)
+  public ResponseEntity updateMembers(@PathVariable(value = "urn") String urn,
+      UriComponentsBuilder uriComponentsBuilder) {
+    try {
+      String newUrn = elementService.updateMembers(
+          DataElementHubRestApplication.getCurrentUser().getId(), urn);
+      UriComponents uriComponents;
+      uriComponents =
+          uriComponentsBuilder.path("/v1/element/{urn}").buildAndExpand(newUrn);
+      HttpHeaders httpHeaders = new HttpHeaders();
+      httpHeaders.setLocation(uriComponents.toUri());
+      return new ResponseEntity<>(httpHeaders, HttpStatus.OK);
+    } catch (NoSuchElementException nse) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    } catch (IllegalAccessException e) {
+      return new ResponseEntity<>(e, HttpStatus.FORBIDDEN);
+    } catch (IllegalArgumentException e) {
+      return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
+    }
+  }
 }
