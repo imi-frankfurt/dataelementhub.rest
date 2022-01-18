@@ -28,6 +28,8 @@ public class DataElementHubRestApplication {
   @Value("${spring.datasource.password}")
   private String password;
 
+  public static final String restVersion = "v1";
+
   /**
    * Start the rest application.
    */

@@ -488,8 +488,8 @@
         ]
       }
     },
-    "/v1/element/{urn}/members": {
-      "put": {
+    "/v1/element/{urn}/updateMembers": {
+      "post": {
         "tags": [
           "Element"
         ],
@@ -537,7 +537,7 @@
             }
           },
           "400": {
-            "description": "Element Type is not supported. Only dataELementGroup and record are accepted!",
+            "description": "Element Type is not supported. Only dataElementGroup and record are accepted!",
             "content": {
               "*/*": {
                 "schema": {

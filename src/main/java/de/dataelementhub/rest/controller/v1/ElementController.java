@@ -1,5 +1,7 @@
 package de.dataelementhub.rest.controller.v1;
 
+import static de.dataelementhub.rest.DataElementHubRestApplication.restVersion;
+
 import de.dataelementhub.dal.ResourceManager;
 import de.dataelementhub.dal.jooq.enums.Status;
 import de.dataelementhub.dal.jooq.tables.pojos.ScopedIdentifier;
@@ -45,11 +47,13 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
-@RequestMapping("/v1/element")
+@RequestMapping("/" + restVersion + "/element")
 public class ElementController {
 
   private ElementService elementService;
   private JsonValidationService jsonValidationService;
+
+  private static final String elementPath = "/" + restVersion + "/element/{urn}";
 
   @Autowired
   public ElementController(ElementService elementService,
@@ -358,9 +362,10 @@ public class ElementController {
 
   /**
    * Update dataElementGroup or record members.
-   * If changes acquired return the new location otherwise return the old one.
+   * If at least one member has new version return the new element location
+   * otherwise return the old one.
    */
-  @PutMapping("/{urn}/members")
+  @PostMapping("/{urn}/updateMembers")
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity updateMembers(@PathVariable(value = "urn") String urn,
       UriComponentsBuilder uriComponentsBuilder) {
@@ -369,7 +374,7 @@ public class ElementController {
           DataElementHubRestApplication.getCurrentUser().getId(), urn);
       UriComponents uriComponents;
       uriComponents =
-          uriComponentsBuilder.path("/v1/element/{urn}").buildAndExpand(newUrn);
+          uriComponentsBuilder.path(elementPath).buildAndExpand(newUrn);
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.setLocation(uriComponents.toUri());
       return new ResponseEntity<>(httpHeaders, HttpStatus.OK);
