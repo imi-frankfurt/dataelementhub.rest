@@ -1,6 +1,6 @@
 package de.dataelementhub.rest.controller.v1;
 
-import static de.dataelementhub.rest.DataElementHubRestApplication.restVersion;
+import static de.dataelementhub.rest.controller.v1.ApiVersion.API_VERSION;
 
 import de.dataelementhub.dal.ResourceManager;
 import de.dataelementhub.dal.jooq.enums.Status;
@@ -21,8 +21,6 @@ import de.dataelementhub.model.service.ElementService;
 import de.dataelementhub.model.service.JsonValidationService;
 import de.dataelementhub.rest.DataElementHubRestApplication;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -47,13 +45,13 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
-@RequestMapping("/" + restVersion + "/element")
+@RequestMapping("/" + API_VERSION + "/element")
 public class ElementController {
 
   private ElementService elementService;
   private JsonValidationService jsonValidationService;
 
-  private static final String elementPath = "/" + restVersion + "/element/{urn}";
+  private static final String elementPath = "/" + API_VERSION + "/element/{urn}";
 
   @Autowired
   public ElementController(ElementService elementService,
