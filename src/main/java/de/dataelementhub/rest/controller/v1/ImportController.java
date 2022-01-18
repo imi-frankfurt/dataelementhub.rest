@@ -1,17 +1,16 @@
 package de.dataelementhub.rest.controller.v1;
 
-import de.dataelementhub.dal.jooq.enums.AccessLevelType;
 import de.dataelementhub.model.DaoUtil;
 import de.dataelementhub.model.dto.importdto.ImportInfo;
 import de.dataelementhub.model.dto.listviews.StagedElement;
 import de.dataelementhub.model.service.ImportService;
 import de.dataelementhub.rest.DataElementHubRestApplication;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import javax.annotation.PostConstruct;
@@ -20,6 +19,7 @@ import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,7 +37,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RequestMapping("/v1")
 public class ImportController {
 
-  public String importDirectory = System.getProperty("java.io.tmpdir") + "/uploads";
+  public String importDirectory = System.getProperty("java.io.tmpdir") + "/uploads"
+      .replace('/', File.separatorChar);
 
   private final ImportService importService;
 
@@ -51,9 +52,9 @@ public class ImportController {
    */
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   @GetMapping(value = "/import")
-  public ResponseEntity<List<ImportInfo>> allImports() {
+  public ResponseEntity<List<ImportInfo>> listAllImports() {
     Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
-    List<ImportInfo> importInfoList = importService.allImports(userId);
+    List<ImportInfo> importInfoList = importService.listAllImports(userId);
     return new ResponseEntity<List<ImportInfo>>(importInfoList, HttpStatus.OK);
   }
 
@@ -61,7 +62,8 @@ public class ImportController {
    * Receive import files, start import process and return import id.
    */
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
-  @PostMapping(consumes = {"multipart/form-data", "application/json"}, value = "/import")
+  @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE},
+      value = "/import")
   public ResponseEntity<String> importFiles(@RequestBody List<MultipartFile> file,
       @RequestParam("namespaceUrn") String namespaceUrn,
       UriComponentsBuilder uriComponentsBuilder) {
@@ -69,8 +71,7 @@ public class ImportController {
     Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
     String timestamp = new Timestamp(System.currentTimeMillis())
         .toString().replaceAll("[ \\.\\-\\:]", "_");
-    if (!DaoUtil.checkGrants(namespaceIdentifier, userId,
-        Arrays.asList(AccessLevelType.ADMIN, AccessLevelType.WRITE))) {
+    if (!DaoUtil.accessLevelGranted(namespaceIdentifier, userId, DaoUtil.WRITE_ACCESS_TYPES)) {
       return new ResponseEntity<>(
           "Only users with WRITE or ADMIN Grant can import to this namespace.",
           HttpStatus.UNAUTHORIZED);
@@ -87,9 +88,8 @@ public class ImportController {
     } catch (IOException e) {
       return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
     }
-    UriComponents uriComponents =
-        uriComponentsBuilder.path("/v1/import/{importId}")
-            .buildAndExpand(importId);
+    UriComponents uriComponents = uriComponentsBuilder.path("/v1/import/{importId}")
+        .buildAndExpand(importId);
     if (importId > -1) {
       importService.importService(file, importDirectory, userId, importId, timestamp);
       HttpHeaders httpHeaders = new HttpHeaders();
