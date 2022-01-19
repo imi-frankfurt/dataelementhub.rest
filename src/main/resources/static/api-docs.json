@@ -18,10 +18,10 @@
     "/v1/import": {
       "get": {
         "tags": [
-          "Import and StagedElement Management"
+          "Import"
         ],
-        "summary": "Get an overview of all Imports.",
-        "operationId": "Get an overview of all Imports.",
+        "summary": "List all imports.",
+        "operationId": "List all imports.",
         "responses": {
           "200": {
             "description": "default response",
@@ -47,7 +47,7 @@
     "/v1/import/?namespaceUrn={namespaceUrn}": {
       "post": {
         "tags": [
-          "Import and StagedElement Management"
+          "Import"
         ],
         "summary": "Import stagedElements into DEHUB.",
         "operationId": "import",
@@ -103,10 +103,10 @@
     "/v1/import/{importId}": {
       "delete": {
         "tags": [
-          "Import and StagedElement Management"
+          "Import"
         ],
-        "summary": "Delete an Import by ID.",
-        "operationId": "Delete an Import by ID.",
+        "summary": "Delete an import by Id.",
+        "operationId": "Delete an import by Id.",
         "parameters": [
           {
             "name": "importId",
@@ -140,10 +140,10 @@
       },
       "get": {
         "tags": [
-          "Import and StagedElement Management"
+          "Import"
         ],
-        "summary": "Get Import Info by ID.",
-        "operationId": "Get Import Info by ID.",
+        "summary": "Get import info by Id.",
+        "operationId": "Get import info by Id.",
         "parameters": [
           {
             "name": "importId",
@@ -179,10 +179,10 @@
     "/v1/import/{importId}/members?hideSubElements={hideSubElements}&onlyConverted={onlyConverted}": {
       "get": {
         "tags": [
-          "Import and StagedElement Management"
+          "Import"
         ],
-        "summary": "Get All Import Members.",
-        "operationId": "Get All Import Members.",
+        "summary": "Get all import members.",
+        "operationId": "Get all import members.",
         "parameters": [
           {
             "name": "importId",
@@ -236,10 +236,10 @@
     "/v1/import/{importId}/{stagedElementId}": {
       "get": {
         "tags": [
-          "Import and StagedElement Management"
+          "Import"
         ],
-        "summary": "Get StagedElement from a specified Import by ID.",
-        "operationId": "Get StagedElement from a specified Import by ID.",
+        "summary": "Get stagedElement from a specified import by Id.",
+        "operationId": "Get stagedElement from a specified import by Id.",
         "parameters": [
           {
             "name": "importId",
@@ -283,10 +283,10 @@
     "/v1/import/{importId}/{stagedElementId}/members?onlyConverted={onlyConverted}": {
       "get": {
         "tags": [
-          "Import and StagedElement Management"
+          "Import"
         ],
-        "summary": "Get StagedElement Members from a specified Import by ID.",
-        "operationId": "Get StagedElement Members from a specified Import by ID.",
+        "summary": "Get stagedElement members from a specified import by Id.",
+        "operationId": "Get stagedElement members from a specified import by Id.",
         "parameters": [
           {
             "name": "importId",
@@ -339,10 +339,10 @@
     "/v1/import/{importId}/convert": {
       "post": {
         "tags": [
-          "Import and StagedElement Management"
+          "Import"
         ],
-        "summary": "Get StagedElement from a specified Import to Draft.",
-        "operationId": "Get StagedElement from a specified Import to Draft.",
+        "summary": "Get stagedElement from a specified import to draft.",
+        "operationId": "Get stagedElement from a specified import to draft.",
         "parameters": [
           {
             "name": "importId",

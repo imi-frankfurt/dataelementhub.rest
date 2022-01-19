@@ -3,6 +3,7 @@ package de.dataelementhub.rest.controller.v1;
 import de.dataelementhub.model.DaoUtil;
 import de.dataelementhub.model.dto.importdto.ImportInfo;
 import de.dataelementhub.model.dto.listviews.StagedElement;
+import de.dataelementhub.model.handler.element.section.IdentificationHandler;
 import de.dataelementhub.model.service.ImportService;
 import de.dataelementhub.rest.DataElementHubRestApplication;
 import java.io.File;
@@ -64,34 +65,33 @@ public class ImportController {
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE},
       value = "/import")
-  public ResponseEntity<String> importFiles(@RequestBody List<MultipartFile> file,
+  public ResponseEntity<String> importFiles(@RequestBody List<MultipartFile> files,
       @RequestParam("namespaceUrn") String namespaceUrn,
       UriComponentsBuilder uriComponentsBuilder) {
-    Integer namespaceIdentifier = Integer.valueOf(namespaceUrn.split(":")[1]);
+    Integer namespaceIdentifier = IdentificationHandler.getIdentifierFromUrn(namespaceUrn);
     Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
     String timestamp = new Timestamp(System.currentTimeMillis())
         .toString().replaceAll("[ \\.\\-\\:]", "_");
     if (!DaoUtil.accessLevelGranted(namespaceIdentifier, userId, DaoUtil.WRITE_ACCESS_TYPES)) {
       return new ResponseEntity<>(
-          "Only users with WRITE or ADMIN Grant can import to this namespace.",
+          "Only users with WRITE or ADMIN accessLevel can import to this namespace.",
           HttpStatus.UNAUTHORIZED);
     }
-    if (file == null) {
+    if (files == null) {
       return new ResponseEntity<>(
-          "Uploaded File is not Valid.",
-          HttpStatus.BAD_REQUEST);
+          "No file was submitted.", HttpStatus.BAD_REQUEST);
     }
     int importId = 0;
     try {
       importId = importService
-          .generateImportId(namespaceUrn, userId, file, importDirectory, timestamp);
+          .generateImportId(namespaceUrn, userId, files, importDirectory);
     } catch (IOException e) {
-      return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+      return new ResponseEntity<>(e.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
     }
     UriComponents uriComponents = uriComponentsBuilder.path("/v1/import/{importId}")
         .buildAndExpand(importId);
     if (importId > -1) {
-      importService.importService(file, importDirectory, userId, importId, timestamp);
+      importService.importService(files, importDirectory, userId, importId);
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.setLocation(uriComponents.toUri());
       return new ResponseEntity(httpHeaders, HttpStatus.ACCEPTED);
@@ -201,7 +201,7 @@ public class ImportController {
   }
 
   /**
-   * Check user grants then delete staged import.
+   * Delete stagedImport by Id.
    */
   @DeleteMapping(value = "/import/{importId}")
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
@@ -218,6 +218,9 @@ public class ImportController {
     }
   }
 
+  /**
+   * Create the importDirectory after the initialization of bean properties.
+   */
   @PostConstruct
   public void createImportDirectory() throws IOException {
     Files.createDirectories(Paths.get(importDirectory));
