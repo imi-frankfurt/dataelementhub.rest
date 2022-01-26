@@ -102,6 +102,7 @@ public class ExportController {
       throws Exception {
     Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
     ExportInfo exportInfo = exportService.exportInfo(exportId, userId, exportDirectory);
+    String format = exportInfo.getFormat().toUpperCase();
     switch (exportInfo.getStatus()) {
       case "NOT DEFINED":
         return new ResponseEntity<>(exportInfo.toString(), HttpStatus.NOT_FOUND);
@@ -109,10 +110,10 @@ public class ExportController {
         String file;
         if (onlyUrns) {
           file = exportDirectory + "/" + userId + "/" + exportId + "-"
-              + exportInfo.getFormat().toUpperCase() + "-done/" + "exportedElements.txt";
+              + format + "-done/" + "exportedElements.txt";
         } else {
           file = exportDirectory + "/" + userId + "/" + exportId + "-"
-              + exportInfo.getFormat().toUpperCase() + "-done/" + exportId + ".zip";
+              + format + "-done/" + exportId + ".zip";
         }
         return ResponseEntity.ok()
             .header("Content-Disposition", "attachment; filename="
@@ -121,7 +122,7 @@ public class ExportController {
       case "EXPIRED":
         if (onlyUrns) {
           file = exportDirectory + "/" + userId + "/" + exportId + "-"
-              + exportInfo.getFormat().toUpperCase() + "-expired/" + "exportedElements.txt";
+              + format + "-expired/" + "exportedElements.txt";
           return ResponseEntity.ok()
               .header("Content-Disposition", "attachment; filename="
                   + new FileSystemResource(file).getFilename())
