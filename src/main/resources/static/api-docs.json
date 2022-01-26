@@ -1186,7 +1186,7 @@
         ]
       }
     },
-    "/v1/namespaces/{namespaceId}/members?elementType={elementType}&hideSubElements={hideSubElements}": {
+    "/v1/namespaces/{namespaceId}/members?elementType={elementType}": {
       "get": {
         "tags": [
           "Namespace"
@@ -1229,24 +1229,300 @@
               "items": {
                 "type": "string"
               },
-              "example": ["DATAELEMENTGROUP", "RECORD", "DATAELEMENT", "NAMESPACE",
+              "example": ["DATAELEMENTGROUP", "RECORD", "DATAELEMENT",
                 "ENUMERATED_VALUE_DOMAIN", "DESCRIBED_VALUE_DOMAIN", "DEFINED_VALUE_DOMAIN",
                 "CATALOG_VALUE_DOMAIN", "PERMISSIBLE_VALUE"]
             }
           },
           {
-            "in": "path",
+            "in": "query",
             "name": "hideSubElements",
             "schema": {
               "type": "boolean",
-              "enum": [false, true]
-            },
-            "required": true
+              "required": false,
+              "default": false
+            }
           }
         ],
         "responses": {
           "200": {
+            "description": "Default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such element found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/namespaces/{namespaceIdentifier}/access": {
+      "get": {
+        "tags": [
+          "Namespace"
+        ],
+        "summary": "Read user access to namespace by namespace identifier.",
+        "operationId": "Read user access to namespace by namespace identifier.",
+        "parameters": [
+          {
+            "name": "namespaceIdentifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access is forbidden",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such element found.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Namespace"
+        ],
+        "summary": "Update user access to namespace.",
+        "operationId": "Update user access to namespace.",
+        "parameters": [
+          {
+            "name": "namespaceIdentifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array"
+              },
+              "examples": {
+                "Permissions": {
+                  "description": "Update Element Relation.",
+                  "value": [
+                    {
+                      "userAuthId": "foo-bar",
+                      "accessLevel": "WRITE"
+                    }, {
+                      "userAuthId": "bar-foo",
+                      "accessLevel": "READ"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
             "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access is forbidden",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such element found.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/namespaces/{namespaceIdentifier}/access/{userAuthId}": {
+      "delete": {
+        "tags": [
+          "Namespace"
+        ],
+        "summary": "Update user access to namespace.",
+        "operationId": "Update user access to namespace.",
+        "parameters": [
+          {
+            "name": "namespaceIdentifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userAuthId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access is forbidden",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such element found.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request.",
             "content": {
               "*/*": {
                 "schema": {
