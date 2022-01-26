@@ -22,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.core.annotation.Order;
-import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,15 +41,18 @@ public class ExportController {
   private final ExportService exportService;
 
   @Autowired
-  public ExportController(ExportService exportService, Environment env) {
+  public ExportController(ExportService exportService) {
     this.exportService = exportService;
   }
 
   @Value("${export.exportDirectory}")
-  public String exportDirectory;
+  public String defaultExportDirectory;
+
 
   @Value("${export.expirationPeriodInDays}")
   private int expirationPeriodInDays;
+
+  public String exportDirectory = getExportDirectory();
 
 
   /**
@@ -83,7 +85,8 @@ public class ExportController {
     String timestamp = new Timestamp(System.currentTimeMillis())
         .toString().replaceAll("[ \\.\\-\\:]", "_");
     exportService
-        .exportService(exportRequest, userId, format, fullExport, timestamp, exportDirectory);
+        .exportService(exportRequest, userId,
+            format.toUpperCase(), fullExport, timestamp, exportDirectory);
     return new ResponseEntity<>(timestamp, HttpStatus.ACCEPTED);
   }
 
@@ -106,10 +109,10 @@ public class ExportController {
         String file;
         if (onlyUrns) {
           file = exportDirectory + "/" + userId + "/" + exportId + "-"
-              + exportInfo.getFormat().toLowerCase() + "-done/" + "exportedElements.txt";
+              + exportInfo.getFormat().toUpperCase() + "-done/" + "exportedElements.txt";
         } else {
           file = exportDirectory + "/" + userId + "/" + exportId + "-"
-              + exportInfo.getFormat().toLowerCase() + "-done/" + exportId + ".zip";
+              + exportInfo.getFormat().toUpperCase() + "-done/" + exportId + ".zip";
         }
         return ResponseEntity.ok()
             .header("Content-Disposition", "attachment; filename="
@@ -118,7 +121,7 @@ public class ExportController {
       case "EXPIRED":
         if (onlyUrns) {
           file = exportDirectory + "/" + userId + "/" + exportId + "-"
-              + exportInfo.getFormat().toLowerCase() + "-expired/" + "exportedElements.txt";
+              + exportInfo.getFormat().toUpperCase() + "-expired/" + "exportedElements.txt";
           return ResponseEntity.ok()
               .header("Content-Disposition", "attachment; filename="
                   + new FileSystemResource(file).getFilename())
@@ -170,5 +173,16 @@ public class ExportController {
       file.renameTo(newFile);
     }
     countDeletedFiles.get();
+  }
+
+  /**
+   * Get export directory.
+   */
+  public String getExportDirectory() {
+    if (defaultExportDirectory == null) {
+      return System.getProperty("java.io.tmpdir")
+          + "/exports".replace('/', File.separatorChar);
+    }
+    return defaultExportDirectory;
   }
 }
