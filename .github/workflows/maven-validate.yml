@@ -26,5 +26,6 @@ jobs:
       uses: whelk-io/maven-settings-xml-action@v20
       with:
         repositories: '[{ "id": "oss-releases", "url": "https://repo.mig-frankfurt.de/repository/oss-release/" }, { "id": "oss-snapshots", "url": "https://repo.mig-frankfurt.de/repository/oss-snapshots/" }]'
+        servers: '[{ "id": "oss-snapshots", "username": "${{ secrets.NEXUS_USER }}", "password": "${{ secrets.NEXUS_PW }}" }]'
     - name: Build with Maven
       run: mvn -B package --file pom.xml -Pvalidate
