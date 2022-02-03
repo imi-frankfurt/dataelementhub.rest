@@ -5,6 +5,7 @@ import de.dataelementhub.dal.jooq.tables.pojos.DehubUser;
 import de.dataelementhub.model.handler.UserHandler;
 import java.util.Map;
 import org.jooq.CloseableDSLContext;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpMethod;
@@ -14,7 +15,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -23,6 +23,9 @@ import org.springframework.stereotype.Component;
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+
+  @Value("${dehub.keycloakClient}")
+  private String keycloakClient;
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
@@ -41,7 +44,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
   private Converter<Jwt, ? extends AbstractAuthenticationToken> jwtAuthenticationConverter() {
     JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();
-    jwtConverter.setJwtGrantedAuthoritiesConverter(new KeycloakRealmRoleConverter());
+    jwtConverter.setJwtGrantedAuthoritiesConverter(new KeycloakRealmRoleConverter(keycloakClient));
     return jwtConverter;
   }
 

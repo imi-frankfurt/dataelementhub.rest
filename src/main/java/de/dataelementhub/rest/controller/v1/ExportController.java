@@ -49,10 +49,10 @@ public class ExportController {
     this.exportService = exportService;
   }
 
-  @Value("${export.exportDirectory}")
+  @Value("${dehub.export.exportDirectory}")
   public String exportDirectory;
 
-  @Value("${export.expirationPeriodInDays}")
+  @Value("${dehub.export.expirationPeriodInDays}")
   private int expirationPeriodInDays;
 
 
@@ -145,7 +145,7 @@ public class ExportController {
 
 
   /** Delete all expired exports. */
-  @Scheduled(fixedRateString = "${export.expiredExportsCheckRate}")
+  @Scheduled(fixedRateString = "${dehub.export.expiredExportsCheckRate}")
   @PostConstruct
   public void deleteExpiredExports() throws IOException {
     Files.createDirectories(Paths.get(exportDirectory));
