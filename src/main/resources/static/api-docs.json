@@ -867,6 +867,75 @@
         ]
       }
     },
+    "/v1/element/{urn}/updateMembers": {
+      "post": {
+        "tags": [
+          "Element"
+        ],
+        "summary": "Update dataElementGroup or record members by urn.",
+        "operationId": "Update dataElementGroup or record members by urn.",
+        "parameters": [
+          {
+            "name": "urn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Element not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User has no write access to namespace",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Element Type is not supported. Only dataElementGroup and record are accepted!",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
     "/v1/element/{urn}": {
       "get": {
         "tags": [
