@@ -204,6 +204,7 @@
 				<configuration>
 					<excludeProperties>
 						<excludeProperty>^git.local.branch.*$</excludeProperty>
+						<excludeProperty>^git.*.user.*$</excludeProperty>
 					</excludeProperties>
 					<generateGitPropertiesFile>true</generateGitPropertiesFile>
 					<generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
