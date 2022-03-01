@@ -9,6 +9,7 @@ import de.dataelementhub.model.Deserializer;
 import de.dataelementhub.model.MediaType;
 import de.dataelementhub.model.dto.ElementRelation;
 import de.dataelementhub.model.dto.element.Element;
+import de.dataelementhub.model.dto.element.ElementPath;
 import de.dataelementhub.model.dto.element.section.ConceptAssociation;
 import de.dataelementhub.model.dto.element.section.Definition;
 import de.dataelementhub.model.dto.element.section.Identification;
@@ -380,6 +381,22 @@ public class ElementController {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     } catch (IllegalAccessException e) {
       return new ResponseEntity<>(e, HttpStatus.FORBIDDEN);
+    } catch (IllegalArgumentException e) {
+      return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  /**
+   * Get all available paths for a given element.
+   */
+  @GetMapping("/{urn}/paths")
+  @Order(SecurityProperties.BASIC_AUTH_ORDER)
+  public ResponseEntity getElementPaths(@PathVariable(value = "urn") String urn,
+      @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String languages) {
+    try {
+      int userId = DataElementHubRestApplication.getCurrentUser().getId();
+      List<ElementPath> elementPaths = elementService.getElementPaths(userId, urn, languages);
+      return new ResponseEntity<>(elementPaths, HttpStatus.OK);
     } catch (IllegalArgumentException e) {
       return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
     }
