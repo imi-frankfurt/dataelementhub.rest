@@ -399,6 +399,8 @@ public class ElementController {
       return new ResponseEntity<>(elementPaths, HttpStatus.OK);
     } catch (IllegalArgumentException e) {
       return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
+    } catch (IllegalStateException e) {
+      return new ResponseEntity<>(e.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
     }
   }
 }
