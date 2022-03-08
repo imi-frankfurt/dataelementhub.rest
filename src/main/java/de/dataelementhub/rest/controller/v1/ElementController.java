@@ -9,13 +9,13 @@ import de.dataelementhub.model.Deserializer;
 import de.dataelementhub.model.MediaType;
 import de.dataelementhub.model.dto.ElementRelation;
 import de.dataelementhub.model.dto.element.Element;
-import de.dataelementhub.model.dto.element.ElementPath;
 import de.dataelementhub.model.dto.element.section.ConceptAssociation;
 import de.dataelementhub.model.dto.element.section.Definition;
 import de.dataelementhub.model.dto.element.section.Identification;
 import de.dataelementhub.model.dto.element.section.Member;
 import de.dataelementhub.model.dto.element.section.Slot;
 import de.dataelementhub.model.dto.listviews.DataElementGroupMember;
+import de.dataelementhub.model.dto.listviews.SimplifiedElementIdentification;
 import de.dataelementhub.model.handler.element.ElementHandler;
 import de.dataelementhub.model.handler.element.section.IdentificationHandler;
 import de.dataelementhub.model.service.ElementService;
@@ -395,7 +395,8 @@ public class ElementController {
       @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String languages) {
     try {
       int userId = DataElementHubRestApplication.getCurrentUser().getId();
-      List<ElementPath> elementPaths = elementService.getElementPaths(userId, urn, languages);
+      List<List<SimplifiedElementIdentification>> elementPaths =
+          elementService.getElementPaths(userId, urn, languages);
       return new ResponseEntity<>(elementPaths, HttpStatus.OK);
     } catch (IllegalArgumentException e) {
       return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
