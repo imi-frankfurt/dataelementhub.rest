@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Endpoint to get all members of a stagedElement by ID
 - Endpoint to enable converting the stagedElements to drafts
 - Endpoint to delete an import by ID
+- Endpoint to return all available paths for specified element
 - Endpoint to update the members of dataElementGroup/record
 ### Changed
 - ElementController does not process namespaces anymore 

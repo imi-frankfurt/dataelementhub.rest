@@ -15,6 +15,7 @@ import de.dataelementhub.model.dto.element.section.Identification;
 import de.dataelementhub.model.dto.element.section.Member;
 import de.dataelementhub.model.dto.element.section.Slot;
 import de.dataelementhub.model.dto.listviews.DataElementGroupMember;
+import de.dataelementhub.model.dto.listviews.SimplifiedElementIdentification;
 import de.dataelementhub.model.handler.element.ElementHandler;
 import de.dataelementhub.model.handler.element.section.IdentificationHandler;
 import de.dataelementhub.model.service.ElementService;
@@ -382,6 +383,25 @@ public class ElementController {
       return new ResponseEntity<>(e, HttpStatus.FORBIDDEN);
     } catch (IllegalArgumentException e) {
       return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  /**
+   * Get all available paths for a given element.
+   */
+  @GetMapping("/{urn}/paths")
+  @Order(SecurityProperties.BASIC_AUTH_ORDER)
+  public ResponseEntity getElementPaths(@PathVariable(value = "urn") String urn,
+      @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String languages) {
+    try {
+      int userId = DataElementHubRestApplication.getCurrentUser().getId();
+      List<List<SimplifiedElementIdentification>> elementPaths =
+          elementService.getElementPaths(userId, urn, languages);
+      return new ResponseEntity<>(elementPaths, HttpStatus.OK);
+    } catch (IllegalArgumentException e) {
+      return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
+    } catch (IllegalStateException e) {
+      return new ResponseEntity<>(e.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
     }
   }
 }

@@ -27,6 +27,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -125,6 +126,7 @@ public class NamespaceController {
    * Create a new Namespace and return its new ID.
    */
   @PostMapping
+  @PreAuthorize("hasRole('ROLE_createNamespace')")
   public ResponseEntity create(@RequestBody String content,
       UriComponentsBuilder uriComponentsBuilder,
       @RequestHeader(value = HttpHeaders.HOST, required = false) String host,
