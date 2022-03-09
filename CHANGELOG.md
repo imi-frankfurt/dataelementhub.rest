@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.3.0] - UNRELEASED
 ### Added
 - export feature
+- Endpoint to enable importing elements to a staging area
+- Endpoint to retrieve all imports
+- Endpoint to get import status by ID
+- Endpoint to get all import members
+- Endpoint to get an imported element by ID
+- Endpoint to get all members of a stagedElement by ID
+- Endpoint to enable converting the stagedElements to drafts
+- Endpoint to delete an import by ID
+- Endpoint to return all available paths for specified element
 ### Changed
 ### Deprecated
 ### Removed

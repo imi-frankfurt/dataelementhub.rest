@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -33,6 +34,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
 @RequestMapping("/v1")
@@ -48,8 +51,7 @@ public class ExportController {
   @Value("${export.exportDirectory}")
   public String defaultExportDirectory;
 
-
-  @Value("${export.expirationPeriodInDays}")
+  @Value("${dehub.export.expirationPeriodInDays}")
   private int expirationPeriodInDays;
 
   public String exportDirectory = getExportDirectory();
@@ -74,7 +76,7 @@ public class ExportController {
   public ResponseEntity<String> export(@RequestBody ExportRequest exportRequest,
       @RequestParam(value = "format", required = false, defaultValue = "JSON") String format,
       @RequestParam(value = "fullExport", required = false,
-          defaultValue = "true") Boolean fullExport) {
+          defaultValue = "true") Boolean fullExport, UriComponentsBuilder uriComponentsBuilder) {
     int numberOfNamespacesExportedFrom = exportRequest.getElementUrns().stream()
         .map(e -> e.split(":")[1]).collect(Collectors.toSet()).size();
     if (numberOfNamespacesExportedFrom > 1) {
@@ -85,9 +87,12 @@ public class ExportController {
     String timestamp = new Timestamp(System.currentTimeMillis())
         .toString().replaceAll("[ \\.\\-\\:]", "_");
     exportService
-        .exportService(exportRequest, userId,
-            format.toUpperCase(), fullExport, timestamp, exportDirectory);
-    return new ResponseEntity<>(timestamp, HttpStatus.ACCEPTED);
+        .exportService(exportRequest, userId, format, fullExport, timestamp, exportDirectory);
+    UriComponents uriComponents = uriComponentsBuilder.path("/v1/export/{exportId}")
+            .buildAndExpand(timestamp);
+    HttpHeaders httpHeaders = new HttpHeaders();
+    httpHeaders.setLocation(uriComponents.toUri());
+    return new ResponseEntity<>(httpHeaders, HttpStatus.ACCEPTED);
   }
 
 
@@ -142,7 +147,7 @@ public class ExportController {
 
 
   /** Delete all expired exports. */
-  @Scheduled(fixedRateString = "${export.expiredExportsCheckRate}")
+  @Scheduled(fixedRateString = "${dehub.export.expiredExportsCheckRate}")
   @PostConstruct
   public void deleteExpiredExports() throws IOException {
     Files.createDirectories(Paths.get(exportDirectory));

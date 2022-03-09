@@ -1,5 +1,7 @@
 package de.dataelementhub.rest.controller.v1;
 
+import static de.dataelementhub.rest.controller.v1.ApiVersion.API_VERSION;
+
 import de.dataelementhub.dal.ResourceManager;
 import de.dataelementhub.dal.jooq.enums.Status;
 import de.dataelementhub.dal.jooq.tables.pojos.ScopedIdentifier;
@@ -13,14 +15,13 @@ import de.dataelementhub.model.dto.element.section.Identification;
 import de.dataelementhub.model.dto.element.section.Member;
 import de.dataelementhub.model.dto.element.section.Slot;
 import de.dataelementhub.model.dto.listviews.DataElementGroupMember;
+import de.dataelementhub.model.dto.listviews.SimplifiedElementIdentification;
 import de.dataelementhub.model.handler.element.ElementHandler;
 import de.dataelementhub.model.handler.element.section.IdentificationHandler;
 import de.dataelementhub.model.service.ElementService;
 import de.dataelementhub.model.service.JsonValidationService;
 import de.dataelementhub.rest.DataElementHubRestApplication;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -45,11 +46,13 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
-@RequestMapping("/v1/element")
+@RequestMapping("/" + API_VERSION + "/element")
 public class ElementController {
 
   private ElementService elementService;
   private JsonValidationService jsonValidationService;
+
+  private static final String elementPath = "/" + API_VERSION + "/element/{urn}";
 
   @Autowired
   public ElementController(ElementService elementService,
@@ -353,6 +356,52 @@ public class ElementController {
       }
     } catch (NoSuchElementException e) {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+  }
+
+  /**
+   * Update dataElementGroup or record members.
+   * If at least one member has new version return the new element location
+   * otherwise return the old one.
+   */
+  @PostMapping("/{urn}/updateMembers")
+  @Order(SecurityProperties.BASIC_AUTH_ORDER)
+  public ResponseEntity updateMembers(@PathVariable(value = "urn") String urn,
+      UriComponentsBuilder uriComponentsBuilder) {
+    try {
+      String newUrn = elementService.updateMembers(
+          DataElementHubRestApplication.getCurrentUser().getId(), urn);
+      UriComponents uriComponents;
+      uriComponents =
+          uriComponentsBuilder.path(elementPath).buildAndExpand(newUrn);
+      HttpHeaders httpHeaders = new HttpHeaders();
+      httpHeaders.setLocation(uriComponents.toUri());
+      return new ResponseEntity<>(httpHeaders, HttpStatus.OK);
+    } catch (NoSuchElementException nse) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    } catch (IllegalAccessException e) {
+      return new ResponseEntity<>(e, HttpStatus.FORBIDDEN);
+    } catch (IllegalArgumentException e) {
+      return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  /**
+   * Get all available paths for a given element.
+   */
+  @GetMapping("/{urn}/paths")
+  @Order(SecurityProperties.BASIC_AUTH_ORDER)
+  public ResponseEntity getElementPaths(@PathVariable(value = "urn") String urn,
+      @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String languages) {
+    try {
+      int userId = DataElementHubRestApplication.getCurrentUser().getId();
+      List<List<SimplifiedElementIdentification>> elementPaths =
+          elementService.getElementPaths(userId, urn, languages);
+      return new ResponseEntity<>(elementPaths, HttpStatus.OK);
+    } catch (IllegalArgumentException e) {
+      return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
+    } catch (IllegalStateException e) {
+      return new ResponseEntity<>(e.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
     }
   }
 }
