@@ -394,7 +394,7 @@
         ]
       }
     },
-    "/v1/export/?format={format}&fullExport={fullExport}": {
+    "/v1/export/?fullExport={fullExport}": {
       "post": {
         "tags": [
           "Export"
@@ -404,11 +404,11 @@
         "parameters": [
           {
             "name": "format",
-            "in": "path",
+            "in": "header",
             "required": true,
             "schema": {
               "type": "string",
-              "enum": ["JSON", "XML"]
+              "enum": ["application/json", "application/json"]
             }
           },
           {

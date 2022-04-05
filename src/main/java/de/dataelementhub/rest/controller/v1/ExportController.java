@@ -25,12 +25,14 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,9 +40,10 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
-@RequestMapping("/v1")
+@RequestMapping("/" + ApiVersion.API_VERSION)
 public class ExportController {
 
+  public static final String EXPORTED_ELEMENTS_FILENAME = "exportedElements.txt";
   private final ExportService exportService;
 
   @Autowired
@@ -65,7 +68,7 @@ public class ExportController {
   public ResponseEntity<List<ExportInfo>> allExports() {
     Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
     List<ExportInfo> exportDescriptions = exportService.allExports(userId, exportDirectory);
-    return new ResponseEntity<List<ExportInfo>>(exportDescriptions, HttpStatus.OK);
+    return new ResponseEntity<>(exportDescriptions, HttpStatus.OK);
   }
 
   /**
@@ -74,7 +77,7 @@ public class ExportController {
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   @PostMapping(value = "/export")
   public ResponseEntity<String> export(@RequestBody ExportRequest exportRequest,
-      @RequestParam(value = "format", required = false, defaultValue = "JSON") String format,
+      @RequestHeader(value = HttpHeaders.ACCEPT) String mediaType,
       @RequestParam(value = "fullExport", required = false,
           defaultValue = "true") Boolean fullExport, UriComponentsBuilder uriComponentsBuilder) {
     int numberOfNamespacesExportedFrom = exportRequest.getElementUrns().stream()
@@ -83,14 +86,22 @@ public class ExportController {
       return new ResponseEntity<>("Export from more than one namespace is forbidden",
           HttpStatus.BAD_REQUEST);
     }
+    MediaType exportMediaType = MediaType.parseMediaType(mediaType);
+    if (!(exportMediaType.equalsTypeAndSubtype(MediaType.APPLICATION_JSON)
+        || exportMediaType.equalsTypeAndSubtype(MediaType.APPLICATION_XML))) {
+      return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+    }
     Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
     String timestamp = new Timestamp(System.currentTimeMillis())
         .toString().replaceAll("[ \\.\\-\\:]", "_");
     exportService
-        .exportService(exportRequest, userId, format.toUpperCase(),
+        .exportService(exportRequest, userId, exportMediaType,
             fullExport, timestamp, exportDirectory);
-    UriComponents uriComponents = uriComponentsBuilder.path("/v1/export/{exportId}")
-            .buildAndExpand(timestamp);
+    UriComponents uriComponents = uriComponentsBuilder.path(
+        File.separator + ApiVersion.API_VERSION
+            + File.separator + "export"
+            + File.separator + "{exportId}")
+        .buildAndExpand(timestamp);
     HttpHeaders httpHeaders = new HttpHeaders();
     httpHeaders.setLocation(uriComponents.toUri());
     return new ResponseEntity<>(httpHeaders, HttpStatus.ACCEPTED);
@@ -100,7 +111,8 @@ public class ExportController {
   /**
    * Returns export file if done otherwise returns export status.
    */
-  @GetMapping(produces = {"application/zip", "text/plain"}, value = "/export/{exportId}")
+  @GetMapping(produces = {"application/zip",
+      MediaType.TEXT_PLAIN_VALUE}, value = "/export/{exportId}")
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity exportStatus(
       @PathVariable(value = "exportId") String exportId,
@@ -108,31 +120,40 @@ public class ExportController {
       throws Exception {
     Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
     ExportInfo exportInfo = exportService.exportInfo(exportId, userId, exportDirectory);
-    String format = exportInfo.getFormat().toUpperCase();
+    StringBuilder stringBuilder = new StringBuilder();
+    FileSystemResource fileSystemResource;
     switch (exportInfo.getStatus()) {
       case "NOT DEFINED":
         return new ResponseEntity<>(exportInfo.toString(), HttpStatus.NOT_FOUND);
       case "DONE":
-        String file;
+        stringBuilder.append(exportDirectory).append(File.separatorChar);
+        stringBuilder.append(userId).append(File.separatorChar);
+        stringBuilder.append(exportId).append("-");
+        stringBuilder.append(exportInfo.getMediaType().getSubtype()).append("-");
+        stringBuilder.append(exportInfo.getStatus().toLowerCase()).append(File.separatorChar);
         if (onlyUrns) {
-          file = exportDirectory + "/" + userId + "/" + exportId + "-"
-              + format + "-done/" + "exportedElements.txt";
+          stringBuilder.append(EXPORTED_ELEMENTS_FILENAME);
         } else {
-          file = exportDirectory + "/" + userId + "/" + exportId + "-"
-              + format + "-done/" + exportId + ".zip";
+          stringBuilder.append(exportId).append(".zip");
         }
+        fileSystemResource = new FileSystemResource(stringBuilder.toString());
         return ResponseEntity.ok()
-            .header("Content-Disposition", "attachment; filename="
-                + new FileSystemResource(file).getFilename())
-            .body(new FileSystemResource(file));
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename="
+                + fileSystemResource.getFilename())
+            .body(fileSystemResource);
       case "EXPIRED":
         if (onlyUrns) {
-          file = exportDirectory + "/" + userId + "/" + exportId + "-"
-              + format + "-expired/" + "exportedElements.txt";
+          stringBuilder.append(exportDirectory).append(File.separatorChar);
+          stringBuilder.append(userId).append(File.separatorChar);
+          stringBuilder.append(exportId).append("-");
+          stringBuilder.append(exportInfo.getMediaType().getSubtype()).append("-");
+          stringBuilder.append(exportInfo.getStatus().toLowerCase()).append(File.separatorChar);
+          stringBuilder.append(EXPORTED_ELEMENTS_FILENAME);
+          fileSystemResource = new FileSystemResource(stringBuilder.toString());
           return ResponseEntity.ok()
-              .header("Content-Disposition", "attachment; filename="
-                  + new FileSystemResource(file).getFilename())
-              .body(new FileSystemResource(file));
+              .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename="
+                  + fileSystemResource.getFilename())
+              .body(fileSystemResource);
         } else {
           return new ResponseEntity<>("This Export has expired on: " + exportInfo
               .getTimestamp().toLocalDateTime().plusDays(expirationPeriodInDays),
