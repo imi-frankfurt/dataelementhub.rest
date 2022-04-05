@@ -24,4 +24,3 @@ springdoc:
 
 server:
   port: 8090
-

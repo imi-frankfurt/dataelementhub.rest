@@ -68,7 +68,7 @@ public class ElementRelationController {
   /**
    * Update an element relation.
    */
-  @PutMapping("/update")
+  @PutMapping()
   public ResponseEntity update(@RequestBody
       de.dataelementhub.dal.jooq.tables.pojos.ElementRelation elementRelation) {
     try {
@@ -84,7 +84,7 @@ public class ElementRelationController {
   /**
    * Delete an element relation.
    */
-  @DeleteMapping("/delete")
+  @DeleteMapping()
   public ResponseEntity deleteElementRelation(@RequestBody
       de.dataelementhub.dal.jooq.tables.pojos.ElementRelation elementRelation) {
     try {
