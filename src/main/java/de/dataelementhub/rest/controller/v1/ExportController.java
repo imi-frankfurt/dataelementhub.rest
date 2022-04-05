@@ -1,6 +1,5 @@
 package de.dataelementhub.rest.controller.v1;
 
-
 import de.dataelementhub.model.dto.export.ExportInfo;
 import de.dataelementhub.model.dto.export.ExportRequest;
 import de.dataelementhub.model.service.ExportService;
@@ -32,7 +31,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -44,6 +42,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class ExportController {
 
   public static final String EXPORTED_ELEMENTS_FILENAME = "exportedElements.txt";
+  public static final String FORMAT_PARAM = "format";
+  public static final String FULL_EXPORT_PARAM = "fullExport";
   private final ExportService exportService;
 
   @Autowired
@@ -77,19 +77,21 @@ public class ExportController {
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   @PostMapping(value = "/export")
   public ResponseEntity<String> export(@RequestBody ExportRequest exportRequest,
-      @RequestHeader(value = HttpHeaders.ACCEPT) String mediaType,
-      @RequestParam(value = "fullExport", required = false,
-          defaultValue = "true") Boolean fullExport, UriComponentsBuilder uriComponentsBuilder) {
+      @RequestParam(value = FORMAT_PARAM, required = false, defaultValue = "json") String format,
+      @RequestParam(value = FULL_EXPORT_PARAM, required = false, defaultValue = "true")
+          Boolean fullExport, UriComponentsBuilder uriComponentsBuilder) {
+
     int numberOfNamespacesExportedFrom = exportRequest.getElementUrns().stream()
         .map(e -> e.split(":")[1]).collect(Collectors.toSet()).size();
     if (numberOfNamespacesExportedFrom > 1) {
       return new ResponseEntity<>("Export from more than one namespace is forbidden",
           HttpStatus.BAD_REQUEST);
     }
-    MediaType exportMediaType = MediaType.parseMediaType(mediaType);
+
+    MediaType exportMediaType = MediaType.parseMediaType("application/" + format);
     if (!(exportMediaType.equalsTypeAndSubtype(MediaType.APPLICATION_JSON)
         || exportMediaType.equalsTypeAndSubtype(MediaType.APPLICATION_XML))) {
-      return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+      return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
     Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
     String timestamp = new Timestamp(System.currentTimeMillis())
@@ -98,9 +100,9 @@ public class ExportController {
         .exportService(exportRequest, userId, exportMediaType,
             fullExport, timestamp, exportDirectory);
     UriComponents uriComponents = uriComponentsBuilder.path(
-        File.separator + ApiVersion.API_VERSION
-            + File.separator + "export"
-            + File.separator + "{exportId}")
+            File.separator + ApiVersion.API_VERSION
+                + File.separator + "export"
+                + File.separator + "{exportId}")
         .buildAndExpand(timestamp);
     HttpHeaders httpHeaders = new HttpHeaders();
     httpHeaders.setLocation(uriComponents.toUri());
@@ -168,7 +170,9 @@ public class ExportController {
   }
 
 
-  /** Delete all expired exports. */
+  /**
+   * Delete all expired exports.
+   */
   @Scheduled(fixedRateString = "${dehub.export.expiredExportsCheckRate}")
   @PostConstruct
   public void deleteExpiredExports() throws IOException {

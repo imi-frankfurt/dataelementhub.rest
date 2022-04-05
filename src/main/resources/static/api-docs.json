@@ -375,15 +375,14 @@
               "examples": {
                 "Convert Elements": {
                   "description": "Elements to convert.",
-                  "value":
-[
-  "urn:1:dataelement:1:1"
-]
-}
-}
-}
-}
-},
+                  "value": [
+                    "urn:1:dataelement:1:1"
+                  ]
+                }
+              }
+            }
+          }
+        },
         "security": [
           {
             "oauth2": []
@@ -394,7 +393,7 @@
         ]
       }
     },
-    "/v1/export/?fullExport={fullExport}": {
+    "/v1/export": {
       "post": {
         "tags": [
           "Export"
@@ -404,19 +403,21 @@
         "parameters": [
           {
             "name": "format",
-            "in": "header",
-            "required": true,
+            "in": "query",
+            "required": false,
             "schema": {
               "type": "string",
-              "enum": ["application/json", "application/json"]
+              "enum": ["json", "xml"],
+              "default": "json"
             }
           },
           {
             "name": "fullExport",
-            "in": "path",
-            "required": true,
+            "in": "query",
+            "required": false,
             "schema": {
-              "type": "boolean"
+              "type": "boolean",
+              "default": "true"
             }
           }
         ],
@@ -442,6 +443,29 @@
             }
           }
         },
+        "responses": {
+          "202": {
+            "description": "default response"
+          },
+          "406": {
+            "description": "Invalid Accept Header"
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Export"
+        ],
+        "summary": "Get all Exports.",
+        "operationId": "All Exports",
         "responses": {
           "200": {
             "description": "default response",
@@ -521,36 +545,7 @@
         ]
       }
     },
-    "/v1/export": {
-      "get": {
-        "tags": [
-          "Export"
-        ],
-        "summary": "Get all Exports.",
-        "operationId": "All Exports",
-        "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
-          },
-          {
-            "basicAuth": []
-          }
-        ]
-      }
-    },
-    "/v1/relations?type={type}": {
+    "/v1/relations": {
       "get": {
         "tags": [
           "Element Relations"
@@ -560,7 +555,7 @@
         "parameters": [
           {
             "name": "type",
-            "in": "path",
+            "in": "query",
             "required": false,
             "schema": {
               "type": "array",
@@ -592,60 +587,7 @@
             "basicAuth": []
           }
         ]
-      }
-    },
-    "/v1/relations/update": {
-      "put": {
-        "tags": [
-          "Element Relations"
-        ],
-        "summary": "Update Element Relation.",
-        "operationId": "update relations",
-        "requestBody": {
-          "description": "default response",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "string"
-              },
-              "examples": {
-                "ElementRelations": {
-                  "description": "Update Element Relation.",
-                  "value": {
-                      "leftUrn": "urn:1:dataelement:1:1",
-                      "leftSource": 1,
-                      "rightUrn": "urn:1:dataelement:2:1",
-                      "rightSource": 1,
-                      "relation": "equal"
-                    }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
-          },
-          {
-            "basicAuth": []
-          }
-        ]
-      }
-    },
-    "/v1/relations/delete": {
+      },
       "delete": {
         "tags": [
           "Element Relations"
@@ -694,9 +636,7 @@
             "basicAuth": []
           }
         ]
-      }
-    },
-    "/v1/relations": {
+      },
       "post": {
         "tags": [
           "Element Relations"
@@ -722,6 +662,55 @@
                       "relation": "equal"
                     }
                   ]
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Element Relations"
+        ],
+        "summary": "Update Element Relation.",
+        "operationId": "update relations",
+        "requestBody": {
+          "description": "default response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              },
+              "examples": {
+                "ElementRelations": {
+                  "description": "Update Element Relation.",
+                  "value": {
+                    "leftUrn": "urn:1:dataelement:1:1",
+                    "leftSource": 1,
+                    "rightUrn": "urn:1:dataelement:2:1",
+                    "rightSource": 1,
+                    "relation": "equal"
+                  }
                 }
               }
             }
