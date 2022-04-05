@@ -87,7 +87,8 @@ public class ExportController {
     String timestamp = new Timestamp(System.currentTimeMillis())
         .toString().replaceAll("[ \\.\\-\\:]", "_");
     exportService
-        .exportService(exportRequest, userId, format, fullExport, timestamp, exportDirectory);
+        .exportService(exportRequest, userId, format.toUpperCase(),
+            fullExport, timestamp, exportDirectory);
     UriComponents uriComponents = uriComponentsBuilder.path("/v1/export/{exportId}")
             .buildAndExpand(timestamp);
     HttpHeaders httpHeaders = new HttpHeaders();
