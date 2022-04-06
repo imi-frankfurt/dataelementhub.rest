@@ -5,11 +5,24 @@
 <title>The DEHUB-stagedElement Schema</title>
 <required>ns2.import</required>
 <properties>
+<ns2.import>
+  <_id>#/properties/ns2.import</_id>
+  <type>object</type>
+  <title>The ns2.import Schema</title>
+  <required>label</required>
+  <required>stagedElements</required>
+</ns2.import>
 <label>
   <_id>#/properties/label</_id>
   <type>string</type>
   <title>The Label Schema</title>
 </label>
+<stagedElements>
+  <_id>#/properties/stagedElements</_id>
+  <type>array</type>
+  <title>The stagedElements Schema</title>
+  <required>stagedElement</required>
+</stagedElements>
 <stagedElement>
   <_id>#/properties/stagedElement</_id>
   <type>object</type>

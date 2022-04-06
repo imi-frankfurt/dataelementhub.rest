@@ -7,10 +7,22 @@
     "ns2.dehub_data_transfer"
   ],
   "properties": {
+    "ns2.dehub_data_transfer": {
+      "$id": "#/properties/ns2.dehub_data_transfer",
+      "type": "object",
+      "title": "The data transfer Schema",
+      "required": ["label", "stagedElements"]
+    },
     "label": {
       "$id": "#/properties/label",
       "type": "string",
       "title": "The Label Schema"
+    },
+    "stagedElements": {
+      "$id": "#/properties/stagedElements",
+      "type": "array",
+      "title": "The stagedElements Schema",
+      "required": ["stagedElement"]
     },
     "stagedElement": {
       "$id": "#/properties/stagedElement",
