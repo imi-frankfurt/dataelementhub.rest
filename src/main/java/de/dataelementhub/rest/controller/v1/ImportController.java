@@ -10,7 +10,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -70,8 +69,6 @@ public class ImportController {
       UriComponentsBuilder uriComponentsBuilder) {
     Integer namespaceIdentifier = IdentificationHandler.getIdentifierFromUrn(namespaceUrn);
     Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
-    String timestamp = new Timestamp(System.currentTimeMillis())
-        .toString().replaceAll("[ \\.\\-\\:]", "_");
     if (!DaoUtil.accessLevelGranted(namespaceIdentifier, userId, DaoUtil.WRITE_ACCESS_TYPES)) {
       return new ResponseEntity<>(
           "Only users with WRITE or ADMIN accessLevel can import to this namespace.",
@@ -91,7 +88,11 @@ public class ImportController {
     UriComponents uriComponents = uriComponentsBuilder.path("/v1/import/{importId}")
         .buildAndExpand(importId);
     if (importId > -1) {
-      importService.importService(files, importDirectory, userId, importId);
+      try {
+        importService.execute(files, importDirectory, userId, importId);
+      } catch (IOException ioe) {
+        return new ResponseEntity<>(ioe.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
+      }
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.setLocation(uriComponents.toUri());
       return new ResponseEntity(httpHeaders, HttpStatus.ACCEPTED);
