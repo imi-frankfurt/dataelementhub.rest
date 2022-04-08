@@ -61,7 +61,7 @@ public class ElementRelationController {
           DataElementHubRestApplication.getCurrentUser().getId(), er));
       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     } catch (DataAccessException e) {
-      return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -77,7 +77,7 @@ public class ElementRelationController {
           elementRelation);
       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     } catch (DataAccessException e) {
-      return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -93,7 +93,7 @@ public class ElementRelationController {
           elementRelation);
       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     } catch (DataAccessException e) {
-      return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
   }
 }
