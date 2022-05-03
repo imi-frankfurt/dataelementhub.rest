@@ -1,11 +1,13 @@
 package de.dataelementhub.rest.controller.v1;
 
+import de.dataelementhub.dal.ResourceManager;
 import de.dataelementhub.dal.jooq.enums.RelationType;
 import de.dataelementhub.model.dto.ElementRelation;
 import de.dataelementhub.model.service.ElementRelationService;
 import de.dataelementhub.rest.DataElementHubRestApplication;
 import java.util.ArrayList;
 import java.util.List;
+import org.jooq.CloseableDSLContext;
 import org.jooq.exception.DataAccessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -36,14 +38,15 @@ public class ElementRelationController {
   @GetMapping
   public ResponseEntity getElementRelationsByTypes(
       @RequestParam(value = "type", required = false) List<String> types) {
-    try {
+    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
       List<RelationType> relationTypes = new ArrayList<>();
       if (types != null) {
         for (String type : types) {
           relationTypes.add(RelationType.valueOf(type));
         }
       }
-      List<ElementRelation> elementRelations = elementRelationService.listByTypes(relationTypes);
+      List<ElementRelation> elementRelations =
+          elementRelationService.listByTypes(ctx, relationTypes);
       return new ResponseEntity<>(elementRelations, HttpStatus.OK);
     } catch (IllegalArgumentException e) {
       return new ResponseEntity<>("unknown type", HttpStatus.BAD_REQUEST);
@@ -56,9 +59,9 @@ public class ElementRelationController {
   @PostMapping
   public ResponseEntity addElementRelation(@RequestBody
       List<de.dataelementhub.dal.jooq.tables.pojos.ElementRelation> elementRelations) {
-    try {
+    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
       elementRelations.forEach(er -> elementRelationService.createDataElementRelation(
-          DataElementHubRestApplication.getCurrentUser().getId(), er));
+          ctx, DataElementHubRestApplication.getCurrentUser().getId(), er));
       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     } catch (DataAccessException e) {
       return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
@@ -71,9 +74,9 @@ public class ElementRelationController {
   @PutMapping()
   public ResponseEntity update(@RequestBody
       de.dataelementhub.dal.jooq.tables.pojos.ElementRelation elementRelation) {
-    try {
+    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
       elementRelationService.updateDataElementRelation(
-          DataElementHubRestApplication.getCurrentUser().getId(),
+          ctx, DataElementHubRestApplication.getCurrentUser().getId(),
           elementRelation);
       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     } catch (DataAccessException e) {
@@ -87,9 +90,9 @@ public class ElementRelationController {
   @DeleteMapping()
   public ResponseEntity deleteElementRelation(@RequestBody
       de.dataelementhub.dal.jooq.tables.pojos.ElementRelation elementRelation) {
-    try {
+    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
       elementRelationService.deleteDataElementRelation(
-          DataElementHubRestApplication.getCurrentUser().getId(),
+          ctx, DataElementHubRestApplication.getCurrentUser().getId(),
           elementRelation);
       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     } catch (DataAccessException e) {
