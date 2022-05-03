@@ -135,31 +135,29 @@ public class NamespaceController {
       UriComponentsBuilder uriComponentsBuilder,
       @RequestHeader(value = HttpHeaders.HOST, required = false) String host,
       @RequestHeader(value = "x-forwarded-proto", required = false) String scheme) {
-    try {
-      try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
-        jsonValidationService.validate(content);
-        Element element = Deserializer.getElement(content);
-        Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
-        ScopedIdentifier scopedIdentifier = namespaceService.create(ctx, userId, element);
+    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
+      jsonValidationService.validate(content);
+      Element element = Deserializer.getElement(content);
+      Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
+      ScopedIdentifier scopedIdentifier = namespaceService.create(ctx, userId, element);
 
-        UriComponents uriComponents;
-        if (host != null && scheme != null) {
-          uriComponents =
-              uriComponentsBuilder
-                  .path("/v1/namespaces/{id}")
-                  .host(host)
-                  .scheme(scheme)
-                  .buildAndExpand(scopedIdentifier.getIdentifier());
-        } else {
-          uriComponents =
-              uriComponentsBuilder
-                  .path("/v1/namespaces/{id}")
-                  .buildAndExpand(scopedIdentifier.getIdentifier());
-        }
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setLocation(uriComponents.toUri());
-        return new ResponseEntity<>(httpHeaders, HttpStatus.CREATED);
+      UriComponents uriComponents;
+      if (host != null && scheme != null) {
+        uriComponents =
+            uriComponentsBuilder
+                .path("/v1/namespaces/{id}")
+                .host(host)
+                .scheme(scheme)
+                .buildAndExpand(scopedIdentifier.getIdentifier());
+      } else {
+        uriComponents =
+            uriComponentsBuilder
+                .path("/v1/namespaces/{id}")
+                .buildAndExpand(scopedIdentifier.getIdentifier());
       }
+      HttpHeaders httpHeaders = new HttpHeaders();
+      httpHeaders.setLocation(uriComponents.toUri());
+      return new ResponseEntity<>(httpHeaders, HttpStatus.CREATED);
     } catch (IllegalAccessException e) {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     } catch (IOException e) {
@@ -174,16 +172,15 @@ public class NamespaceController {
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity read(@PathVariable(value = "namespaceId") String namespaceId,
       @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String languages) {
-    try {
-      try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
-        Element element =
-            namespaceService.read(
-                ctx, DataElementHubRestApplication.getCurrentUser().getId(), namespaceId);
-        if (languages != null) {
-          element.applyLanguageFilter(languages);
-        }
-        return new ResponseEntity<>(element, HttpStatus.OK);
+    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
+      Element element =
+          namespaceService.read(
+              ctx, DataElementHubRestApplication.getCurrentUser().getId(), namespaceId);
+      if (languages != null) {
+        element.applyLanguageFilter(languages);
       }
+      return new ResponseEntity<>(element, HttpStatus.OK);
+
     } catch (NoSuchElementException e) {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
@@ -200,33 +197,31 @@ public class NamespaceController {
       @RequestParam(value = "hideSubElements", required = false) Boolean hideSubElements,
       @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String languages,
       @RequestHeader(value = HttpHeaders.ACCEPT, required = false) String responseType) {
-    try {
+    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
       if (hideSubElements == null) {
         hideSubElements = false;
       }
-      try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
-        if (responseType != null && responseType
-            .equalsIgnoreCase(MediaType.JSON_LIST_VIEW.getLiteral())) {
+      if (responseType != null && responseType
+          .equalsIgnoreCase(MediaType.JSON_LIST_VIEW.getLiteral())) {
 
-          List<NamespaceMember> namespaceMembers = namespaceService.getNamespaceMembersListview(
-              ctx, DataElementHubRestApplication.getCurrentUser().getId(),
-              namespaceId, elementTypes, hideSubElements);
+        List<NamespaceMember> namespaceMembers = namespaceService.getNamespaceMembersListview(
+            ctx, DataElementHubRestApplication.getCurrentUser().getId(),
+            namespaceId, elementTypes, hideSubElements);
 
-          namespaceMembers.forEach(nsm -> {
-            nsm.applyLanguageFilter(languages);
-          });
+        namespaceMembers.forEach(nsm -> {
+          nsm.applyLanguageFilter(languages);
+        });
 
-          return new ResponseEntity<>(namespaceMembers, HttpStatus.OK);
-        } else {
-          List<Member> namespaceMembers =
-              namespaceService.readNamespaceMembers(
-                  ctx,
-                  DataElementHubRestApplication.getCurrentUser().getId(),
-                  namespaceId,
-                  elementTypes,
-                  hideSubElements);
-          return new ResponseEntity<>(namespaceMembers, HttpStatus.OK);
-        }
+        return new ResponseEntity<>(namespaceMembers, HttpStatus.OK);
+      } else {
+        List<Member> namespaceMembers =
+            namespaceService.readNamespaceMembers(
+                ctx,
+                DataElementHubRestApplication.getCurrentUser().getId(),
+                namespaceId,
+                elementTypes,
+                hideSubElements);
+        return new ResponseEntity<>(namespaceMembers, HttpStatus.OK);
       }
     } catch (NoSuchElementException e) {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
