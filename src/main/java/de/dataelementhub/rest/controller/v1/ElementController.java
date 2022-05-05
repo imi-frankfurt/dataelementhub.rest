@@ -402,6 +402,8 @@ public class ElementController {
       return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
     } catch (IllegalStateException e) {
       return new ResponseEntity<>(e.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
+    } catch (NoSuchElementException nse) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
   }
 }
