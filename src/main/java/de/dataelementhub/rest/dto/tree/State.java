@@ -2,6 +2,9 @@ package de.dataelementhub.rest.dto.tree;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * State.
+ */
 public class State {
 
   private Boolean checked;

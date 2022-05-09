@@ -9,7 +9,9 @@ import io.swagger.v3.oas.models.info.Info;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-
+/**
+ * OpenAPI Config.
+ */
 @Configuration
 @SecurityScheme(name = "basicAuth", bearerFormat = "JWT", type = SecuritySchemeType.HTTP,
     scheme = "bearer")
