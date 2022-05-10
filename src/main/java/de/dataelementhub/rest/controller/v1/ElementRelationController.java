@@ -19,6 +19,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Element Relation Controller.
+ */
 @RestController
 @RequestMapping("/v1/relations")
 public class ElementRelationController {
@@ -61,7 +64,7 @@ public class ElementRelationController {
           DataElementHubRestApplication.getCurrentUser().getId(), er));
       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     } catch (DataAccessException e) {
-      return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -77,7 +80,7 @@ public class ElementRelationController {
           elementRelation);
       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     } catch (DataAccessException e) {
-      return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -93,7 +96,7 @@ public class ElementRelationController {
           elementRelation);
       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     } catch (DataAccessException e) {
-      return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
   }
 }

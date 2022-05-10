@@ -3,6 +3,9 @@ package de.dataelementhub.rest.dto.tree;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Attributes List.
+ */
 public class AttributesList {
 
   private Map<String, String> attributes;
