@@ -3,7 +3,7 @@ package de.dataelementhub.rest.controller.v1;
 import de.dataelementhub.dal.ResourceManager;
 import de.dataelementhub.dal.jooq.enums.Status;
 import de.dataelementhub.rest.dto.tree.AttributesList;
-import de.dataelementhub.rest.dto.tree.ITree;
+import de.dataelementhub.rest.dto.tree.Itree;
 import de.dataelementhub.rest.dto.tree.State;
 import de.dataelementhub.rest.dto.tree.TreeNode;
 import java.util.ArrayList;
@@ -18,6 +18,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Tree Controller.
+ */
 @RestController
 @RequestMapping("/v1/tree")
 public class TreeController {
@@ -63,17 +66,17 @@ public class TreeController {
     }
     // Make namespaces non-selectable
     for (TreeNode rootNode : rootNodeList) {
-      ITree rootNodeITree = rootNode.getITree();
-      if (rootNodeITree == null) {
-        rootNodeITree = new ITree();
+      Itree rootNodeItree = rootNode.getItree();
+      if (rootNodeItree == null) {
+        rootNodeItree = new Itree();
       }
-      State rootNodeITreeState = rootNodeITree.getState();
-      if (rootNodeITreeState == null) {
-        rootNodeITreeState = new State();
+      State rootNodeItreeState = rootNodeItree.getState();
+      if (rootNodeItreeState == null) {
+        rootNodeItreeState = new State();
       }
-      rootNodeITreeState.setSelectable(false);
-      rootNodeITree.setState(rootNodeITreeState);
-      rootNode.setITree(rootNodeITree);
+      rootNodeItreeState.setSelectable(false);
+      rootNodeItree.setState(rootNodeItreeState);
+      rootNode.setItree(rootNodeItree);
     }
 
     return rootNodeList;
@@ -153,7 +156,7 @@ public class TreeController {
     groupNode.setChildren(children);
 
     if (anchorAttributes != null || listItemAttributes != null) {
-      ITree itree = new ITree();
+      Itree itree = new Itree();
 
       if (anchorAttributes != null) {
         AttributesList list = new AttributesList();
@@ -179,7 +182,7 @@ public class TreeController {
       }
       itree.setState(state);
 
-      groupNode.setITree(itree);
+      groupNode.setItree(itree);
     }
 
     rootNodeList.add(groupNode);

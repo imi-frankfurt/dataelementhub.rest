@@ -16,6 +16,9 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+/**
+ * Dataelement Hub Rest Application.
+ */
 @SpringBootApplication(exclude = {R2dbcAutoConfiguration.class})
 public class DataElementHubRestApplication {
 

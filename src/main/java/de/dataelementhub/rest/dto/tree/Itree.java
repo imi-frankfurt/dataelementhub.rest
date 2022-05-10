@@ -2,7 +2,10 @@ package de.dataelementhub.rest.dto.tree;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class ITree {
+/**
+ * Itree.
+ */
+public class Itree {
   // Attributes for li and a currently missing
 
   private String icon;
