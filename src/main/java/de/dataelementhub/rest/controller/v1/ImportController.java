@@ -1,7 +1,7 @@
 package de.dataelementhub.rest.controller.v1;
 
 import de.dataelementhub.model.DaoUtil;
-import de.dataelementhub.model.dto.datatransfer.ImportInfo;
+import de.dataelementhub.model.dto.importexport.ImportInfo;
 import de.dataelementhub.model.dto.listviews.StagedElement;
 import de.dataelementhub.model.handler.element.section.IdentificationHandler;
 import de.dataelementhub.model.service.ImportService;
