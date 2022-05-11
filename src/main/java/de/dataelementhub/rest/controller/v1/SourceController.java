@@ -1,11 +1,11 @@
 package de.dataelementhub.rest.controller.v1;
 
+import de.dataelementhub.dal.ResourceManager;
 import de.dataelementhub.dal.jooq.enums.SourceType;
 import de.dataelementhub.dal.jooq.tables.pojos.Source;
 import de.dataelementhub.model.service.SourceService;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
+import org.jooq.CloseableDSLContext;
 import org.jooq.exception.DataAccessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
@@ -45,12 +45,12 @@ public class SourceController {
   @GetMapping
   public ResponseEntity getSourcesByTypes(
       @RequestParam(value = "type", required = false) String type) {
-    try {
+    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
       List<Source> sourceList;
       if (type == null || type.isEmpty()) {
-        sourceList = sourceService.list();
+        sourceList = sourceService.list(ctx);
       } else {
-        sourceList = sourceService.listByType(SourceType.valueOf(type));
+        sourceList = sourceService.listByType(ctx, SourceType.valueOf(type));
       }
       return new ResponseEntity<>(sourceList, HttpStatus.OK);
     } catch (IllegalArgumentException e) {
@@ -63,8 +63,8 @@ public class SourceController {
    */
   @GetMapping("/{id}")
   public ResponseEntity getSource(@PathVariable("id") String sourceId) {
-    try {
-      Source source = sourceService.read(Integer.parseInt(sourceId));
+    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
+      Source source = sourceService.read(ctx, Integer.parseInt(sourceId));
       if (source == null) {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
       }
@@ -83,8 +83,8 @@ public class SourceController {
       UriComponentsBuilder uriComponentsBuilder,
       @RequestHeader(value = HttpHeaders.HOST, required = false) String host,
       @RequestHeader(value = "x-forwarded-proto", required = false) String scheme) {
-    try {
-      int sourceId = sourceService.create(source);
+    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
+      int sourceId = sourceService.create(ctx, source);
       UriComponents uriComponents;
       if (host != null && scheme != null) {
         uriComponents =

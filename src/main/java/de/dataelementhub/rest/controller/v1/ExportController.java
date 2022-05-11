@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
+import org.jooq.CloseableDSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
@@ -83,33 +84,34 @@ public class ExportController {
       @RequestParam(value = FORMAT_PARAM, required = false, defaultValue = "json") String format,
       @RequestParam(value = FULL_EXPORT_PARAM, required = false, defaultValue = "true")
           Boolean fullExport, UriComponentsBuilder uriComponentsBuilder) {
+    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
+      int numberOfNamespacesExportedFrom = exportRequest.getElementUrns().stream()
+          .map(e -> e.split(":")[1]).collect(Collectors.toSet()).size();
+      if (numberOfNamespacesExportedFrom > 1) {
+        return new ResponseEntity<>("Export from more than one namespace is forbidden",
+            HttpStatus.BAD_REQUEST);
+      }
 
-    int numberOfNamespacesExportedFrom = exportRequest.getElementUrns().stream()
-        .map(e -> e.split(":")[1]).collect(Collectors.toSet()).size();
-    if (numberOfNamespacesExportedFrom > 1) {
-      return new ResponseEntity<>("Export from more than one namespace is forbidden",
-          HttpStatus.BAD_REQUEST);
+      MediaType exportMediaType = MediaType.parseMediaType("application/" + format);
+      if (!(exportMediaType.equalsTypeAndSubtype(MediaType.APPLICATION_JSON)
+          || exportMediaType.equalsTypeAndSubtype(MediaType.APPLICATION_XML))) {
+        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+      }
+      Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
+      String timestamp = new Timestamp(System.currentTimeMillis())
+          .toString().replaceAll("[ \\.\\-\\:]", "_");
+      exportService
+          .exportService(ctx, exportRequest, userId, exportMediaType,
+              fullExport, timestamp, exportDirectory);
+      UriComponents uriComponents = uriComponentsBuilder.path(
+              File.separator + ApiVersion.API_VERSION
+                  + File.separator + "export"
+                  + File.separator + "{exportId}")
+          .buildAndExpand(timestamp);
+      HttpHeaders httpHeaders = new HttpHeaders();
+      httpHeaders.setLocation(uriComponents.toUri());
+      return new ResponseEntity<>(httpHeaders, HttpStatus.ACCEPTED);
     }
-
-    MediaType exportMediaType = MediaType.parseMediaType("application/" + format);
-    if (!(exportMediaType.equalsTypeAndSubtype(MediaType.APPLICATION_JSON)
-        || exportMediaType.equalsTypeAndSubtype(MediaType.APPLICATION_XML))) {
-      return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-    }
-    Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
-    String timestamp = new Timestamp(System.currentTimeMillis())
-        .toString().replaceAll("[ \\.\\-\\:]", "_");
-    exportService
-        .exportService(exportRequest, userId, exportMediaType,
-            fullExport, timestamp, exportDirectory);
-    UriComponents uriComponents = uriComponentsBuilder.path(
-            File.separator + ApiVersion.API_VERSION
-                + File.separator + "export"
-                + File.separator + "{exportId}")
-        .buildAndExpand(timestamp);
-    HttpHeaders httpHeaders = new HttpHeaders();
-    httpHeaders.setLocation(uriComponents.toUri());
-    return new ResponseEntity<>(httpHeaders, HttpStatus.ACCEPTED);
   }
 
 

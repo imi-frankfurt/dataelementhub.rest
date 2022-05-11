@@ -1,5 +1,6 @@
 package de.dataelementhub.rest.controller.v1;
 
+import de.dataelementhub.dal.ResourceManager;
 import de.dataelementhub.dal.jooq.enums.ElementType;
 import de.dataelementhub.dal.jooq.enums.Status;
 import de.dataelementhub.model.dto.element.Element;
@@ -9,6 +10,7 @@ import de.dataelementhub.rest.DataElementHubRestApplication;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.jooq.CloseableDSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.core.annotation.Order;
@@ -72,8 +74,10 @@ public class SearchController {
 
     int userId = DataElementHubRestApplication.getCurrentUser().getId();
     SearchRequest searchRequest = new SearchRequest(searchText, types, status, elementPartsString);
-    List<Element> elements = searchService.search(
-        searchRequest, userId);
-    return new ResponseEntity<>(elements, HttpStatus.OK);
+    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
+      List<Element> elements = searchService.search(
+          ctx, searchRequest, userId);
+      return new ResponseEntity<>(elements, HttpStatus.OK);
+    }
   }
 }
