@@ -44,6 +44,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+/**
+ * Namespace Controller.
+ */
 @RestController
 @RequestMapping("/v1/namespaces")
 public class NamespaceController {

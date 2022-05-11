@@ -2,11 +2,14 @@ package de.dataelementhub.rest.dto.tree;
 
 import java.util.Objects;
 
+/**
+ * Treenode.
+ */
 public class TreeNode {
 
   private String id;
   private String text;
-  private ITree itree;
+  private Itree itree;
   private boolean children;
 
   public String getId() {
@@ -25,11 +28,11 @@ public class TreeNode {
     this.text = text;
   }
 
-  public ITree getITree() {
+  public Itree getItree() {
     return itree;
   }
 
-  public void setITree(ITree itree) {
+  public void setItree(Itree itree) {
     this.itree = itree;
   }
 
