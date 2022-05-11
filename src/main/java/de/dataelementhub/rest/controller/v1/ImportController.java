@@ -1,7 +1,7 @@
 package de.dataelementhub.rest.controller.v1;
 
 import de.dataelementhub.model.DaoUtil;
-import de.dataelementhub.model.dto.importdto.ImportInfo;
+import de.dataelementhub.model.dto.importexport.ImportInfo;
 import de.dataelementhub.model.dto.listviews.StagedElement;
 import de.dataelementhub.model.handler.element.section.IdentificationHandler;
 import de.dataelementhub.model.service.ImportService;
@@ -37,7 +37,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * Import Controller.
  */
 @RestController
-@RequestMapping("/v1")
+@RequestMapping("/v1/import")
 public class ImportController {
 
   public String importDirectory = System.getProperty("java.io.tmpdir") + "/uploads"
@@ -54,11 +54,11 @@ public class ImportController {
    * Get an overview about all user imports and their status.
    */
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
-  @GetMapping(value = "/import")
+  @GetMapping(value = "")
   public ResponseEntity<List<ImportInfo>> listAllImports() {
     Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
     List<ImportInfo> importInfoList = importService.listAllImports(userId);
-    return new ResponseEntity<List<ImportInfo>>(importInfoList, HttpStatus.OK);
+    return new ResponseEntity<>(importInfoList, HttpStatus.OK);
   }
 
   /**
@@ -66,7 +66,7 @@ public class ImportController {
    */
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE},
-      value = "/import")
+      value = "")
   public ResponseEntity<String> importFiles(@RequestBody List<MultipartFile> files,
       @RequestParam("namespaceUrn") String namespaceUrn,
       UriComponentsBuilder uriComponentsBuilder) {
@@ -107,7 +107,7 @@ public class ImportController {
   /**
    * Get import info by ID.
    */
-  @GetMapping(value = "/import/{importId}")
+  @GetMapping(value = "/{importId}")
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity<String> importInfo(
       @PathVariable(value = "importId") String importId) {
@@ -125,7 +125,7 @@ public class ImportController {
   /**
    * Return imported stagedElements in listView format by importId.
    */
-  @GetMapping(value = "/import/{importId}/members")
+  @GetMapping(value = "/{importId}/members")
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity getStagedElementsListView(
       @RequestParam(value = "hideSubElements", required = false, defaultValue = "false")
@@ -149,7 +149,7 @@ public class ImportController {
   /**
    * Get stagedElement by Id.
    */
-  @GetMapping(value = "/import/{importId}/{stagedElementId}")
+  @GetMapping(value = "/{importId}/{stagedElementId}")
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity getStagedElement(
       @PathVariable(value = "importId") Integer importId,
@@ -170,7 +170,7 @@ public class ImportController {
   /**
    * Get stagedElementMembers by Id.
    */
-  @GetMapping(value = "/import/{importId}/{stagedElementId}/members")
+  @GetMapping(value = "/{importId}/{stagedElementId}/members")
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity getStagedElementMembers(
       @RequestParam(value = "onlyConverted", required = false, defaultValue = "false")
@@ -194,7 +194,7 @@ public class ImportController {
   /**
    * Convert stagedElements to Drafts.
    */
-  @PostMapping(value = "/import/{importId}/convert")
+  @PostMapping(value = "/{importId}/convert")
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity convertStagedElementsToDrafts(
       @PathVariable(value = "importId") Integer importId,
@@ -207,7 +207,7 @@ public class ImportController {
   /**
    * Delete stagedImport by Id.
    */
-  @DeleteMapping(value = "/import/{importId}")
+  @DeleteMapping(value = "/{importId}")
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity deleteStagedImport(
       @PathVariable(value = "importId") Integer importId) {

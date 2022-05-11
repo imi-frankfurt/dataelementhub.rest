@@ -1,7 +1,7 @@
 package de.dataelementhub.rest.controller.v1;
 
-import de.dataelementhub.model.dto.export.ExportInfo;
-import de.dataelementhub.model.dto.export.ExportRequest;
+import de.dataelementhub.model.dto.importexport.ExportInfo;
+import de.dataelementhub.model.dto.importexport.ExportRequest;
 import de.dataelementhub.model.service.ExportService;
 import de.dataelementhub.rest.DataElementHubRestApplication;
 import java.io.File;
