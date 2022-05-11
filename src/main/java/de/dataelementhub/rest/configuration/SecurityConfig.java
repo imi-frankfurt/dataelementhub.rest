@@ -20,6 +20,9 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 
+/**
+ * Security Config.
+ */
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
@@ -48,6 +51,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     return jwtConverter;
   }
 
+  /**
+   * Authentication Success Listener.
+   */
   @Component
   public class AuthenticationSuccessListener
       implements ApplicationListener<AuthenticationSuccessEvent> {

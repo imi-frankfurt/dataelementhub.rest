@@ -1,8 +1,7 @@
 package de.dataelementhub.rest.controller.v1;
 
-import de.dataelementhub.dal.ResourceManager;
-import de.dataelementhub.model.dto.export.ExportInfo;
-import de.dataelementhub.model.dto.export.ExportRequest;
+import de.dataelementhub.model.dto.importexport.ExportInfo;
+import de.dataelementhub.model.dto.importexport.ExportRequest;
 import de.dataelementhub.model.service.ExportService;
 import de.dataelementhub.rest.DataElementHubRestApplication;
 import java.io.File;
@@ -39,6 +38,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+/**
+ * Export Controller.
+ */
 @RestController
 @RequestMapping("/" + ApiVersion.API_VERSION)
 public class ExportController {
