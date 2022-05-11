@@ -1,5 +1,6 @@
 package de.dataelementhub.rest.controller.v1;
 
+import de.dataelementhub.dal.ResourceManager;
 import de.dataelementhub.model.dto.importexport.ExportInfo;
 import de.dataelementhub.model.dto.importexport.ExportRequest;
 import de.dataelementhub.model.service.ExportService;
