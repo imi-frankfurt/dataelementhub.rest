@@ -379,7 +379,7 @@ public class ElementController {
           uriComponentsBuilder.path(elementPath).buildAndExpand(newUrn);
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.setLocation(uriComponents.toUri());
-      return new ResponseEntity<>(httpHeaders, HttpStatus.OK);
+      return new ResponseEntity<>(httpHeaders, HttpStatus.NO_CONTENT);
     } catch (NoSuchElementException nse) {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     } catch (IllegalAccessException e) {
