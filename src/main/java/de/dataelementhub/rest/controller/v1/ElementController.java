@@ -401,12 +401,8 @@ public class ElementController {
       List<List<SimplifiedElementIdentification>> elementPaths =
           elementService.getElementPaths(ctx, userId, urn, languages);
       return new ResponseEntity<>(elementPaths, HttpStatus.OK);
-    } catch (IllegalArgumentException e) {
-      return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
     } catch (NoSuchElementException nse) {
-      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+      return new ResponseEntity<>(nse.getMessage(), HttpStatus.NOT_FOUND);
     }
   }
 }
