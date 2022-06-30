@@ -246,10 +246,6 @@ public class NamespaceController {
       Element oldNamespace = namespaceService
           .read(ctx, DataElementHubRestApplication.getCurrentUser().getId(), oldNamespaceId);
 
-      if (oldNamespace == null) {
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-      }
-
       if (oldNamespace.getIdentification().getStatus() == Status.RELEASED && (
           element.getIdentification().getStatus() == Status.STAGED
               || element.getIdentification().getStatus() == Status.DRAFT)) {
@@ -288,6 +284,9 @@ public class NamespaceController {
       return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     } catch (IOException | IllegalStateException e) {
       return new ResponseEntity<>(e.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
+    } catch (NoSuchElementException nse) {
+      return new ResponseEntity<>(
+          "NamespaceId: " + oldNamespaceId + " does not exist!", HttpStatus.NOT_FOUND);
     }
   }
 
