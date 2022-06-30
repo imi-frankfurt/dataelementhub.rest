@@ -98,7 +98,7 @@ public class ElementController {
     } catch (IllegalAccessException e) {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     } catch (NoSuchElementException e) {
-      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (IllegalArgumentException | IllegalStateException | IOException e) {
       return new ResponseEntity<>(e.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
     }
