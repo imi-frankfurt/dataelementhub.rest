@@ -143,8 +143,8 @@ public class ElementController {
       try {
         element = Deserializer.getElement(content);
 
-        if (oldIdentification.getStatus() == Status.RELEASED &&
-            element.getIdentification().getStatus() == Status.DRAFT) {
+        if (oldIdentification.getStatus() == Status.RELEASED
+            && element.getIdentification().getStatus() == Status.DRAFT) {
           return new ResponseEntity<>("Status change from released to draft not allowed.",
               HttpStatus.BAD_REQUEST);
         }
