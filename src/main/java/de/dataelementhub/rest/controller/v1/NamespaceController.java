@@ -108,14 +108,14 @@ public class NamespaceController {
       }
     }
     if (languages != null) {
-      namespaceMap.entrySet().stream()
+      namespaceMap.entrySet()
           .forEach(es -> es.getValue().forEach(ns -> ns.applyLanguageFilter(languages)));
     }
     if (responseType != null && responseType
         .equalsIgnoreCase(MediaType.JSON_LIST_VIEW.getLiteral())) {
       Map<AccessLevelType, List<de.dataelementhub.model.dto.listviews.Namespace>>
           namespaceListViewMap = new HashMap<>();
-      namespaceMap.entrySet().stream()
+      namespaceMap.entrySet()
           .forEach(es -> {
             List<de.dataelementhub.model.dto.listviews.Namespace> nsviews = new ArrayList<>();
             es.getValue()
@@ -211,9 +211,7 @@ public class NamespaceController {
             ctx, DataElementHubRestApplication.getCurrentUser().getId(),
             namespaceId, elementTypes, hideSubElements);
 
-        namespaceMembers.forEach(nsm -> {
-          nsm.applyLanguageFilter(languages);
-        });
+        namespaceMembers.forEach(nsm -> nsm.applyLanguageFilter(languages));
 
         return new ResponseEntity<>(namespaceMembers, HttpStatus.OK);
       } else {

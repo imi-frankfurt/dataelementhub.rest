@@ -88,10 +88,8 @@ public class ImportController {
         return new ResponseEntity<>(
             "No file was submitted.", HttpStatus.BAD_REQUEST);
       }
-      int importId = 0;
-
-      importId = importService
-          .generateImportId(ctx, namespaceUrn, userId, files, importDirectory);
+      int importId = importService.generateImportId(ctx, namespaceUrn, userId, files,
+          importDirectory);
       UriComponents uriComponents = uriComponentsBuilder.path("/v1/import/{importId}")
           .buildAndExpand(importId);
       if (importId > -1) {
@@ -158,7 +156,7 @@ public class ImportController {
       @PathVariable(value = "importId") Integer importId,
       @PathVariable(value = "stagedElementId") String stagedElementId) {
     Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
-    de.dataelementhub.model.dto.element.StagedElement stagedElement = null;
+    de.dataelementhub.model.dto.element.StagedElement stagedElement;
     try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
       stagedElement = importService.getStagedElement(ctx, importId, userId, stagedElementId);
     } catch (IllegalAccessException e) {
@@ -181,8 +179,7 @@ public class ImportController {
       @PathVariable(value = "importId") Integer importId,
       @PathVariable(value = "stagedElementId") String stagedElementId) {
     Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
-    List<StagedElement> stagedElements =
-        null;
+    List<StagedElement> stagedElements;
     try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
       stagedElements = importService.getStagedElementMembers(
           ctx, importId, userId, stagedElementId, onlyConverted);
