@@ -246,9 +246,8 @@ public class NamespaceController {
       Element oldNamespace = namespaceService
           .read(ctx, DataElementHubRestApplication.getCurrentUser().getId(), oldNamespaceId);
 
-      if (oldNamespace.getIdentification().getStatus() == Status.RELEASED && (
-          element.getIdentification().getStatus() == Status.STAGED
-              || element.getIdentification().getStatus() == Status.DRAFT)) {
+      if (oldNamespace.getIdentification().getStatus() == Status.RELEASED &&
+          element.getIdentification().getStatus() == Status.DRAFT) {
         return new ResponseEntity<>("Status change from released to draft or staged not allowed.",
             HttpStatus.BAD_REQUEST);
       }
