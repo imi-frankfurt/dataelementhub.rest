@@ -17,6 +17,8 @@ spring:
         jwt:
           issuer-uri: ${ISSUER_URI}
           jwk-set-uri: ${JWK_SET_URI}
+  flyway:
+    locations: "classpath:de/dataelementhub/db/migration"
 
 springdoc:
   swagger-ui:

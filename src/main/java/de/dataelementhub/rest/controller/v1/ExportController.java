@@ -1,8 +1,8 @@
 package de.dataelementhub.rest.controller.v1;
 
-import de.dataelementhub.dal.ResourceManager;
 import de.dataelementhub.model.dto.importexport.ExportInfo;
 import de.dataelementhub.model.dto.importexport.ExportRequest;
+import de.dataelementhub.model.handler.UserHandler;
 import de.dataelementhub.model.service.ExportService;
 import de.dataelementhub.rest.DataElementHubRestApplication;
 import java.io.File;
@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
-import org.jooq.CloseableDSLContext;
+import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
@@ -29,6 +29,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,6 +43,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 /**
  * Export Controller.
  */
+@Transactional
 @RestController
 @RequestMapping("/" + ApiVersion.API_VERSION)
 public class ExportController {
@@ -51,9 +53,12 @@ public class ExportController {
   public static final String FULL_EXPORT_PARAM = "fullExport";
   private final ExportService exportService;
 
+  private final DSLContext ctx;
+
   @Autowired
-  public ExportController(ExportService exportService) {
+  public ExportController(ExportService exportService, DSLContext ctx) {
     this.exportService = exportService;
+    this.ctx = ctx;
   }
 
   @Value("${export.exportDirectory}")
@@ -71,7 +76,8 @@ public class ExportController {
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   @GetMapping(value = "/export")
   public ResponseEntity<List<ExportInfo>> allExports() {
-    Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
+    Integer userId = UserHandler.getUserByIdentity(ctx,
+        DataElementHubRestApplication.getCurrentUserName()).getId();
     List<ExportInfo> exportDescriptions = exportService.allExports(userId, exportDirectory);
     return new ResponseEntity<>(exportDescriptions, HttpStatus.OK);
   }
@@ -84,35 +90,35 @@ public class ExportController {
   public ResponseEntity<String> export(@RequestBody ExportRequest exportRequest,
       @RequestParam(value = FORMAT_PARAM, required = false, defaultValue = "json") String format,
       @RequestParam(value = FULL_EXPORT_PARAM, required = false, defaultValue = "true")
-          Boolean fullExport, UriComponentsBuilder uriComponentsBuilder) {
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
-      int numberOfNamespacesExportedFrom = exportRequest.getElementUrns().stream()
-          .map(e -> e.split(":")[1]).collect(Collectors.toSet()).size();
-      if (numberOfNamespacesExportedFrom > 1) {
-        return new ResponseEntity<>("Export from more than one namespace is forbidden",
-            HttpStatus.BAD_REQUEST);
-      }
+      Boolean fullExport, UriComponentsBuilder uriComponentsBuilder) {
 
-      MediaType exportMediaType = MediaType.parseMediaType("application/" + format);
-      if (!(exportMediaType.equalsTypeAndSubtype(MediaType.APPLICATION_JSON)
-          || exportMediaType.equalsTypeAndSubtype(MediaType.APPLICATION_XML))) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-      }
-      Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
-      String timestamp = new Timestamp(System.currentTimeMillis())
-          .toString().replaceAll("[ \\.\\-\\:]", "_");
-      exportService
-          .exportService(ctx, exportRequest, userId, exportMediaType,
-              fullExport, timestamp, exportDirectory);
-      UriComponents uriComponents = uriComponentsBuilder.path(
-              File.separator + ApiVersion.API_VERSION
-                  + File.separator + "export"
-                  + File.separator + "{exportId}")
-          .buildAndExpand(timestamp);
-      HttpHeaders httpHeaders = new HttpHeaders();
-      httpHeaders.setLocation(uriComponents.toUri());
-      return new ResponseEntity<>(httpHeaders, HttpStatus.ACCEPTED);
+    int numberOfNamespacesExportedFrom = exportRequest.getElementUrns().stream()
+        .map(e -> e.split(":")[1]).collect(Collectors.toSet()).size();
+    if (numberOfNamespacesExportedFrom > 1) {
+      return new ResponseEntity<>("Export from more than one namespace is forbidden",
+          HttpStatus.BAD_REQUEST);
     }
+
+    MediaType exportMediaType = MediaType.parseMediaType("application/" + format);
+    if (!(exportMediaType.equalsTypeAndSubtype(MediaType.APPLICATION_JSON)
+        || exportMediaType.equalsTypeAndSubtype(MediaType.APPLICATION_XML))) {
+      return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    }
+    Integer userId = UserHandler.getUserByIdentity(ctx,
+        DataElementHubRestApplication.getCurrentUserName()).getId();
+    String timestamp = new Timestamp(System.currentTimeMillis())
+        .toString().replaceAll("[ \\.\\-\\:]", "_");
+    exportService
+        .exportService(ctx, exportRequest, userId, exportMediaType,
+            fullExport, timestamp, exportDirectory);
+    UriComponents uriComponents = uriComponentsBuilder.path(
+            File.separator + ApiVersion.API_VERSION
+                + File.separator + "export"
+                + File.separator + "{exportId}")
+        .buildAndExpand(timestamp);
+    HttpHeaders httpHeaders = new HttpHeaders();
+    httpHeaders.setLocation(uriComponents.toUri());
+    return new ResponseEntity<>(httpHeaders, HttpStatus.ACCEPTED);
   }
 
 
@@ -126,7 +132,8 @@ public class ExportController {
       @PathVariable(value = "exportId") String exportId,
       @RequestParam(value = "onlyUrns", required = false, defaultValue = "false") Boolean onlyUrns)
       throws Exception {
-    Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
+    Integer userId = UserHandler.getUserByIdentity(ctx,
+        DataElementHubRestApplication.getCurrentUserName()).getId();
     ExportInfo exportInfo = exportService.exportInfo(exportId, userId, exportDirectory);
     StringBuilder stringBuilder = new StringBuilder();
     FileSystemResource fileSystemResource;

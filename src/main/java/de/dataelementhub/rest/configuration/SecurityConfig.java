@@ -1,10 +1,10 @@
 package de.dataelementhub.rest.configuration;
 
-import de.dataelementhub.dal.ResourceManager;
 import de.dataelementhub.dal.jooq.tables.pojos.DehubUser;
 import de.dataelementhub.model.handler.UserHandler;
 import java.util.Map;
-import org.jooq.CloseableDSLContext;
+import org.jooq.DSLContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.convert.converter.Converter;
@@ -29,6 +29,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
   @Value("${dehub.keycloakClient}")
   private String keycloakClient;
+
+  @Autowired
+  private DSLContext ctx;
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
@@ -60,18 +63,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     public void onApplicationEvent(AuthenticationSuccessEvent event) {
-      try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
-        Map<String, Object> claims =
-            ((JwtAuthenticationToken) event.getAuthentication()).getTokenAttributes();
-        String sub = (String) claims.get("sub");
-        String email = (String) claims.get("email");
-        String name = (String) claims.get("name");
-        DehubUser user = new DehubUser();
-        user.setAuthId(sub);
-        user.setUserName(name);
-        user.setEmail(email);
-        UserHandler.upsertUser(ctx, user);
-      }
+      Map<String, Object> claims =
+          ((JwtAuthenticationToken) event.getAuthentication()).getTokenAttributes();
+      String sub = (String) claims.get("sub");
+      String email = (String) claims.get("email");
+      String name = (String) claims.get("name");
+      DehubUser user = new DehubUser();
+      user.setAuthId(sub);
+      user.setUserName(name);
+      user.setEmail(email);
+      UserHandler.upsertUser(ctx, user);
     }
   }
 }

@@ -1,21 +1,22 @@
 package de.dataelementhub.rest.controller.v1;
 
-import de.dataelementhub.dal.ResourceManager;
 import de.dataelementhub.dal.jooq.enums.ElementType;
 import de.dataelementhub.dal.jooq.enums.Status;
 import de.dataelementhub.model.dto.element.Element;
 import de.dataelementhub.model.dto.search.SearchRequest;
+import de.dataelementhub.model.handler.UserHandler;
 import de.dataelementhub.model.service.SearchService;
 import de.dataelementhub.rest.DataElementHubRestApplication;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.jooq.CloseableDSLContext;
+import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,15 +25,19 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Search Controller.
  */
+@Transactional
 @RestController
 @RequestMapping("/v1/search")
 public class SearchController {
 
   private final SearchService searchService;
 
+  private final DSLContext ctx;
+
   @Autowired
-  public SearchController(SearchService searchService) {
+  public SearchController(SearchService searchService, DSLContext ctx) {
     this.searchService = searchService;
+    this.ctx = ctx;
   }
 
   /**
@@ -72,12 +77,13 @@ public class SearchController {
           "dataType", "valueDomainDescription", "unitOfMeasure", "format");
     }
 
-    int userId = DataElementHubRestApplication.getCurrentUser().getId();
+    int userId = UserHandler.getUserByIdentity(ctx,
+        DataElementHubRestApplication.getCurrentUserName()).getId();
     SearchRequest searchRequest = new SearchRequest(searchText, types, status, elementPartsString);
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
-      List<Element> elements = searchService.search(
-          ctx, searchRequest, userId);
-      return new ResponseEntity<>(elements, HttpStatus.OK);
-    }
+
+    List<Element> elements = searchService.search(
+        ctx, searchRequest, userId);
+    return new ResponseEntity<>(elements, HttpStatus.OK);
+
   }
 }
