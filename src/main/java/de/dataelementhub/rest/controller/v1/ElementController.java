@@ -3,6 +3,7 @@ package de.dataelementhub.rest.controller.v1;
 import static de.dataelementhub.rest.controller.v1.ApiVersion.API_VERSION;
 
 import de.dataelementhub.dal.jooq.enums.Status;
+import de.dataelementhub.dal.jooq.tables.pojos.DehubUser;
 import de.dataelementhub.dal.jooq.tables.pojos.ScopedIdentifier;
 import de.dataelementhub.model.Deserializer;
 import de.dataelementhub.model.MediaType;
@@ -169,16 +170,14 @@ public class ElementController {
 
 
       // check if namespace status and element status are compatible
-      if (ElementHandler.statusMismatch(ctx,
-          UserHandler.getUserByIdentity(ctx, DataElementHubRestApplication.getCurrentUserName())
-              .getId(), element)) {
+      DehubUser dehubUser = UserHandler.getUserByIdentity(ctx,
+          DataElementHubRestApplication.getCurrentUserName());
+      if (ElementHandler.statusMismatch(ctx, dehubUser.getId(), element)) {
         return new ResponseEntity<>("Unreleased namespaces can't contain released elements",
             HttpStatus.UNPROCESSABLE_ENTITY);
       }
       jsonValidationService.validate(content);
-      Identification identification = elementService.update(ctx,
-          UserHandler.getUserByIdentity(ctx, DataElementHubRestApplication.getCurrentUserName())
-              .getId(), element);
+      Identification identification = elementService.update(ctx, dehubUser.getId(), element);
 
       UriComponents uriComponents;
       if (host != null && scheme != null) {
@@ -358,17 +357,15 @@ public class ElementController {
       @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String languages,
       @RequestHeader(value = HttpHeaders.ACCEPT, required = false) String responseType) {
     try {
-      List<Member> members = elementService.readMembers(ctx,
-          UserHandler.getUserByIdentity(ctx, DataElementHubRestApplication.getCurrentUserName())
-              .getId(), urn);
+      DehubUser dehubUser = UserHandler.getUserByIdentity(ctx,
+          DataElementHubRestApplication.getCurrentUserName());
+      List<Member> members = elementService.readMembers(ctx, dehubUser.getId(), urn);
 
       if (responseType != null && responseType
           .equalsIgnoreCase(MediaType.JSON_LIST_VIEW.getLiteral())) {
         List<DataElementGroupMember> dataElementGroupMembers = new ArrayList<>();
         members.forEach(m -> {
-          Element element = elementService.read(ctx,
-              UserHandler.getUserByIdentity(ctx, DataElementHubRestApplication.getCurrentUserName())
-                  .getId(), m.getElementUrn());
+          Element element = elementService.read(ctx, dehubUser.getId(), m.getElementUrn());
           element.applyLanguageFilter(languages);
           dataElementGroupMembers.add(new DataElementGroupMember(element));
         });
