@@ -1,6 +1,5 @@
 package de.dataelementhub.rest;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.r2dbc.R2dbcAutoConfiguration;
@@ -14,15 +13,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
  */
 @SpringBootApplication(exclude = {R2dbcAutoConfiguration.class})
 public class DataElementHubRestApplication {
-
-  @Value("${spring.datasource.url}")
-  private String url;
-
-  @Value("${spring.datasource.username}")
-  private String username;
-
-  @Value("${spring.datasource.password}")
-  private String password;
 
   /**
    * Start the rest application.
