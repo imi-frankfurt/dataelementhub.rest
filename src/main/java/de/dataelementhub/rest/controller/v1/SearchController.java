@@ -84,7 +84,7 @@ public class SearchController {
         elementPartsString = elementPartsString.stream().map(String::toLowerCase).collect(
             Collectors.toList());
         if (!availableElementPartsString.containsAll(elementPartsString)) {
-          throw new IllegalArgumentException("Element parts are not valid!");
+          throw new IllegalArgumentException("Element section is not valid!");
         }
       }
     } catch (IllegalArgumentException iae) {
