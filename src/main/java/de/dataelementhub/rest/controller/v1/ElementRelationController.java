@@ -1,17 +1,18 @@
 package de.dataelementhub.rest.controller.v1;
 
-import de.dataelementhub.dal.ResourceManager;
 import de.dataelementhub.dal.jooq.enums.RelationType;
 import de.dataelementhub.model.dto.ElementRelation;
+import de.dataelementhub.model.handler.UserHandler;
 import de.dataelementhub.model.service.ElementRelationService;
 import de.dataelementhub.rest.DataElementHubRestApplication;
 import java.util.ArrayList;
 import java.util.List;
-import org.jooq.CloseableDSLContext;
+import org.jooq.DSLContext;
 import org.jooq.exception.DataAccessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,15 +25,19 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Element Relation Controller.
  */
+@Transactional
 @RestController
 @RequestMapping("/v1/relations")
 public class ElementRelationController {
 
   private ElementRelationService elementRelationService;
 
+  private final DSLContext ctx;
+
   @Autowired
-  public ElementRelationController(ElementRelationService elementRelationService) {
+  public ElementRelationController(ElementRelationService elementRelationService, DSLContext ctx) {
     this.elementRelationService = elementRelationService;
+    this.ctx = ctx;
   }
 
   /**
@@ -41,7 +46,7 @@ public class ElementRelationController {
   @GetMapping
   public ResponseEntity getElementRelationsByTypes(
       @RequestParam(value = "type", required = false) List<String> types) {
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
+    try {
       List<RelationType> relationTypes = new ArrayList<>();
       if (types != null) {
         for (String type : types) {
@@ -60,11 +65,12 @@ public class ElementRelationController {
    * Add an element relation.
    */
   @PostMapping
-  public ResponseEntity addElementRelation(@RequestBody
-      List<de.dataelementhub.dal.jooq.tables.pojos.ElementRelation> elementRelations) {
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
-      elementRelations.forEach(er -> elementRelationService.createDataElementRelation(
-          ctx, DataElementHubRestApplication.getCurrentUser().getId(), er));
+  public ResponseEntity addElementRelation(
+      @RequestBody List<de.dataelementhub.dal.jooq.tables.pojos.ElementRelation> elementRelations) {
+    try {
+      elementRelations.forEach(er -> elementRelationService.createDataElementRelation(ctx,
+          UserHandler.getUserByIdentity(ctx, DataElementHubRestApplication.getCurrentUserName())
+              .getId(), er));
       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     } catch (DataAccessException e) {
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -77,10 +83,10 @@ public class ElementRelationController {
   @PutMapping()
   public ResponseEntity update(@RequestBody
       de.dataelementhub.dal.jooq.tables.pojos.ElementRelation elementRelation) {
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
-      elementRelationService.updateDataElementRelation(
-          ctx, DataElementHubRestApplication.getCurrentUser().getId(),
-          elementRelation);
+    try {
+      elementRelationService.updateDataElementRelation(ctx,
+          UserHandler.getUserByIdentity(ctx, DataElementHubRestApplication.getCurrentUserName())
+              .getId(), elementRelation);
       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     } catch (DataAccessException e) {
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -93,10 +99,10 @@ public class ElementRelationController {
   @DeleteMapping()
   public ResponseEntity deleteElementRelation(@RequestBody
       de.dataelementhub.dal.jooq.tables.pojos.ElementRelation elementRelation) {
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
-      elementRelationService.deleteDataElementRelation(
-          ctx, DataElementHubRestApplication.getCurrentUser().getId(),
-          elementRelation);
+    try {
+      elementRelationService.deleteDataElementRelation(ctx,
+          UserHandler.getUserByIdentity(ctx, DataElementHubRestApplication.getCurrentUserName())
+              .getId(), elementRelation);
       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     } catch (DataAccessException e) {
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);

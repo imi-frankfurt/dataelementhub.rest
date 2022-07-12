@@ -1,4 +1,4 @@
-FROM openjdk:15-jdk-alpine
+FROM openjdk:18-jdk-alpine
 EXPOSE 8090
 COPY docker/start.sh .
 COPY docker/dehub-update-ca-certificates /etc/sudoers.d/

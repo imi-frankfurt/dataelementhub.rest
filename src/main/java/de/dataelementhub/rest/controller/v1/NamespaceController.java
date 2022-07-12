@@ -1,8 +1,8 @@
 package de.dataelementhub.rest.controller.v1;
 
-import de.dataelementhub.dal.ResourceManager;
 import de.dataelementhub.dal.jooq.enums.AccessLevelType;
 import de.dataelementhub.dal.jooq.enums.Status;
+import de.dataelementhub.dal.jooq.tables.pojos.DehubUser;
 import de.dataelementhub.dal.jooq.tables.pojos.ScopedIdentifier;
 import de.dataelementhub.model.Deserializer;
 import de.dataelementhub.model.MediaType;
@@ -12,6 +12,7 @@ import de.dataelementhub.model.dto.element.Namespace;
 import de.dataelementhub.model.dto.element.section.Identification;
 import de.dataelementhub.model.dto.element.section.Member;
 import de.dataelementhub.model.dto.listviews.NamespaceMember;
+import de.dataelementhub.model.handler.UserHandler;
 import de.dataelementhub.model.service.JsonValidationService;
 import de.dataelementhub.model.service.NamespaceService;
 import de.dataelementhub.model.service.UserService;
@@ -22,7 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import org.jooq.CloseableDSLContext;
+import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.core.annotation.Order;
@@ -30,6 +31,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -47,6 +49,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 /**
  * Namespace Controller.
  */
+@Transactional
 @RestController
 @RequestMapping("/v1/namespaces")
 public class NamespaceController {
@@ -55,27 +58,18 @@ public class NamespaceController {
   private UserService userService;
   private JsonValidationService jsonValidationService;
 
+  private final DSLContext ctx;
+
   /**
    * Create a new NamespaceController.
    */
   @Autowired
   public NamespaceController(NamespaceService namespaceService, UserService userService,
-      JsonValidationService jsonValidationService) {
+      JsonValidationService jsonValidationService, DSLContext ctx) {
     this.namespaceService = namespaceService;
     this.userService = userService;
     this.jsonValidationService = jsonValidationService;
-  }
-
-  /**
-   * TODO.
-   */
-  @GetMapping("/writable")
-  public List<Namespace> getWritable() {
-    /*try (DSLContext ctx = ResourceManager.getDslContext()) {
-      DehubUser user = DataElementHubRestApplication.getCurrentUser();
-      return NamespaceHandler.getWritable(ctx, user.getId());
-    }*/
-    return new ArrayList<>(); // TODO remove
+    this.ctx = ctx;
   }
 
   /**
@@ -89,33 +83,29 @@ public class NamespaceController {
       @RequestParam(name = "scope", required = false) String scope) {
 
     Map<AccessLevelType, List<Namespace>> namespaceMap;
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
-      if (scope == null) {
-        namespaceMap =
-            namespaceService.readNamespaces(
-                ctx, DataElementHubRestApplication.getCurrentUser().getId());
-      } else {
-        try {
-          AccessLevelType scopeAccessLevel = AccessLevelType.valueOf(scope.toUpperCase());
-          namespaceMap =
-              namespaceService.readNamespaces(
-                  ctx, DataElementHubRestApplication.getCurrentUser().getId(), scopeAccessLevel);
-        } catch (IllegalAccessException e) {
-          return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        } catch (IllegalArgumentException e) {
-          return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+    DehubUser dehubUser = UserHandler.getUserByIdentity(ctx,
+        DataElementHubRestApplication.getCurrentUserName());
+    if (scope == null) {
+      namespaceMap = namespaceService.readNamespaces(ctx, dehubUser.getId());
+    } else {
+      try {
+        AccessLevelType scopeAccessLevel = AccessLevelType.valueOf(scope.toUpperCase());
+        namespaceMap = namespaceService.readNamespaces(ctx, dehubUser.getId(), scopeAccessLevel);
+      } catch (IllegalAccessException e) {
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+      } catch (IllegalArgumentException e) {
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
       }
     }
     if (languages != null) {
-      namespaceMap.entrySet().stream()
+      namespaceMap.entrySet()
           .forEach(es -> es.getValue().forEach(ns -> ns.applyLanguageFilter(languages)));
     }
     if (responseType != null && responseType
         .equalsIgnoreCase(MediaType.JSON_LIST_VIEW.getLiteral())) {
       Map<AccessLevelType, List<de.dataelementhub.model.dto.listviews.Namespace>>
           namespaceListViewMap = new HashMap<>();
-      namespaceMap.entrySet().stream()
+      namespaceMap.entrySet()
           .forEach(es -> {
             List<de.dataelementhub.model.dto.listviews.Namespace> nsviews = new ArrayList<>();
             es.getValue()
@@ -138,10 +128,11 @@ public class NamespaceController {
       UriComponentsBuilder uriComponentsBuilder,
       @RequestHeader(value = HttpHeaders.HOST, required = false) String host,
       @RequestHeader(value = "x-forwarded-proto", required = false) String scheme) {
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
+    try  {
       jsonValidationService.validate(content);
       Element element = Deserializer.getElement(content);
-      Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
+      Integer userId = UserHandler.getUserByIdentity(ctx,
+          DataElementHubRestApplication.getCurrentUserName()).getId();
       ScopedIdentifier scopedIdentifier = namespaceService.create(ctx, userId, element);
 
       UriComponents uriComponents;
@@ -175,10 +166,10 @@ public class NamespaceController {
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity read(@PathVariable(value = "namespaceId") String namespaceId,
       @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String languages) {
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
-      Element element =
-          namespaceService.read(
-              ctx, DataElementHubRestApplication.getCurrentUser().getId(), namespaceId);
+    try  {
+      Element element = namespaceService.read(ctx,
+          UserHandler.getUserByIdentity(ctx,
+              DataElementHubRestApplication.getCurrentUserName()).getId(), namespaceId);
       if (languages != null) {
         element.applyLanguageFilter(languages);
       }
@@ -200,27 +191,26 @@ public class NamespaceController {
       @RequestParam(value = "hideSubElements", required = false) Boolean hideSubElements,
       @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String languages,
       @RequestHeader(value = HttpHeaders.ACCEPT, required = false) String responseType) {
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
+    try  {
       if (hideSubElements == null) {
         hideSubElements = false;
       }
+      DehubUser dehubUser = UserHandler.getUserByIdentity(ctx,
+          DataElementHubRestApplication.getCurrentUserName());
       if (responseType != null && responseType
           .equalsIgnoreCase(MediaType.JSON_LIST_VIEW.getLiteral())) {
 
-        List<NamespaceMember> namespaceMembers = namespaceService.getNamespaceMembersListview(
-            ctx, DataElementHubRestApplication.getCurrentUser().getId(),
-            namespaceId, elementTypes, hideSubElements);
+        List<NamespaceMember> namespaceMembers = namespaceService.getNamespaceMembersListview(ctx,
+            dehubUser.getId(), namespaceId, elementTypes, hideSubElements);
 
-        namespaceMembers.forEach(nsm -> {
-          nsm.applyLanguageFilter(languages);
-        });
+        namespaceMembers.forEach(nsm -> nsm.applyLanguageFilter(languages));
 
         return new ResponseEntity<>(namespaceMembers, HttpStatus.OK);
       } else {
         List<Member> namespaceMembers =
             namespaceService.readNamespaceMembers(
                 ctx,
-                DataElementHubRestApplication.getCurrentUser().getId(),
+                dehubUser.getId(),
                 namespaceId,
                 elementTypes,
                 hideSubElements);
@@ -241,10 +231,10 @@ public class NamespaceController {
       @RequestHeader(value = HttpHeaders.HOST, required = false) String host,
       @RequestHeader(value = "x-forwarded-proto", required = false) String scheme) {
     Element element = Deserializer.getElement(content);
-    Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
-      Element oldNamespace = namespaceService
-          .read(ctx, DataElementHubRestApplication.getCurrentUser().getId(), oldNamespaceId);
+    Integer userId = UserHandler.getUserByIdentity(ctx,
+        DataElementHubRestApplication.getCurrentUserName()).getId();
+    try  {
+      Element oldNamespace = namespaceService.read(ctx, userId, oldNamespaceId);
 
       if (oldNamespace.getIdentification().getStatus() == Status.RELEASED
           && element.getIdentification().getStatus() == Status.DRAFT) {
@@ -296,11 +286,11 @@ public class NamespaceController {
   @DeleteMapping("/{namespaceId}")
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity delete(@PathVariable(value = "namespaceId") String namespaceId) {
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
-      Element namespace = namespaceService
-          .read(ctx, DataElementHubRestApplication.getCurrentUser().getId(), namespaceId);
-      namespaceService.delete(ctx, DataElementHubRestApplication.getCurrentUser().getId(),
-          namespace.getIdentification().getUrn());
+    try {
+      DehubUser dehubUser = UserHandler.getUserByIdentity(ctx,
+          DataElementHubRestApplication.getCurrentUserName());
+      Element namespace = namespaceService.read(ctx, dehubUser.getId(), namespaceId);
+      namespaceService.delete(ctx, dehubUser.getId(), namespace.getIdentification().getUrn());
       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     } catch (IllegalArgumentException e) {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -317,11 +307,11 @@ public class NamespaceController {
   @PatchMapping("/{namespaceId}/release")
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity release(@PathVariable(value = "namespaceId") String namespaceId) {
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
-      Element namespace = namespaceService
-          .read(ctx, DataElementHubRestApplication.getCurrentUser().getId(), namespaceId);
-      namespaceService.release(ctx, DataElementHubRestApplication.getCurrentUser().getId(),
-          namespace.getIdentification().getUrn());
+    try {
+      DehubUser dehubUser = UserHandler.getUserByIdentity(ctx,
+          DataElementHubRestApplication.getCurrentUserName());
+      Element namespace = namespaceService.read(ctx, dehubUser.getId(), namespaceId);
+      namespaceService.release(ctx, dehubUser.getId(), namespace.getIdentification().getUrn());
       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     } catch (IllegalArgumentException | IllegalStateException e) {
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -337,16 +327,16 @@ public class NamespaceController {
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity readAccessLevels(
       @PathVariable(value = "namespaceIdentifier") String namespaceIdentifier) {
-    if (DataElementHubRestApplication.getCurrentUser().getId() < 0) {
+    DehubUser dehubUser = UserHandler.getUserByIdentity(ctx,
+        DataElementHubRestApplication.getCurrentUserName());
+
+    if (dehubUser.getId() < 0) {
       return new ResponseEntity(HttpStatus.UNAUTHORIZED);
     }
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
-      namespaceService
-          .read(ctx, DataElementHubRestApplication.getCurrentUser().getId(), namespaceIdentifier);
-      List<DeHubUserPermission> userPermissions = namespaceService.readUserAccessList(
-          ctx,
-          DataElementHubRestApplication.getCurrentUser().getId(),
-          Integer.parseInt(namespaceIdentifier));
+    try  {
+      namespaceService.read(ctx, dehubUser.getId(), namespaceIdentifier);
+      List<DeHubUserPermission> userPermissions = namespaceService.readUserAccessList(ctx,
+          dehubUser.getId(), Integer.parseInt(namespaceIdentifier));
 
       return new ResponseEntity(userPermissions, HttpStatus.OK);
     } catch (IllegalAccessException e) {
@@ -365,11 +355,11 @@ public class NamespaceController {
       @PathVariable(value = "namespaceIdentifier") String namespaceIdentifier,
       @RequestBody List<DeHubUserPermission> permissions) {
 
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
-      namespaceService
-          .read(ctx, DataElementHubRestApplication.getCurrentUser().getId(), namespaceIdentifier);
-      userService.grantAccessToNamespace(
-          ctx, DataElementHubRestApplication.getCurrentUser().getId(),
+    try {
+      DehubUser dehubUser = UserHandler.getUserByIdentity(ctx,
+          DataElementHubRestApplication.getCurrentUserName());
+      namespaceService.read(ctx, dehubUser.getId(), namespaceIdentifier);
+      userService.grantAccessToNamespace(ctx, dehubUser.getId(),
           Integer.parseInt(namespaceIdentifier), permissions);
       return new ResponseEntity(HttpStatus.NO_CONTENT);
     } catch (IllegalAccessException e) {
@@ -390,11 +380,11 @@ public class NamespaceController {
       @PathVariable(value = "namespaceIdentifier") String namespaceIdentifier,
       @PathVariable(value = "userAuthId") String userAuthId) {
 
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
-      namespaceService
-          .read(ctx, DataElementHubRestApplication.getCurrentUser().getId(), namespaceIdentifier);
-      userService.revokeAccessToNamespace(
-          ctx, DataElementHubRestApplication.getCurrentUser().getId(),
+    try {
+      DehubUser dehubUser = UserHandler.getUserByIdentity(ctx,
+          DataElementHubRestApplication.getCurrentUserName());
+      namespaceService.read(ctx, dehubUser.getId(), namespaceIdentifier);
+      userService.revokeAccessToNamespace(ctx, dehubUser.getId(),
           Integer.parseInt(namespaceIdentifier), userAuthId);
       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     } catch (IllegalAccessException e) {

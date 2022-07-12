@@ -1,9 +1,9 @@
 package de.dataelementhub.rest.controller.v1;
 
-import de.dataelementhub.dal.ResourceManager;
 import de.dataelementhub.model.DaoUtil;
 import de.dataelementhub.model.dto.importexport.ImportInfo;
 import de.dataelementhub.model.dto.listviews.StagedElement;
+import de.dataelementhub.model.handler.UserHandler;
 import de.dataelementhub.model.handler.element.section.IdentificationHandler;
 import de.dataelementhub.model.service.ImportService;
 import de.dataelementhub.rest.DataElementHubRestApplication;
@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import javax.annotation.PostConstruct;
-import org.jooq.CloseableDSLContext;
+import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.core.annotation.Order;
@@ -23,6 +23,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,6 +39,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 /**
  * Import Controller.
  */
+@Transactional
 @RestController
 @RequestMapping("/v1/import")
 public class ImportController {
@@ -47,9 +49,12 @@ public class ImportController {
 
   private final ImportService importService;
 
+  private final DSLContext ctx;
+
   @Autowired
-  public ImportController(ImportService importService) {
+  public ImportController(ImportService importService, DSLContext ctx) {
     this.importService = importService;
+    this.ctx = ctx;
   }
 
   /**
@@ -58,12 +63,10 @@ public class ImportController {
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   @GetMapping(value = "")
   public ResponseEntity<List<ImportInfo>> listAllImports() {
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
-      Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
-      List<ImportInfo> importInfoList = importService.listAllImports(ctx, userId);
-      return new ResponseEntity<>(importInfoList, HttpStatus.OK);
-    }
-
+    Integer userId = UserHandler.getUserByIdentity(ctx,
+        DataElementHubRestApplication.getCurrentUserName()).getId();
+    List<ImportInfo> importInfoList = importService.listAllImports(ctx, userId);
+    return new ResponseEntity<>(importInfoList, HttpStatus.OK);
   }
 
   /**
@@ -76,8 +79,9 @@ public class ImportController {
       @RequestParam("namespaceUrn") String namespaceUrn,
       UriComponentsBuilder uriComponentsBuilder) {
     Integer namespaceIdentifier = IdentificationHandler.getIdentifierFromUrn(namespaceUrn);
-    Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
+    Integer userId = UserHandler.getUserByIdentity(ctx,
+        DataElementHubRestApplication.getCurrentUserName()).getId();
+    try  {
       if (!DaoUtil.accessLevelGranted(
           ctx, namespaceIdentifier, userId, DaoUtil.WRITE_ACCESS_TYPES)) {
         return new ResponseEntity<>(
@@ -88,10 +92,8 @@ public class ImportController {
         return new ResponseEntity<>(
             "No file was submitted.", HttpStatus.BAD_REQUEST);
       }
-      int importId = 0;
-
-      importId = importService
-          .generateImportId(ctx, namespaceUrn, userId, files, importDirectory);
+      int importId = importService.generateImportId(ctx, namespaceUrn, userId, files,
+          importDirectory);
       UriComponents uriComponents = uriComponentsBuilder.path("/v1/import/{importId}")
           .buildAndExpand(importId);
       if (importId > -1) {
@@ -114,8 +116,9 @@ public class ImportController {
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity<String> importInfo(
       @PathVariable(value = "importId") String importId) {
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
-      Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
+    try  {
+      Integer userId = UserHandler.getUserByIdentity(ctx,
+          DataElementHubRestApplication.getCurrentUserName()).getId();
       ImportInfo importInfo = importService.getImportInfo(ctx, Integer.parseInt(importId), userId);
       return new ResponseEntity(importInfo, HttpStatus.OK);
     } catch (NoSuchElementException ex) {
@@ -136,9 +139,10 @@ public class ImportController {
       @RequestParam(value = "onlyConverted", required = false, defaultValue = "false")
           Boolean onlyConverted,
       @PathVariable(value = "importId") Integer importId) {
-    Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
+    Integer userId = UserHandler.getUserByIdentity(ctx,
+        DataElementHubRestApplication.getCurrentUserName()).getId();
     List<StagedElement> stagedElements = new ArrayList<>();
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
+    try  {
       stagedElements = importService.getImportMembersListView(
           ctx, importId, userId, hideSubElements, onlyConverted);
     } catch (IllegalAccessException e) {
@@ -157,9 +161,10 @@ public class ImportController {
   public ResponseEntity getStagedElement(
       @PathVariable(value = "importId") Integer importId,
       @PathVariable(value = "stagedElementId") String stagedElementId) {
-    Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
-    de.dataelementhub.model.dto.element.StagedElement stagedElement = null;
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
+    Integer userId = UserHandler.getUserByIdentity(ctx,
+        DataElementHubRestApplication.getCurrentUserName()).getId();
+    de.dataelementhub.model.dto.element.StagedElement stagedElement;
+    try  {
       stagedElement = importService.getStagedElement(ctx, importId, userId, stagedElementId);
     } catch (IllegalAccessException e) {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
@@ -180,10 +185,10 @@ public class ImportController {
           Boolean onlyConverted,
       @PathVariable(value = "importId") Integer importId,
       @PathVariable(value = "stagedElementId") String stagedElementId) {
-    Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
-    List<StagedElement> stagedElements =
-        null;
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
+    Integer userId = UserHandler.getUserByIdentity(ctx,
+        DataElementHubRestApplication.getCurrentUserName()).getId();
+    List<StagedElement> stagedElements;
+    try  {
       stagedElements = importService.getStagedElementMembers(
           ctx, importId, userId, stagedElementId, onlyConverted);
     } catch (IllegalAccessException e) {
@@ -202,11 +207,10 @@ public class ImportController {
   public ResponseEntity convertStagedElementsToDrafts(
       @PathVariable(value = "importId") Integer importId,
       @RequestBody List<String> stagedElementsUrns) throws Exception {
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
-      Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
-      importService.convertToDraft(ctx, stagedElementsUrns, userId, importId);
-      return new ResponseEntity(HttpStatus.OK);
-    }
+    Integer userId = UserHandler.getUserByIdentity(ctx,
+        DataElementHubRestApplication.getCurrentUserName()).getId();
+    importService.convertToDraft(ctx, stagedElementsUrns, userId, importId);
+    return new ResponseEntity(HttpStatus.OK);
   }
 
   /**
@@ -216,8 +220,9 @@ public class ImportController {
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity deleteStagedImport(
       @PathVariable(value = "importId") Integer importId) {
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
-      Integer userId = DataElementHubRestApplication.getCurrentUser().getId();
+    try  {
+      Integer userId = UserHandler.getUserByIdentity(ctx,
+          DataElementHubRestApplication.getCurrentUserName()).getId();
       importService.deleteStagedImport(ctx, userId, importId);
       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     } catch (IllegalAccessException ie) {

@@ -2,8 +2,8 @@ package de.dataelementhub.rest.controller.v1;
 
 import static de.dataelementhub.rest.controller.v1.ApiVersion.API_VERSION;
 
-import de.dataelementhub.dal.ResourceManager;
 import de.dataelementhub.dal.jooq.enums.Status;
+import de.dataelementhub.dal.jooq.tables.pojos.DehubUser;
 import de.dataelementhub.dal.jooq.tables.pojos.ScopedIdentifier;
 import de.dataelementhub.model.Deserializer;
 import de.dataelementhub.model.MediaType;
@@ -16,6 +16,7 @@ import de.dataelementhub.model.dto.element.section.Member;
 import de.dataelementhub.model.dto.element.section.Slot;
 import de.dataelementhub.model.dto.listviews.DataElementGroupMember;
 import de.dataelementhub.model.dto.listviews.SimplifiedElementIdentification;
+import de.dataelementhub.model.handler.UserHandler;
 import de.dataelementhub.model.handler.element.ElementHandler;
 import de.dataelementhub.model.handler.element.section.IdentificationHandler;
 import de.dataelementhub.model.service.ElementService;
@@ -25,13 +26,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import org.jooq.CloseableDSLContext;
+import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -48,6 +50,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 /**
  * Element Controller.
  */
+@Transactional
 @RestController
 @RequestMapping("/" + API_VERSION + "/element")
 public class ElementController {
@@ -57,11 +60,17 @@ public class ElementController {
 
   private static final String elementPath = "/" + API_VERSION + "/element/{urn}";
 
+  private final DSLContext ctx;
+
+  /**
+   * Constructor for the ElementController class.
+   */
   @Autowired
   public ElementController(ElementService elementService,
-      JsonValidationService jsonValidationService) {
+      JsonValidationService jsonValidationService, DSLContext ctx) {
     this.elementService = elementService;
     this.jsonValidationService = jsonValidationService;
+    this.ctx = ctx;
   }
 
 
@@ -74,11 +83,12 @@ public class ElementController {
       UriComponentsBuilder uriComponentsBuilder,
       @RequestHeader(value = HttpHeaders.HOST, required = false) String host,
       @RequestHeader(value = "x-forwarded-proto", required = false) String scheme) {
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
+    try {
       jsonValidationService.validate(content);
       Element element = Deserializer.getElement(content);
-      ScopedIdentifier scopedIdentifier = elementService
-          .create(ctx, DataElementHubRestApplication.getCurrentUser().getId(), element);
+      ScopedIdentifier scopedIdentifier = elementService.create(ctx,
+          UserHandler.getUserByIdentity(ctx, DataElementHubRestApplication.getCurrentUserName())
+              .getId(), element);
 
       UriComponents uriComponents;
       if (host != null && scheme != null) {
@@ -112,9 +122,10 @@ public class ElementController {
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity read(@PathVariable(value = "urn") String urn,
       @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String languages) {
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
-      Element element = elementService
-          .read(ctx, DataElementHubRestApplication.getCurrentUser(ctx).getId(), urn);
+    try  {
+      Element element = elementService.read(ctx,
+          UserHandler.getUserByIdentity(ctx, DataElementHubRestApplication.getCurrentUserName())
+              .getId(), urn);
       if (languages != null) {
         element.applyLanguageFilter(languages);
       }
@@ -133,7 +144,7 @@ public class ElementController {
       UriComponentsBuilder uriComponentsBuilder,
       @RequestHeader(value = HttpHeaders.HOST, required = false) String host,
       @RequestHeader(value = "x-forwarded-proto", required = false) String scheme) {
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
+    try  {
       Identification oldIdentification = IdentificationHandler.fromUrn(ctx, oldUrn);
       if (oldIdentification == null) {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -159,14 +170,14 @@ public class ElementController {
 
 
       // check if namespace status and element status are compatible
-      if (ElementHandler.statusMismatch(ctx, DataElementHubRestApplication.getCurrentUser().getId(),
-          element)) {
+      DehubUser dehubUser = UserHandler.getUserByIdentity(ctx,
+          DataElementHubRestApplication.getCurrentUserName());
+      if (ElementHandler.statusMismatch(ctx, dehubUser.getId(), element)) {
         return new ResponseEntity<>("Unreleased namespaces can't contain released elements",
             HttpStatus.UNPROCESSABLE_ENTITY);
       }
       jsonValidationService.validate(content);
-      Identification identification = elementService
-          .update(ctx, DataElementHubRestApplication.getCurrentUser().getId(), element);
+      Identification identification = elementService.update(ctx, dehubUser.getId(), element);
 
       UriComponents uriComponents;
       if (host != null && scheme != null) {
@@ -200,8 +211,10 @@ public class ElementController {
   @DeleteMapping("/{urn}")
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity delete(@PathVariable(value = "urn") String urn) {
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
-      elementService.delete(ctx, DataElementHubRestApplication.getCurrentUser().getId(), urn);
+    try  {
+      elementService.delete(ctx,
+          UserHandler.getUserByIdentity(ctx, DataElementHubRestApplication.getCurrentUserName())
+              .getId(), urn);
       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     } catch (IllegalArgumentException e) {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -217,8 +230,10 @@ public class ElementController {
   @PatchMapping("/{urn}/release")
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity release(@PathVariable(value = "urn") String urn) {
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
-      elementService.release(ctx, DataElementHubRestApplication.getCurrentUser().getId(), urn);
+    try  {
+      elementService.release(ctx,
+          UserHandler.getUserByIdentity(ctx, DataElementHubRestApplication.getCurrentUserName())
+              .getId(), urn);
       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     } catch (IllegalArgumentException e) {
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -237,9 +252,10 @@ public class ElementController {
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity getValueDomain(@PathVariable(value = "urn") String urn,
       @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String languages) {
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
-      Element element = elementService
-          .readValueDomain(ctx, DataElementHubRestApplication.getCurrentUser().getId(), urn);
+    try  {
+      Element element = elementService.readValueDomain(ctx,
+          UserHandler.getUserByIdentity(ctx, DataElementHubRestApplication.getCurrentUserName())
+              .getId(), urn);
       if (languages != null) {
         element.applyLanguageFilter(languages);
       }
@@ -255,9 +271,10 @@ public class ElementController {
   @GetMapping("/{urn}/definitions")
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity getDefinitions(@PathVariable(value = "urn") String urn) {
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
-      List<Definition> definitions = elementService
-          .readDefinitions(ctx, DataElementHubRestApplication.getCurrentUser().getId(), urn);
+    try  {
+      List<Definition> definitions = elementService.readDefinitions(ctx,
+          UserHandler.getUserByIdentity(ctx, DataElementHubRestApplication.getCurrentUserName())
+              .getId(), urn);
       return new ResponseEntity<>(definitions, HttpStatus.OK);
     } catch (NoSuchElementException nse) {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -270,9 +287,10 @@ public class ElementController {
   @GetMapping("/{urn}/slots")
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity getSlots(@PathVariable(value = "urn") String urn) {
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
-      List<Slot> slots = elementService
-          .readSlots(ctx, DataElementHubRestApplication.getCurrentUser().getId(), urn);
+    try  {
+      List<Slot> slots = elementService.readSlots(ctx,
+          UserHandler.getUserByIdentity(ctx, DataElementHubRestApplication.getCurrentUserName())
+              .getId(), urn);
       return new ResponseEntity<>(slots, HttpStatus.OK);
     } catch (NoSuchElementException nse) {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -285,9 +303,10 @@ public class ElementController {
   @GetMapping("/{urn}/identification")
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity getIdentification(@PathVariable(value = "urn") String urn) {
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
-      Identification identification = elementService
-          .readIdentification(ctx, DataElementHubRestApplication.getCurrentUser().getId(), urn);
+    try  {
+      Identification identification = elementService.readIdentification(ctx,
+          UserHandler.getUserByIdentity(ctx, DataElementHubRestApplication.getCurrentUserName())
+              .getId(), urn);
       return new ResponseEntity<>(identification, HttpStatus.OK);
     } catch (NoSuchElementException nse) {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -300,10 +319,10 @@ public class ElementController {
   @GetMapping("/{urn}/concepts")
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity getConceptAssociations(@PathVariable(value = "urn") String urn) {
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
-      List<ConceptAssociation> conceptAssociations = elementService
-          .readConceptAssociations(
-              ctx, DataElementHubRestApplication.getCurrentUser().getId(), urn);
+    try {
+      List<ConceptAssociation> conceptAssociations = elementService.readConceptAssociations(ctx,
+          UserHandler.getUserByIdentity(ctx, DataElementHubRestApplication.getCurrentUserName())
+              .getId(), urn);
       return new ResponseEntity<>(conceptAssociations, HttpStatus.OK);
     } catch (NoSuchElementException nse) {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -317,9 +336,10 @@ public class ElementController {
   @GetMapping("/{urn}/relations")
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity getRelations(@PathVariable(value = "urn") String urn) {
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
-      List<ElementRelation> relations = elementService
-          .readRelations(ctx, DataElementHubRestApplication.getCurrentUser().getId(), urn);
+    try {
+      List<ElementRelation> relations = elementService.readRelations(ctx,
+          UserHandler.getUserByIdentity(ctx, DataElementHubRestApplication.getCurrentUserName())
+              .getId(), urn);
       return new ResponseEntity<>(relations, HttpStatus.OK);
     } catch (NoSuchElementException nse) {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -337,24 +357,21 @@ public class ElementController {
       @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String languages,
       @RequestHeader(value = HttpHeaders.ACCEPT, required = false) String responseType) {
     try {
-      try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
-        List<Member> members =
-            elementService.readMembers(
-                ctx, DataElementHubRestApplication.getCurrentUser(ctx).getId(), urn);
+      DehubUser dehubUser = UserHandler.getUserByIdentity(ctx,
+          DataElementHubRestApplication.getCurrentUserName());
+      List<Member> members = elementService.readMembers(ctx, dehubUser.getId(), urn);
 
-        if (responseType != null && responseType
-            .equalsIgnoreCase(MediaType.JSON_LIST_VIEW.getLiteral())) {
-          List<DataElementGroupMember> dataElementGroupMembers = new ArrayList<>();
-          members.forEach(m -> {
-            Element element = elementService.read(
-                ctx, DataElementHubRestApplication.getCurrentUser().getId(), m.getElementUrn());
-            element.applyLanguageFilter(languages);
-            dataElementGroupMembers.add(new DataElementGroupMember(element));
-          });
-          return new ResponseEntity<>(dataElementGroupMembers, HttpStatus.OK);
-        } else {
-          return new ResponseEntity<>(members, HttpStatus.OK);
-        }
+      if (responseType != null && responseType
+          .equalsIgnoreCase(MediaType.JSON_LIST_VIEW.getLiteral())) {
+        List<DataElementGroupMember> dataElementGroupMembers = new ArrayList<>();
+        members.forEach(m -> {
+          Element element = elementService.read(ctx, dehubUser.getId(), m.getElementUrn());
+          element.applyLanguageFilter(languages);
+          dataElementGroupMembers.add(new DataElementGroupMember(element));
+        });
+        return new ResponseEntity<>(dataElementGroupMembers, HttpStatus.OK);
+      } else {
+        return new ResponseEntity<>(members, HttpStatus.OK);
       }
     } catch (NoSuchElementException e) {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -370,9 +387,10 @@ public class ElementController {
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity updateMembers(@PathVariable(value = "urn") String urn,
       UriComponentsBuilder uriComponentsBuilder) {
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
-      String newUrn = elementService.updateMembers(
-          ctx, DataElementHubRestApplication.getCurrentUser().getId(), urn);
+    try  {
+      String newUrn = elementService.updateMembers(ctx,
+          UserHandler.getUserByIdentity(ctx, DataElementHubRestApplication.getCurrentUserName())
+              .getId(), urn);
       UriComponents uriComponents;
       uriComponents =
           uriComponentsBuilder.path(elementPath).buildAndExpand(newUrn);
@@ -395,8 +413,9 @@ public class ElementController {
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity getElementPaths(@PathVariable(value = "urn") String urn,
       @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String languages) {
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
-      int userId = DataElementHubRestApplication.getCurrentUser().getId();
+    try  {
+      int userId = UserHandler.getUserByIdentity(ctx,
+          DataElementHubRestApplication.getCurrentUserName()).getId();
       List<List<SimplifiedElementIdentification>> elementPaths =
           elementService.getElementPaths(ctx, userId, urn, languages);
       return new ResponseEntity<>(elementPaths, HttpStatus.OK);
