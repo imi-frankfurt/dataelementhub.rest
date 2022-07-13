@@ -68,10 +68,9 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "file": {
+                  "files": {
                     "type": "string",
-                    "format": "binary",
-                    "required": true
+                    "format": "binary"
                   }
                 }
               }
