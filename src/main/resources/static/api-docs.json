@@ -787,7 +787,6 @@
           {
             "in": "header",
             "name": "Accept-Language",
-            "type": "string",
             "required": false,
             "example": "de-DE"
           }
