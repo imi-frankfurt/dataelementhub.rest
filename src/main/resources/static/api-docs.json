@@ -3,8 +3,8 @@
   "info": {
     "title": "DataElementHub Rest API",
     "contact": {
-      "name": "Medical Informatics Group",
-      "url": "http://www.mig-frankfurt.de",
+      "name": "Institut für Medizininformatik",
+      "url": "http://www.imi-frankfurt.de",
       "email": "vengadeswaran@med.uni-frankfurt.de"
     },
     "description": "REST API Documentation!\n\n  Github repositories:\n\n<https://github.com/mig-frankfurt/dataelementhub.dal>\n\n<https://github.com/mig-frankfurt/dataelementhub.model>\n\n<https://github.com/mig-frankfurt/dataelementhub.rest>\n\n<https://github.com/mig-frankfurt/dataelementhub.gui>\n\nContact:\n\n",
@@ -15,6 +15,1638 @@
     }
   },
   "paths": {
+    "/v1/namespaces/{namespaceId}/release": {
+      "patch": {
+        "tags": [
+          "Namespace"
+        ],
+        "summary": "Release Namespace by id.",
+        "operationId": "Release Namespace by id.",
+        "parameters": [
+          {
+            "name": "namespaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/namespaces/?scope={scope}": {
+      "get": {
+        "tags": [
+          "Namespace"
+        ],
+        "summary": "Get all Namespaces with specified scope.",
+        "operationId": "Get all Namespaces with specified scope.",
+        "parameters": [
+          {
+            "name": "scope",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["read", "write", "admin"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/namespaces/{namespaceId}/members?elementType={elementType}": {
+      "get": {
+        "tags": [
+          "Namespace"
+        ],
+        "summary": "Get Namespace Members.",
+        "operationId": "Get Namespace Members.",
+        "parameters": [
+          {
+            "name": "namespaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Accept-Language",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "example": "de-DE"
+          },
+          {
+            "in": "header",
+            "name": "Accept",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "example": "application/vnd+de.dataelementhub.listview+json"
+          },
+          {
+            "name": "elementType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "example": ["DATAELEMENTGROUP", "RECORD", "DATAELEMENT",
+                "ENUMERATED_VALUE_DOMAIN", "DESCRIBED_VALUE_DOMAIN", "DEFINED_VALUE_DOMAIN",
+                "CATALOG_VALUE_DOMAIN", "PERMISSIBLE_VALUE"]
+            }
+          },
+          {
+            "in": "query",
+            "name": "hideSubElements",
+            "schema": {
+              "type": "boolean",
+              "required": false,
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such element found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/namespaces/{namespaceIdentifier}/access": {
+      "get": {
+        "tags": [
+          "Namespace"
+        ],
+        "summary": "Read user access to namespace by namespace identifier.",
+        "operationId": "Read user access to namespace by namespace identifier.",
+        "parameters": [
+          {
+            "name": "namespaceIdentifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access is forbidden",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such element found.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Namespace"
+        ],
+        "summary": "Update user access to namespace.",
+        "operationId": "Update user access to namespace.",
+        "parameters": [
+          {
+            "name": "namespaceIdentifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array"
+              },
+              "examples": {
+                "Permissions": {
+                  "description": "Update Element Relation.",
+                  "value": [
+                    {
+                      "userAuthId": "foo-bar",
+                      "accessLevel": "WRITE"
+                    }, {
+                      "userAuthId": "bar-foo",
+                      "accessLevel": "READ"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access is forbidden",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such element found.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/namespaces/{namespaceIdentifier}/access/{userAuthId}": {
+      "delete": {
+        "tags": [
+          "Namespace"
+        ],
+        "summary": "Delete user access to namespace.",
+        "operationId": "Delete user access to namespace.",
+        "parameters": [
+          {
+            "name": "namespaceIdentifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userAuthId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access is forbidden",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such element found.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/namespaces/{namespaceId}": {
+      "get": {
+        "tags": [
+          "Namespace"
+        ],
+        "summary": "Get Namespace by id.",
+        "operationId": "Get Namespace by id.",
+        "parameters": [
+          {
+            "name": "namespaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Accept-Language",
+            "type": "string",
+            "required": false,
+            "example": "de-DE"
+          }
+
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Namespace"
+        ],
+        "summary": "Update namespace.",
+        "operationId": "Update namespace",
+        "parameters": [
+          {
+            "name": "namespaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Update Namespace",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "examples": {
+                "UPDATE NAMESPACE": {
+                  "description": "UPDATE NAMESPACE",
+                  "value": {
+                    "identification": {
+                      "urn": "urn:1:namespace:1:1",
+                      "namespaceUrn": "urn:1:namespace:1:1",
+                      "elementType": "NAMESPACE",
+                      "status": "RELEASED",
+                      "hideNamespace": false
+                    },
+                    "definitions": [
+                      {
+                        "designation": "Namespace designation",
+                        "definition": "Namespace definition",
+                        "language": "en"
+                      }
+                    ],
+                    "slots": []
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Namespace"
+        ],
+        "summary": "Delete Namespace by id.",
+        "operationId": "delete_1",
+        "parameters": [
+          {
+            "name": "namespaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/namespaces": {
+      "post": {
+        "tags": [
+          "Namespace"
+        ],
+        "summary": "Create namespace.",
+        "operationId": "create namespace",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              },
+              "examples": {
+                "NAMESPACE": {
+                  "description": "NAMESPACE",
+                  "value": {
+                    "identification": {
+                      "elementType": "NAMESPACE",
+                      "hideNamespace": false,
+                      "status": "RELEASED"
+                    },
+                    "definitions": [
+                      {
+                        "designation": "Namespace designation",
+                        "definition": "Namespace definition",
+                        "language": "en"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/element/{urn}/release": {
+      "patch": {
+        "tags": [
+          "Element"
+        ],
+        "summary": "Release Element by URN.",
+        "operationId": "Release Element by URN.",
+        "parameters": [
+          {
+            "name": "urn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/element/{urn}/updateMembers": {
+      "post": {
+        "tags": [
+          "Element"
+        ],
+        "summary": "Update dataElementGroup or record members by urn.",
+        "operationId": "Update dataElementGroup or record members by urn.",
+        "parameters": [
+          {
+            "name": "urn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Element not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User has no write access to namespace",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Element Type is not supported. Only dataElementGroup and record are accepted!",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/element/{urn}": {
+      "get": {
+        "tags": [
+          "Element"
+        ],
+        "summary": "Get Element by URN.",
+        "operationId": "Get Element by URN.",
+        "parameters": [
+          {
+            "name": "urn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Accept-Language",
+            "required": false,
+            "example": "de-DE"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Element"
+        ],
+        "summary": "Update an Element with one of the models Dataelement, Dataelementgroup or Record.",
+        "operationId": "Update an Element with one of the models Dataelement, Dataelementgroup or Record.",
+        "parameters": [
+          {
+            "name": "urn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "default response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/DataElement"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DataElementGroup"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Record"
+                  }
+                ]
+              },
+              "examples": {
+                "DATAELEMENT": {
+                  "description": "DATAELEMENT",
+                  "value": {
+                    "identification": {
+                      "elementType": "DATAELEMENT",
+                      "namespaceUrn": "urn:1:namespace:1:1",
+                      "status": "RELEASED"
+                    },
+                    "definitions": [
+                      {
+                        "designation": "Geschlecht",
+                        "definition": "Geschlecht des Patienten",
+                        "language": "de"
+                      },
+                      {
+                        "designation": "gender",
+                        "definition": "patient´s gender",
+                        "language": "en"
+                      }
+                    ],
+                    "valueDomain": {
+                      "type": "STRING",
+                      "text": {
+                        "useRegEx": false,
+                        "regEx": null,
+                        "useMaximumLength": false
+                      }
+                    },
+                    "slots": [
+                      {
+                        "name": "slot_name",
+                        "value": "slot_value"
+                      }
+                    ],
+                    "conceptAssociations": [
+                      {
+                        "conceptId": 1,
+                        "system": "ca_system",
+                        "sourceId": 1,
+                        "version": "ca_version",
+                        "term": "ca_term",
+                        "text": "ca_text",
+                        "linktype": "undefined",
+                        "scopedIdentifierId": 1
+                      }
+                    ]
+                  }
+                },
+                "DATAELEMENTGROUP": {
+                  "description": "DATAELEMENTGROUP",
+                  "value": {
+                    "identification": {
+                      "elementType": "DATAELEMENTGROUP",
+                      "namespaceUrn": "urn:1:namespace:1:1",
+                      "status": "RELEASED"
+                    },
+                    "definitions": [
+                      {
+                        "designation": "people",
+                        "definition": "smartphone",
+                        "language": "de"
+                      }
+                    ],
+                    "members": [],
+                    "slots": [
+                      {
+                        "name": "slot_DEG",
+                        "value": "slot_value"
+                      }
+                    ]
+                  }
+                },
+                "RECORD": {
+                  "description": "RECORD",
+                  "value": {
+                    "identification": {
+                      "elementType": "RECORD",
+                      "namespaceUrn": "urn:1:namespace:1:1",
+                      "status": "RELEASED"
+                    },
+                    "definitions": [
+                      {
+                        "designation": "people",
+                        "definition": "smartphone",
+                        "language": "de"
+                      }
+                    ],
+                    "members": [],
+                    "slots": [
+                      {
+                        "name": "slot_DEG",
+                        "value": "slot_value"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Element"
+        ],
+        "summary": "Delete Element by URN.",
+        "operationId": "Delete Element by URN.",
+        "parameters": [
+          {
+            "name": "urn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/element/{urn}/valuedomain": {
+      "get": {
+        "tags": [
+          "Element"
+        ],
+        "summary": "Get ValueDomain from a specified Element.",
+        "operationId": "Get ValueDomain from a specified Element.",
+        "parameters": [
+          {
+            "name": "urn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/element/{urn}/definitions": {
+      "get": {
+        "tags": [
+          "Element"
+        ],
+        "summary": "Get Definitions from a specified Element.",
+        "operationId": "Get Definitions from a specified Element.",
+        "parameters": [
+          {
+            "name": "urn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/element/{urn}/slots": {
+      "get": {
+        "tags": [
+          "Element"
+        ],
+        "summary": "Get Slots from a specified Element.",
+        "operationId": "Get Slots from a specified Element.",
+        "parameters": [
+          {
+            "name": "urn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/element/{urn}/identification": {
+      "get": {
+        "tags": [
+          "Element"
+        ],
+        "summary": "Get Identification from a specified Element.",
+        "operationId": "Get Identification from a specified Element.",
+        "parameters": [
+          {
+            "name": "urn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/element/{urn}/concepts": {
+      "get": {
+        "tags": [
+          "Element"
+        ],
+        "summary": "Get ConceptsAssociations from a specified Element.",
+        "operationId": "Get ConceptsAssociations from a specified Element.",
+        "parameters": [
+          {
+            "name": "urn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/element/{urn}/relations": {
+      "get": {
+        "tags": [
+          "Element"
+        ],
+        "summary": "Get Relations from a specified Element to other elements.",
+        "operationId": "Get Relations from a specified Element to other elements.",
+        "parameters": [
+          {
+            "name": "urn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/element": {
+      "post": {
+        "tags": [
+          "Element"
+        ],
+        "summary": "Create an Element with one of the models Dataelement, Dataelementgroup or Record.",
+        "operationId": "Create an Element with one of the models Dataelement, Dataelementgroup or Record.",
+        "requestBody": {
+          "description": "default response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/DataElement"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DataElementGroup"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Record"
+                  }
+                ]
+              },
+              "examples": {
+                "DATAELEMENT": {
+                  "description": "DATAELEMENT",
+                  "value": {
+                    "identification": {
+                      "elementType": "DATAELEMENT",
+                      "namespaceUrn": "urn:1:namespace:1:1",
+                      "status": "RELEASED"
+                    },
+                    "definitions": [
+                      {
+                        "designation": "Geschlecht",
+                        "definition": "Geschlecht des Patienten",
+                        "language": "de"
+                      },
+                      {
+                        "designation": "gender",
+                        "definition": "patient´s gender",
+                        "language": "en"
+                      }
+                    ],
+                    "valueDomain": {
+                      "type": "STRING",
+                      "text": {
+                        "useRegEx": false,
+                        "regEx": null,
+                        "useMaximumLength": false
+                      }
+                    },
+                    "slots": [
+                      {
+                        "name": "slot_name",
+                        "value": "slot_value"
+                      }
+                    ],
+                    "conceptAssociations": [
+                      {
+                        "conceptId": 1,
+                        "system": "ca_system",
+                        "sourceId": 1,
+                        "version": "ca_version",
+                        "term": "ca_term",
+                        "text": "ca_text",
+                        "linktype": "undefined",
+                        "scopedIdentifierId": 1
+                      }
+                    ]
+                  }
+                },
+                "DATAELEMENTGROUP": {
+                  "description": "DATAELEMENTGROUP",
+                  "value": {
+                    "identification": {
+                      "elementType": "DATAELEMENTGROUP",
+                      "namespaceUrn": "urn:1:namespace:1:1",
+                      "status": "RELEASED"
+                    },
+                    "definitions": [
+                      {
+                        "designation": "people",
+                        "definition": "smartphone",
+                        "language": "de"
+                      }
+                    ],
+                    "members": [],
+                    "slots": [
+                      {
+                        "name": "slot_DEG",
+                        "value": "slot_value"
+                      }
+                    ]
+                  }
+                },
+                "RECORD": {
+                  "description": "RECORD",
+                  "value": {
+                    "identification": {
+                      "elementType": "RECORD",
+                      "namespaceUrn": "urn:1:namespace:1:1",
+                      "status": "RELEASED"
+                    },
+                    "definitions": [
+                      {
+                        "designation": "people",
+                        "definition": "smartphone",
+                        "language": "de"
+                      }
+                    ],
+                    "members": [],
+                    "slots": [
+                      {
+                        "name": "slot_DEG",
+                        "value": "slot_value"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "CREATED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/element/{urn}/paths": {
+      "get": {
+        "tags": [
+          "Element"
+        ],
+        "summary": "Get all available paths for a specific element.",
+        "operationId": "Get all available paths for a specific element.",
+        "parameters": [
+          {
+            "name": "urn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/element/{urn}/members": {
+      "get": {
+        "tags": [
+          "Element"
+        ],
+        "summary": "Get DataElementGroup or Record Members as a List using its urn.",
+        "operationId": "Get DataElementGroup or Record Members as a List using its urn.",
+        "parameters": [
+          {
+            "name": "urn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/relations": {
+      "get": {
+        "tags": [
+          "Element Relations"
+        ],
+        "summary": "Get Element Relations.",
+        "operationId": "relations",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "example": ["undefined", "equal", "equivalent", "wider", "subsumes",
+                "narrower", "specializes", "inexact", "supersedes"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Element Relations"
+        ],
+        "summary": "Delete Element Relation.",
+        "operationId": "delete relations",
+        "requestBody": {
+          "description": "default response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              },
+              "examples": {
+                "ElementRelations": {
+                  "description": "Update Element Relation.",
+                  "value": {
+                    "leftUrn": "urn:1:dataelement:1:1",
+                    "leftSource": 1,
+                    "rightUrn": "urn:1:dataelement:2:1",
+                    "rightSource": 1,
+                    "relation": "equal"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Element relations successfully deleted",
+            "content": { }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Element Relations"
+        ],
+        "summary": "Create Element Relations.",
+        "operationId": "create relations",
+        "requestBody": {
+          "description": "default response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              },
+              "examples": {
+                "ElementRelations": {
+                  "description": "ElementRelations",
+                  "value": [
+                    {
+                      "leftUrn": "urn:1:dataelement:1:1",
+                      "leftSource": 1,
+                      "rightUrn": "urn:1:dataelement:2:1",
+                      "rightSource": 1,
+                      "relation": "equal"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Element relations successfully created",
+            "content": {}
+          },
+          "400": {
+            "description": "An error occurred trying to post element relations",
+            "content": {}
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Element Relations"
+        ],
+        "summary": "Update Element Relation.",
+        "operationId": "update relations",
+        "requestBody": {
+          "description": "default response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              },
+              "examples": {
+                "ElementRelations": {
+                  "description": "Update Element Relation.",
+                  "value": {
+                    "leftUrn": "urn:1:dataelement:1:1",
+                    "leftSource": 1,
+                    "rightUrn": "urn:1:dataelement:2:1",
+                    "rightSource": 1,
+                    "relation": "equal"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Updating element relations was successful",
+            "content": { }
+          },
+          "400": {
+            "description": "An error occurred trying to update element relations",
+            "content": { }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
     "/v1/import": {
       "get": {
         "tags": [
@@ -68,10 +1700,9 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "file": {
+                  "files": {
                     "type": "string",
-                    "format": "binary",
-                    "required": true
+                    "format": "binary"
                   }
                 }
               }
@@ -545,189 +2176,6 @@
         ]
       }
     },
-    "/v1/relations": {
-      "get": {
-        "tags": [
-          "Element Relations"
-        ],
-        "summary": "Get Element Relations.",
-        "operationId": "relations",
-        "parameters": [
-          {
-            "name": "type",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "example": ["undefined", "equal", "equivalent", "wider", "subsumes",
-                "narrower", "specializes", "inexact", "supersedes"]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
-          },
-          {
-            "basicAuth": []
-          }
-        ]
-      },
-      "delete": {
-        "tags": [
-          "Element Relations"
-        ],
-        "summary": "Delete Element Relation.",
-        "operationId": "delete relations",
-        "requestBody": {
-          "description": "default response",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "string"
-              },
-              "examples": {
-                "ElementRelations": {
-                  "description": "Update Element Relation.",
-                  "value": {
-                    "leftUrn": "urn:1:dataelement:1:1",
-                    "leftSource": 1,
-                    "rightUrn": "urn:1:dataelement:2:1",
-                    "rightSource": 1,
-                    "relation": "equal"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": "Element relations successfully deleted",
-            "content": { }
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
-          },
-          {
-            "basicAuth": []
-          }
-        ]
-      },
-      "post": {
-        "tags": [
-          "Element Relations"
-        ],
-        "summary": "Create Element Relations.",
-        "operationId": "create relations",
-        "requestBody": {
-          "description": "default response",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "string"
-              },
-              "examples": {
-                "ElementRelations": {
-                  "description": "ElementRelations",
-                  "value": [
-                    {
-                      "leftUrn": "urn:1:dataelement:1:1",
-                      "leftSource": 1,
-                      "rightUrn": "urn:1:dataelement:2:1",
-                      "rightSource": 1,
-                      "relation": "equal"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": "Element relations successfully created",
-            "content": {}
-          },
-          "400": {
-            "description": "An error occurred trying to post element relations",
-            "content": {}
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
-          },
-          {
-            "basicAuth": []
-          }
-        ]
-      },
-      "put": {
-        "tags": [
-          "Element Relations"
-        ],
-        "summary": "Update Element Relation.",
-        "operationId": "update relations",
-        "requestBody": {
-          "description": "default response",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "string"
-              },
-              "examples": {
-                "ElementRelations": {
-                  "description": "Update Element Relation.",
-                  "value": {
-                    "leftUrn": "urn:1:dataelement:1:1",
-                    "leftSource": 1,
-                    "rightUrn": "urn:1:dataelement:2:1",
-                    "rightSource": 1,
-                    "relation": "equal"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": "Updating element relations was successful",
-            "content": { }
-          },
-          "400": {
-            "description": "An error occurred trying to update element relations",
-            "content": { }
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
-          },
-          {
-            "basicAuth": []
-          }
-        ]
-      }
-    },
     "/v1/search?query={query}&type={type}&status={status}&section={section}": {
       "get": {
         "tags": [
@@ -767,7 +2215,7 @@
               "items": {
                 "type": "string"
               },
-              "example": ["RELEASED", "OUTDATED", "STAGED", "DRAFT"]
+              "example": ["RELEASED", "OUTDATED", "DRAFT"]
             }
           },
           {
@@ -805,1439 +2253,6 @@
             "basicAuth": []
           }
         ]
-      }
-    },
-    "/v1/element/{urn}/release": {
-      "patch": {
-        "tags": [
-          "Element"
-        ],
-        "summary": "Release Element by URN.",
-        "operationId": "release",
-        "parameters": [
-          {
-            "name": "urn",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
-          },
-          {
-            "basicAuth": []
-          }
-        ]
-      }
-    },
-    "/v1/element/{urn}/updateMembers": {
-      "post": {
-        "tags": [
-          "Element"
-        ],
-        "summary": "Update dataElementGroup or record members by urn.",
-        "operationId": "Update dataElementGroup or record members by urn.",
-        "parameters": [
-          {
-            "name": "urn",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Element not Found",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "User has no write access to namespace",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Element Type is not supported. Only dataElementGroup and record are accepted!",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
-          },
-          {
-            "basicAuth": []
-          }
-        ]
-      }
-    },
-    "/v1/element/{urn}": {
-      "get": {
-        "tags": [
-          "Element"
-        ],
-        "summary": "Get Element by URN.",
-        "operationId": "read",
-        "parameters": [
-          {
-            "name": "urn",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "Accept-Language",
-            "type": "string",
-            "required": false,
-            "example": "de-DE"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
-          },
-          {
-            "basicAuth": []
-          }
-        ]
-      },
-      "put": {
-        "tags": [
-          "Element"
-        ],
-        "summary": "Update an Element with one of the models Dataelement, Dataelementgroup or Record",
-        "operationId": "update",
-        "parameters": [
-          {
-            "name": "urn",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "description": "default response",
-          "content": {
-            "application/json": {
-              "schema": {
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/DataElement"
-                  },
-                  {
-                    "$ref": "#/components/schemas/DataElementGroup"
-                  },
-                  {
-                    "$ref": "#/components/schemas/Record"
-                  }
-                ]
-              },
-              "examples": {
-                "DATAELEMENT": {
-                  "description": "DATAELEMENT",
-                  "value": {
-                    "identification": {
-                      "elementType": "DATAELEMENT",
-                      "namespaceUrn": "urn:1:namespace:1:1",
-                      "status": "RELEASED"
-                    },
-                    "definitions": [
-                      {
-                        "designation": "Geschlecht",
-                        "definition": "Geschlecht des Patienten",
-                        "language": "de"
-                      },
-                      {
-                        "designation": "gender",
-                        "definition": "patient´s gender",
-                        "language": "en"
-                      }
-                    ],
-                    "valueDomain": {
-                      "type": "STRING",
-                      "text": {
-                        "useRegEx": false,
-                        "regEx": null,
-                        "useMaximumLength": false
-                      }
-                    },
-                    "slots": [
-                      {
-                        "name": "slot_name",
-                        "value": "slot_value"
-                      }
-                    ],
-                    "conceptAssociations": [
-                      {
-                        "conceptId": 1,
-                        "system": "ca_system",
-                        "sourceId": 1,
-                        "version": "ca_version",
-                        "term": "ca_term",
-                        "text": "ca_text",
-                        "linktype": "undefined",
-                        "scopedIdentifierId": 1
-                      }
-                    ]
-                  }
-                },
-                "DATAELEMENTGROUP": {
-                  "description": "DATAELEMENTGROUP",
-                  "value": {
-                    "identification": {
-                      "elementType": "DATAELEMENTGROUP",
-                      "namespaceUrn": "urn:1:namespace:1:1",
-                      "status": "RELEASED"
-                    },
-                    "definitions": [
-                      {
-                        "designation": "people",
-                        "definition": "smartphone",
-                        "language": "de"
-                      }
-                    ],
-                    "members": [],
-                    "slots": [
-                      {
-                        "name": "slot_DEG",
-                        "value": "slot_value"
-                      }
-                    ]
-                  }
-                },
-                "RECORD": {
-                  "description": "RECORD",
-                  "value": {
-                    "identification": {
-                      "elementType": "RECORD",
-                      "namespaceUrn": "urn:1:namespace:1:1",
-                      "status": "RELEASED"
-                    },
-                    "definitions": [
-                      {
-                        "designation": "people",
-                        "definition": "smartphone",
-                        "language": "de"
-                      }
-                    ],
-                    "members": [],
-                    "slots": [
-                      {
-                        "name": "slot_DEG",
-                        "value": "slot_value"
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
-          },
-          {
-            "basicAuth": []
-          }
-        ]
-      },
-      "delete": {
-        "tags": [
-          "Element"
-        ],
-        "summary": "Delete Element by URN.",
-        "operationId": "delete",
-        "parameters": [
-          {
-            "name": "urn",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
-          },
-          {
-            "basicAuth": []
-          }
-        ]
-      }
-    },
-    "/v1/element/{urn}/valuedomain": {
-      "get": {
-        "tags": [
-          "Element"
-        ],
-        "summary": "Get ValueDomain from a specified Element.",
-        "operationId": "release",
-        "parameters": [
-          {
-            "name": "urn",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
-          },
-          {
-            "basicAuth": []
-          }
-        ]
-      }
-    },
-    "/v1/element/{urn}/definitions": {
-      "get": {
-        "tags": [
-          "Element"
-        ],
-        "summary": "Get Definitions from a specified Element.",
-        "operationId": "release",
-        "parameters": [
-          {
-            "name": "urn",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
-          },
-          {
-            "basicAuth": []
-          }
-        ]
-      }
-    },
-    "/v1/element/{urn}/slots": {
-      "get": {
-        "tags": [
-          "Element"
-        ],
-        "summary": "Get Slots from a specified Element.",
-        "operationId": "release",
-        "parameters": [
-          {
-            "name": "urn",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
-          },
-          {
-            "basicAuth": []
-          }
-        ]
-      }
-    },
-    "/v1/element/{urn}/validation": {
-      "get": {
-        "tags": [
-          "Element"
-        ],
-        "summary": "Get Validation from a specified Element.",
-        "operationId": "release",
-        "parameters": [
-          {
-            "name": "urn",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
-          },
-          {
-            "basicAuth": []
-          }
-        ]
-      }
-    },
-    "/v1/element/{urn}/identification": {
-      "get": {
-        "tags": [
-          "Element"
-        ],
-        "summary": "Get Identification from a specified Element.",
-        "operationId": "release",
-        "parameters": [
-          {
-            "name": "urn",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
-          },
-          {
-            "basicAuth": []
-          }
-        ]
-      }
-    },
-    "/v1/element/{urn}/conceptassociation": {
-      "get": {
-        "tags": [
-          "Element"
-        ],
-        "summary": "Get ConceptsAssociations from a specified Element.",
-        "operationId": "release",
-        "parameters": [
-          {
-            "name": "urn",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
-          },
-          {
-            "basicAuth": []
-          }
-        ]
-      }
-    },
-    "/v1/element/{urn}/relations": {
-      "get": {
-        "tags": [
-          "Element"
-        ],
-        "summary": "Get Relations from a specified Element to other elements.",
-        "operationId": "relations",
-        "parameters": [
-          {
-            "name": "urn",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
-          },
-          {
-            "basicAuth": []
-          }
-        ]
-      }
-    },
-    "/v1/element": {
-      "post": {
-        "tags": [
-          "Element"
-        ],
-        "summary": "Create an Element with one of the models Dataelement, Dataelementgroup or Record",
-        "operationId": "create",
-        "requestBody": {
-          "description": "default response",
-          "content": {
-            "application/json": {
-              "schema": {
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/DataElement"
-                  },
-                  {
-                    "$ref": "#/components/schemas/DataElementGroup"
-                  },
-                  {
-                    "$ref": "#/components/schemas/Record"
-                  }
-                ]
-              },
-              "examples": {
-                "DATAELEMENT": {
-                  "description": "DATAELEMENT",
-                  "value": {
-                    "identification": {
-                      "elementType": "DATAELEMENT",
-                      "namespaceUrn": "urn:1:namespace:1:1",
-                      "status": "RELEASED"
-                    },
-                    "definitions": [
-                      {
-                        "designation": "Geschlecht",
-                        "definition": "Geschlecht des Patienten",
-                        "language": "de"
-                      },
-                      {
-                        "designation": "gender",
-                        "definition": "patient´s gender",
-                        "language": "en"
-                      }
-                    ],
-                    "valueDomain": {
-                      "type": "STRING",
-                      "text": {
-                        "useRegEx": false,
-                        "regEx": null,
-                        "useMaximumLength": false
-                      }
-                    },
-                    "slots": [
-                      {
-                        "name": "slot_name",
-                        "value": "slot_value"
-                      }
-                    ],
-                    "conceptAssociations": [
-                      {
-                        "conceptId": 1,
-                        "system": "ca_system",
-                        "sourceId": 1,
-                        "version": "ca_version",
-                        "term": "ca_term",
-                        "text": "ca_text",
-                        "linktype": "undefined",
-                        "scopedIdentifierId": 1
-                      }
-                    ]
-                  }
-                },
-                "DATAELEMENTGROUP": {
-                  "description": "DATAELEMENTGROUP",
-                  "value": {
-                    "identification": {
-                      "elementType": "DATAELEMENTGROUP",
-                      "namespaceUrn": "urn:1:namespace:1:1",
-                      "status": "RELEASED"
-                    },
-                    "definitions": [
-                      {
-                        "designation": "people",
-                        "definition": "smartphone",
-                        "language": "de"
-                      }
-                    ],
-                    "members": [],
-                    "slots": [
-                      {
-                        "name": "slot_DEG",
-                        "value": "slot_value"
-                      }
-                    ]
-                  }
-                },
-                "RECORD": {
-                  "description": "RECORD",
-                  "value": {
-                    "identification": {
-                      "elementType": "RECORD",
-                      "namespaceUrn": "urn:1:namespace:1:1",
-                      "status": "RELEASED"
-                    },
-                    "definitions": [
-                      {
-                        "designation": "people",
-                        "definition": "smartphone",
-                        "language": "de"
-                      }
-                    ],
-                    "members": [],
-                    "slots": [
-                      {
-                        "name": "slot_DEG",
-                        "value": "slot_value"
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "CREATED",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
-          },
-          {
-            "basicAuth": []
-          }
-        ]
-      }
-    },
-    "/v1/namespaces/{namespaceId}/release": {
-      "patch": {
-        "tags": [
-          "Namespace"
-        ],
-        "summary": "Release Namespace by id.",
-        "operationId": "release_1",
-        "parameters": [
-          {
-            "name": "namespaceId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
-          },
-          {
-            "basicAuth": []
-          }
-        ]
-      }
-    },
-    "/v1/namespaces/?scope={scope}": {
-      "get": {
-        "tags": [
-          "Namespace"
-        ],
-        "summary": "Get all Namespaces with specified scope.",
-        "operationId": "",
-        "parameters": [
-          {
-            "name": "scope",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "enum": ["read", "write", "admin"]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
-          },
-          {
-            "basicAuth": []
-          }
-        ]
-      }
-    },
-    "/v1/namespaces/{namespaceId}/members?elementType={elementType}": {
-      "get": {
-        "tags": [
-          "Namespace"
-        ],
-        "summary": "Get Namespace Members.",
-        "operationId": "Get Namespace Members",
-        "parameters": [
-          {
-            "name": "namespaceId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "Accept-Language",
-            "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "example": "de-DE"
-          },
-          {
-            "in": "header",
-            "name": "Accept",
-            "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "example": "application/vnd+de.dataelementhub.listview+json"
-          },
-          {
-            "name": "elementType",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "example": ["DATAELEMENTGROUP", "RECORD", "DATAELEMENT",
-                "ENUMERATED_VALUE_DOMAIN", "DESCRIBED_VALUE_DOMAIN", "DEFINED_VALUE_DOMAIN",
-                "CATALOG_VALUE_DOMAIN", "PERMISSIBLE_VALUE"]
-            }
-          },
-          {
-            "in": "query",
-            "name": "hideSubElements",
-            "schema": {
-              "type": "boolean",
-              "required": false,
-              "default": false
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "No such element found",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
-          },
-          {
-            "basicAuth": []
-          }
-        ]
-      }
-    },
-    "/v1/namespaces/{namespaceIdentifier}/access": {
-      "get": {
-        "tags": [
-          "Namespace"
-        ],
-        "summary": "Read user access to namespace by namespace identifier.",
-        "operationId": "Read user access to namespace by namespace identifier.",
-        "parameters": [
-          {
-            "name": "namespaceIdentifier",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Access is forbidden",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "No such element found.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
-          },
-          {
-            "basicAuth": []
-          }
-        ]
-      },
-      "patch": {
-        "tags": [
-          "Namespace"
-        ],
-        "summary": "Update user access to namespace.",
-        "operationId": "Update user access to namespace.",
-        "parameters": [
-          {
-            "name": "namespaceIdentifier",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "array"
-              },
-              "examples": {
-                "Permissions": {
-                  "description": "Update Element Relation.",
-                  "value": [
-                    {
-                      "userAuthId": "foo-bar",
-                      "accessLevel": "WRITE"
-                    }, {
-                      "userAuthId": "bar-foo",
-                      "accessLevel": "READ"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Access is forbidden",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "No such element found.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
-          },
-          {
-            "basicAuth": []
-          }
-        ]
-      }
-    },
-    "/v1/namespaces/{namespaceIdentifier}/access/{userAuthId}": {
-      "delete": {
-        "tags": [
-          "Namespace"
-        ],
-        "summary": "Update user access to namespace.",
-        "operationId": "Update user access to namespace.",
-        "parameters": [
-          {
-            "name": "namespaceIdentifier",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "userAuthId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Access is forbidden",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "No such element found.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
-          },
-          {
-            "basicAuth": []
-          }
-        ]
-      }
-    },
-    "/v1/namespaces/{namespaceId}": {
-      "get": {
-        "tags": [
-          "Namespace"
-        ],
-        "summary": "Get Namespace by id.",
-        "operationId": "read_1",
-        "parameters": [
-          {
-            "name": "namespaceId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "Accept-Language",
-            "type": "string",
-            "required": false,
-            "example": "de-DE"
-          }
-
-        ],
-        "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
-          },
-          {
-            "basicAuth": []
-          }
-        ]
-      },
-      "put": {
-        "tags": [
-          "Namespace"
-        ],
-        "operationId": "update_1",
-        "parameters": [
-          {
-            "name": "namespaceId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "string"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
-          },
-          {
-            "basicAuth": []
-          }
-        ]
-      },
-      "delete": {
-        "tags": [
-          "Namespace"
-        ],
-        "summary": "Delete Namespace by id.",
-        "operationId": "delete_1",
-        "parameters": [
-          {
-            "name": "namespaceId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
-          },
-          {
-            "basicAuth": []
-          }
-        ]
-      }
-    },
-    "/v1/namespaces": {
-      "post": {
-        "tags": [
-          "Namespace"
-        ],
-        "operationId": "create_1",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "string"
-              },
-              "examples": {
-                "NAMESPACE": {
-                  "description": "NAMESPACE",
-                  "value": {
-                    "identification": {
-                      "elementType": "NAMESPACE",
-                      "hideNamespace": false,
-                      "status": "RELEASED"
-                    },
-                    "definitions": [
-                      {
-                        "designation": "Namespace designation",
-                        "definition": "Namespace definition",
-                        "language": "en"
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
-          },
-          {
-            "basicAuth": []
-          }
-        ]
-      }
-    },
-    "/tree/{nodeId}": {
-      "get": {
-        "operationId": "get",
-        "parameters": [
-          {
-            "name": "nodeId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "enum": [
-                  "DRAFT",
-                  "RELEASED",
-                  "OUTDATED",
-                  "STAGED"
-                ]
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TreeNode"
-                  }
-                }
-              }
-            }
-          }
-        }
       }
     },
     "/version": {
