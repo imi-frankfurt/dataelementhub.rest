@@ -767,7 +767,7 @@
               "items": {
                 "type": "string"
               },
-              "example": ["RELEASED", "OUTDATED", "STAGED", "DRAFT"]
+              "example": ["RELEASED", "OUTDATED", "DRAFT"]
             }
           },
           {
@@ -813,7 +813,7 @@
           "Element"
         ],
         "summary": "Release Element by URN.",
-        "operationId": "release",
+        "operationId": "Release Element by URN.",
         "parameters": [
           {
             "name": "urn",
@@ -921,7 +921,7 @@
           "Element"
         ],
         "summary": "Get Element by URN.",
-        "operationId": "read",
+        "operationId": "Get Element by URN.",
         "parameters": [
           {
             "name": "urn",
@@ -964,8 +964,8 @@
         "tags": [
           "Element"
         ],
-        "summary": "Update an Element with one of the models Dataelement, Dataelementgroup or Record",
-        "operationId": "update",
+        "summary": "Update an Element with one of the models Dataelement, Dataelementgroup or Record.",
+        "operationId": "Update an Element with one of the models Dataelement, Dataelementgroup or Record.",
         "parameters": [
           {
             "name": "urn",
@@ -1120,7 +1120,7 @@
           "Element"
         ],
         "summary": "Delete Element by URN.",
-        "operationId": "delete",
+        "operationId": "Delete Element by URN.",
         "parameters": [
           {
             "name": "urn",
@@ -1159,7 +1159,7 @@
           "Element"
         ],
         "summary": "Get ValueDomain from a specified Element.",
-        "operationId": "release",
+        "operationId": "Get ValueDomain from a specified Element.",
         "parameters": [
           {
             "name": "urn",
@@ -1198,7 +1198,7 @@
           "Element"
         ],
         "summary": "Get Definitions from a specified Element.",
-        "operationId": "release",
+        "operationId": "Get Definitions from a specified Element.",
         "parameters": [
           {
             "name": "urn",
@@ -1237,46 +1237,7 @@
           "Element"
         ],
         "summary": "Get Slots from a specified Element.",
-        "operationId": "release",
-        "parameters": [
-          {
-            "name": "urn",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
-          },
-          {
-            "basicAuth": []
-          }
-        ]
-      }
-    },
-    "/v1/element/{urn}/validation": {
-      "get": {
-        "tags": [
-          "Element"
-        ],
-        "summary": "Get Validation from a specified Element.",
-        "operationId": "release",
+        "operationId": "Get Slots from a specified Element.",
         "parameters": [
           {
             "name": "urn",
@@ -1315,7 +1276,7 @@
           "Element"
         ],
         "summary": "Get Identification from a specified Element.",
-        "operationId": "release",
+        "operationId": "Get Identification from a specified Element.",
         "parameters": [
           {
             "name": "urn",
@@ -1348,13 +1309,13 @@
         ]
       }
     },
-    "/v1/element/{urn}/conceptassociation": {
+    "/v1/element/{urn}/concepts": {
       "get": {
         "tags": [
           "Element"
         ],
         "summary": "Get ConceptsAssociations from a specified Element.",
-        "operationId": "release",
+        "operationId": "Get ConceptsAssociations from a specified Element.",
         "parameters": [
           {
             "name": "urn",
@@ -1393,7 +1354,7 @@
           "Element"
         ],
         "summary": "Get Relations from a specified Element to other elements.",
-        "operationId": "relations",
+        "operationId": "Get Relations from a specified Element to other elements.",
         "parameters": [
           {
             "name": "urn",
@@ -1431,8 +1392,8 @@
         "tags": [
           "Element"
         ],
-        "summary": "Create an Element with one of the models Dataelement, Dataelementgroup or Record",
-        "operationId": "create",
+        "summary": "Create an Element with one of the models Dataelement, Dataelementgroup or Record.",
+        "operationId": "Create an Element with one of the models Dataelement, Dataelementgroup or Record.",
         "requestBody": {
           "description": "default response",
           "content": {
@@ -1573,13 +1534,91 @@
         ]
       }
     },
+    "/v1/element/{urn}/paths": {
+      "get": {
+        "tags": [
+          "Element"
+        ],
+        "summary": "Get all available paths for a specific element.",
+        "operationId": "Get all available paths for a specific element.",
+        "parameters": [
+          {
+            "name": "urn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/element/{urn}/members": {
+      "get": {
+        "tags": [
+          "Element"
+        ],
+        "summary": "Get DataElementGroup or Record Members as a List using its urn.",
+        "operationId": "Get DataElementGroup or Record Members as a List using its urn.",
+        "parameters": [
+          {
+            "name": "urn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
     "/v1/namespaces/{namespaceId}/release": {
       "patch": {
         "tags": [
           "Namespace"
         ],
         "summary": "Release Namespace by id.",
-        "operationId": "release_1",
+        "operationId": "Release Namespace by id.",
         "parameters": [
           {
             "name": "namespaceId",
@@ -1618,7 +1657,7 @@
           "Namespace"
         ],
         "summary": "Get all Namespaces with specified scope.",
-        "operationId": "",
+        "operationId": "Get all Namespaces with specified scope.",
         "parameters": [
           {
             "name": "scope",
@@ -1658,7 +1697,7 @@
           "Namespace"
         ],
         "summary": "Get Namespace Members.",
-        "operationId": "Get Namespace Members",
+        "operationId": "Get Namespace Members.",
         "parameters": [
           {
             "name": "namespaceId",
@@ -1926,8 +1965,8 @@
         "tags": [
           "Namespace"
         ],
-        "summary": "Update user access to namespace.",
-        "operationId": "Update user access to namespace.",
+        "summary": "Delete user access to namespace.",
+        "operationId": "Delete user access to namespace.",
         "parameters": [
           {
             "name": "namespaceIdentifier",
@@ -2014,7 +2053,7 @@
           "Namespace"
         ],
         "summary": "Get Namespace by id.",
-        "operationId": "read_1",
+        "operationId": "Get Namespace by id.",
         "parameters": [
           {
             "name": "namespaceId",
@@ -2058,7 +2097,8 @@
         "tags": [
           "Namespace"
         ],
-        "operationId": "update_1",
+        "summary": "Update namespace.",
+        "operationId": "Update namespace",
         "parameters": [
           {
             "name": "namespaceId",
@@ -2070,10 +2110,33 @@
           }
         ],
         "requestBody": {
+          "description": "Update Namespace",
           "content": {
             "application/json": {
               "schema": {
-                "type": "string"
+                "type": "object"
+              },
+              "examples": {
+                "UPDATE NAMESPACE": {
+                  "description": "UPDATE NAMESPACE",
+                  "value": {
+                    "identification": {
+                      "urn": "urn:1:namespace:1:1",
+                      "namespaceUrn": "urn:1:namespace:1:1",
+                      "elementType": "NAMESPACE",
+                      "status": "RELEASED",
+                      "hideNamespace": false
+                    },
+                    "definitions": [
+                      {
+                        "designation": "Namespace designation",
+                        "definition": "Namespace definition",
+                        "language": "en"
+                      }
+                    ],
+                    "slots": []
+                  }
+                }
               }
             }
           }
@@ -2142,7 +2205,8 @@
         "tags": [
           "Namespace"
         ],
-        "operationId": "create_1",
+        "summary": "Create namespace.",
+        "operationId": "create namespace",
         "requestBody": {
           "content": {
             "application/json": {
@@ -2191,53 +2255,6 @@
             "basicAuth": []
           }
         ]
-      }
-    },
-    "/tree/{nodeId}": {
-      "get": {
-        "operationId": "get",
-        "parameters": [
-          {
-            "name": "nodeId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "enum": [
-                  "DRAFT",
-                  "RELEASED",
-                  "OUTDATED",
-                  "STAGED"
-                ]
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TreeNode"
-                  }
-                }
-              }
-            }
-          }
-        }
       }
     },
     "/version": {
