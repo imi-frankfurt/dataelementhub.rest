@@ -21,7 +21,7 @@
           "Namespace"
         ],
         "summary": "Release Namespace by id.",
-        "operationId": "Release Namespace by id.",
+        "operationId": "Release-Namespace-by-id",
         "parameters": [
           {
             "name": "namespaceId",
@@ -60,7 +60,7 @@
           "Namespace"
         ],
         "summary": "Get all Namespaces with specified scope.",
-        "operationId": "Get all Namespaces with specified scope.",
+        "operationId": "Get-all-Namespaces-with-specified-scope",
         "parameters": [
           {
             "name": "scope",
@@ -100,7 +100,7 @@
           "Namespace"
         ],
         "summary": "Get Namespace Members.",
-        "operationId": "Get Namespace Members.",
+        "operationId": "Get-Namespace-Members",
         "parameters": [
           {
             "name": "namespaceId",
@@ -200,7 +200,7 @@
           "Namespace"
         ],
         "summary": "Read user access to namespace by namespace identifier.",
-        "operationId": "Read user access to namespace by namespace identifier.",
+        "operationId": "Read-user-access-to-namespace-by-namespace-identifier",
         "parameters": [
           {
             "name": "namespaceIdentifier",
@@ -267,7 +267,7 @@
           "Namespace"
         ],
         "summary": "Update user access to namespace.",
-        "operationId": "Update user access to namespace.",
+        "operationId": "Update-user-access-to-namespace",
         "parameters": [
           {
             "name": "namespaceIdentifier",
@@ -369,7 +369,7 @@
           "Namespace"
         ],
         "summary": "Delete user access to namespace.",
-        "operationId": "Delete user access to namespace.",
+        "operationId": "Delete-user-access-to-namespace",
         "parameters": [
           {
             "name": "namespaceIdentifier",
@@ -456,7 +456,7 @@
           "Namespace"
         ],
         "summary": "Get Namespace by id.",
-        "operationId": "Get Namespace by id.",
+        "operationId": "Get-Namespace-by-id",
         "parameters": [
           {
             "name": "namespaceId",
@@ -501,7 +501,7 @@
           "Namespace"
         ],
         "summary": "Update namespace.",
-        "operationId": "Update namespace",
+        "operationId": "Update-namespace",
         "parameters": [
           {
             "name": "namespaceId",
@@ -570,7 +570,7 @@
           "Namespace"
         ],
         "summary": "Delete Namespace by id.",
-        "operationId": "delete_1",
+        "operationId": "Delete-Namespace-by-id",
         "parameters": [
           {
             "name": "namespaceId",
@@ -609,7 +609,7 @@
           "Namespace"
         ],
         "summary": "Create namespace.",
-        "operationId": "create namespace",
+        "operationId": "create-namespace",
         "requestBody": {
           "content": {
             "application/json": {
@@ -666,7 +666,7 @@
           "Element"
         ],
         "summary": "Release Element by URN.",
-        "operationId": "Release Element by URN.",
+        "operationId": "Release-Element-by-URN",
         "parameters": [
           {
             "name": "urn",
@@ -705,7 +705,7 @@
           "Element"
         ],
         "summary": "Update dataElementGroup or record members by urn.",
-        "operationId": "Update dataElementGroup or record members by urn.",
+        "operationId": "Update-dataElementGroup-or-record-members-by-urn",
         "parameters": [
           {
             "name": "urn",
@@ -774,7 +774,7 @@
           "Element"
         ],
         "summary": "Get Element by URN.",
-        "operationId": "Get Element by URN.",
+        "operationId": "Get-Element-by-URN",
         "parameters": [
           {
             "name": "urn",
@@ -817,7 +817,7 @@
           "Element"
         ],
         "summary": "Update an Element with one of the models Dataelement, Dataelementgroup or Record.",
-        "operationId": "Update an Element with one of the models Dataelement, Dataelementgroup or Record.",
+        "operationId": "Update-an-Element-with-one-of-the-models-Dataelement-Dataelementgroup-or-Record",
         "parameters": [
           {
             "name": "urn",
@@ -972,7 +972,7 @@
           "Element"
         ],
         "summary": "Delete Element by URN.",
-        "operationId": "Delete Element by URN.",
+        "operationId": "Delete-Element-by-URN",
         "parameters": [
           {
             "name": "urn",
@@ -1011,7 +1011,7 @@
           "Element"
         ],
         "summary": "Get ValueDomain from a specified Element.",
-        "operationId": "Get ValueDomain from a specified Element.",
+        "operationId": "Get-ValueDomain-from-a-specified-Element",
         "parameters": [
           {
             "name": "urn",
@@ -1050,7 +1050,7 @@
           "Element"
         ],
         "summary": "Get Definitions from a specified Element.",
-        "operationId": "Get Definitions from a specified Element.",
+        "operationId": "Get-Definitions-from-a-specified-Element",
         "parameters": [
           {
             "name": "urn",
@@ -1089,7 +1089,7 @@
           "Element"
         ],
         "summary": "Get Slots from a specified Element.",
-        "operationId": "Get Slots from a specified Element.",
+        "operationId": "Get-Slots-from-a-specified-Element",
         "parameters": [
           {
             "name": "urn",
@@ -1128,7 +1128,7 @@
           "Element"
         ],
         "summary": "Get Identification from a specified Element.",
-        "operationId": "Get Identification from a specified Element.",
+        "operationId": "Get-Identification-from-a-specified-Element",
         "parameters": [
           {
             "name": "urn",
@@ -1167,7 +1167,7 @@
           "Element"
         ],
         "summary": "Get ConceptsAssociations from a specified Element.",
-        "operationId": "Get ConceptsAssociations from a specified Element.",
+        "operationId": "Get-ConceptsAssociations-from-a-specified-Element",
         "parameters": [
           {
             "name": "urn",
@@ -1206,7 +1206,7 @@
           "Element"
         ],
         "summary": "Get Relations from a specified Element to other elements.",
-        "operationId": "Get Relations from a specified Element to other elements.",
+        "operationId": "Get-Relations-from-a-specified-Element-to-other-elements",
         "parameters": [
           {
             "name": "urn",
@@ -1244,8 +1244,8 @@
         "tags": [
           "Element"
         ],
-        "summary": "Create an Element with one of the models Dataelement, Dataelementgroup or Record.",
-        "operationId": "Create an Element with one of the models Dataelement, Dataelementgroup or Record.",
+        "summary": "Create an Element.",
+        "operationId": "Create-an-Element",
         "requestBody": {
           "description": "default response",
           "content": {
@@ -1264,6 +1264,41 @@
                 ]
               },
               "examples": {
+                "ENUMERATED_VALUE_DOMAIN": {
+                  "description": "ENUMERATED_VALUE_DOMAIN",
+                  "value": {
+                    "identification": {
+                      "elementType": "ENUMERATED_VALUE_DOMAIN",
+                      "namespaceUrn": "urn:1:namespace:1:1",
+                      "status": "DRAFT"
+                    },
+                    "type": "ENUMERATED",
+                    "definitions": [
+                      {
+                        "designation": "designation",
+                        "definition": "definition",
+                        "language": "de"
+                      }
+                    ],
+                    "permittedValues": [
+                      {
+                        "identification": {
+                          "elementType": "PERMISSIBLE_VALUE",
+                          "namespaceUrn": "urn:1:namespace:1:1",
+                          "status": "DRAFT"
+                        },
+                        "definitions": [
+                          {
+                            "designation": "designation",
+                            "definition": "definition",
+                            "language": "de"
+                          }
+                        ],
+                        "value": "value"
+                      }
+                    ]
+                  }
+                },
                 "DATAELEMENT": {
                   "description": "DATAELEMENT",
                   "value": {
@@ -1392,7 +1427,7 @@
           "Element"
         ],
         "summary": "Get all available paths for a specific element.",
-        "operationId": "Get all available paths for a specific element.",
+        "operationId": "Get-all-available-paths-for-a-specific-element",
         "parameters": [
           {
             "name": "urn",
@@ -1431,7 +1466,7 @@
           "Element"
         ],
         "summary": "Get DataElementGroup or Record Members as a List using its urn.",
-        "operationId": "Get DataElementGroup or Record Members as a List using its urn.",
+        "operationId": "Get-DataElementGroup-or-Record-Members-as-a-List-using-its-urn",
         "parameters": [
           {
             "name": "urn",
@@ -1470,7 +1505,7 @@
           "Element Relations"
         ],
         "summary": "Get Element Relations.",
-        "operationId": "relations",
+        "operationId": "Get-Element-Relations",
         "parameters": [
           {
             "name": "type",
@@ -1512,7 +1547,7 @@
           "Element Relations"
         ],
         "summary": "Delete Element Relation.",
-        "operationId": "delete relations",
+        "operationId": "Delete-Element-Relation",
         "requestBody": {
           "description": "default response",
           "content": {
@@ -1555,7 +1590,7 @@
           "Element Relations"
         ],
         "summary": "Create Element Relations.",
-        "operationId": "create relations",
+        "operationId": "Create-Element-Relations",
         "requestBody": {
           "description": "default response",
           "content": {
@@ -1604,7 +1639,7 @@
           "Element Relations"
         ],
         "summary": "Update Element Relation.",
-        "operationId": "update relations",
+        "operationId": "Update-Element-Relation",
         "requestBody": {
           "description": "default response",
           "content": {
@@ -1653,7 +1688,7 @@
           "Import"
         ],
         "summary": "List all imports.",
-        "operationId": "List all imports.",
+        "operationId": "List-all-imports",
         "responses": {
           "200": {
             "description": "default response",
@@ -1682,7 +1717,7 @@
           "Import"
         ],
         "summary": "Import stagedElements into DEHUB.",
-        "operationId": "import",
+        "operationId": "Import-stagedElements-into-DEHUB",
         "parameters": [
           {
             "name": "namespaceUrn",
@@ -1737,7 +1772,7 @@
           "Import"
         ],
         "summary": "Delete an import by Id.",
-        "operationId": "Delete an import by Id.",
+        "operationId": "Delete-an-import-by-Id",
         "parameters": [
           {
             "name": "importId",
@@ -1774,7 +1809,7 @@
           "Import"
         ],
         "summary": "Get import info by Id.",
-        "operationId": "Get import info by Id.",
+        "operationId": "Get-import-info-by-Id",
         "parameters": [
           {
             "name": "importId",
@@ -1813,7 +1848,7 @@
           "Import"
         ],
         "summary": "Get all import members.",
-        "operationId": "Get all import members.",
+        "operationId": "Get-all-import-members",
         "parameters": [
           {
             "name": "importId",
@@ -1870,7 +1905,7 @@
           "Import"
         ],
         "summary": "Get stagedElement from a specified import by Id.",
-        "operationId": "Get stagedElement from a specified import by Id.",
+        "operationId": "Get-stagedElement-from-a-specified-import-by-Id",
         "parameters": [
           {
             "name": "importId",
@@ -1917,7 +1952,7 @@
           "Import"
         ],
         "summary": "Get stagedElement members from a specified import by Id.",
-        "operationId": "Get stagedElement members from a specified import by Id.",
+        "operationId": "Get-stagedElement-members-from-a-specified-import-by-Id",
         "parameters": [
           {
             "name": "importId",
@@ -1973,7 +2008,7 @@
           "Import"
         ],
         "summary": "Get stagedElement from a specified import to draft.",
-        "operationId": "Get stagedElement from a specified import to draft.",
+        "operationId": "Get-stagedElement-from-a-specified-import-to-draft",
         "parameters": [
           {
             "name": "importId",
@@ -2030,7 +2065,7 @@
           "Export"
         ],
         "summary": "Export DEHUB Elements in JSON or XML format.",
-        "operationId": "Export DEHUB Elements in JSON or XML format.",
+        "operationId": "Export-DEHUB-Elements-in-JSON-or-XML-format",
         "parameters": [
           {
             "name": "format",
@@ -2096,7 +2131,7 @@
           "Export"
         ],
         "summary": "Get all Exports.",
-        "operationId": "All Exports",
+        "operationId": "Get-all-Exports",
         "responses": {
           "200": {
             "description": "default response",
@@ -2125,7 +2160,7 @@
           "Export"
         ],
         "summary": "Get export file/exported elements if done otherwise get export status.",
-        "operationId": "Check Export Status and return export file if done.",
+        "operationId": "Check-Export-Status-and-return-export-file-if-done",
         "parameters": [
           {
             "name": "exportId",
@@ -2182,7 +2217,7 @@
           "Search"
         ],
         "summary": "Search for an Element.",
-        "operationId": "search",
+        "operationId": "Search-for-an-Element",
         "parameters": [
           {
             "name": "query",
