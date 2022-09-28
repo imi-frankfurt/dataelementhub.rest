@@ -23,6 +23,7 @@ spring:
 springdoc:
   swagger-ui:
     url: /api-docs.json
+    deep-linking: true
 
 server:
   port: 8090

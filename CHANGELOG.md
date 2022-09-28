@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Endpoint to delete an import by ID
 - Endpoint to return all available paths for specified element
 - Endpoint to update the members of dataElementGroup/record
+- DeepLinking for swagger
 ### Changed
 - ElementController does not process namespaces anymore 
 - updated dehub-dal and dehub-model
