@@ -18,6 +18,10 @@
     {
       "name": "Export",
       "description": "You can export your metadata in XMl or JSON format with a single request, via our most optimized export endpoint with integrated data validation mechanism. The exported metadata--which will be provided as a .zip file--can include data elements, data element groups, records, value domains or whole namespaces.\n After an export is requested, it will build in the background. The eventual .zip can then be downloaded for up to 7 days."
+    },
+    {
+      "name": "Search",
+      "description": "You can search for DEHUB elements and filter the results based on element type, element status, specified element parts and much more."
     }
   ],
   "paths": {
@@ -2222,7 +2226,7 @@
         "tags": [
           "Search"
         ],
-        "summary": "Search for an Element.",
+        "summary": "Returns a JSON response containing details for elements that match the query parameters, without limitations for query length.",
         "operationId": "Search-for-an-Element",
         "parameters": [
           {
