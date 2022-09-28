@@ -14,6 +14,12 @@
       "name": "License: AGPLv3"
     }
   },
+  "tags": [
+    {
+      "name": "Export",
+      "description": "You can export your metadata in XMl or JSON format with a single request, via our most optimized export endpoint with integrated data validation mechanism. The exported metadata--which will be provided as a .zip file--can include data elements, data element groups, records, value domains or whole namespaces.\n After an export is requested, it will build in the background. The eventual .zip can then be downloaded for up to 7 days."
+    }
+  ],
   "paths": {
     "/v1/namespaces/{namespaceId}/release": {
       "patch": {
@@ -2064,7 +2070,7 @@
         "tags": [
           "Export"
         ],
-        "summary": "Export DEHUB Elements in JSON or XML format.",
+        "summary": "Start the asynchronous export process of existing DEHUB elements. This is the first half of the two-step export flow, which provide you eventually with export file in JSON or XML format.",
         "operationId": "Export-DEHUB-Elements-in-JSON-or-XML-format",
         "parameters": [
           {
@@ -2130,7 +2136,7 @@
         "tags": [
           "Export"
         ],
-        "summary": "Get all Exports.",
+        "summary": "Retrieves the details of all available exports.",
         "operationId": "Get-all-Exports",
         "responses": {
           "200": {
@@ -2159,7 +2165,7 @@
         "tags": [
           "Export"
         ],
-        "summary": "Get export file/exported elements if done otherwise get export status.",
+        "summary": "Retrieves the details of an export that has previously been started by ID. If the export process is finished this endpoint will provide the final export file (XML/JSON). This is the second half of the two-step export flow, where you have to start the export process first.",
         "operationId": "Check-Export-Status-and-return-export-file-if-done",
         "parameters": [
           {
