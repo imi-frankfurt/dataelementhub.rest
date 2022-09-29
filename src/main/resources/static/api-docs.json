@@ -2150,10 +2150,10 @@
             }
           },
           "400": {
-            "description": "Bad Request. Export from more than one namespace is forbidden.",
+            "description": "Bad Request. Export from more than one namespace is forbidden."
           },
           "501": {
-            "description": "Not Implemented. Export can only be processed in JSON or XML format.",
+            "description": "Not Implemented. Export can only be processed in JSON or XML format."
           }
         },
         "security": [
@@ -2241,10 +2241,10 @@
             }
           },
           "202": {
-            "description": "Accepted. The export ID is valid and the process is still running in the background.",
+            "description": "Accepted. The export ID is valid and the process is still running in the background."
           },
           "404": {
-            "description": "Not Found. The provided export ID does not exist or the export is older than 7 days and it can not be downloaded anymore.",
+            "description": "Not Found. The provided export ID does not exist or the export is older than 7 days and it can not be downloaded anymore."
           }
         },
         "security": [
