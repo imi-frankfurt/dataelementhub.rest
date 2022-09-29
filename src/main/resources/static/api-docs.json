@@ -2084,6 +2084,7 @@
           {
             "name": "format",
             "in": "query",
+            "description": "Export the elements in this file format (e.g. choose XML to generate XML export file).",
             "required": false,
             "schema": {
               "type": "string",
@@ -2094,6 +2095,7 @@
           {
             "name": "fullExport",
             "in": "query",
+            "description": "Full export contains all available element revisions, even if they are OUTDATED (e.g. pass false to export only RELEASED elements)",
             "required": false,
             "schema": {
               "type": "boolean",
@@ -2144,7 +2146,7 @@
         "tags": [
           "Export"
         ],
-        "summary": "Retrieves the details of all available exports.",
+        "summary": "Retrieves the details of all available exports, including export id, status and timestamp",
         "operationId": "Get-all-Exports",
         "responses": {
           "200": {
@@ -2179,6 +2181,7 @@
           {
             "name": "exportId",
             "in": "path",
+            "description": "Only return details/exportFile for the given exportID.",
             "required": true,
             "schema": {
               "type": "string"
@@ -2187,6 +2190,7 @@
           {
             "name": "onlyUrns",
             "in": "path",
+            "description": "Return complete elements or just element urns (e.g. pass true to return only element urns).",
             "required": true,
             "schema": {
               "type": "boolean",
