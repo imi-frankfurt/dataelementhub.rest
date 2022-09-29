@@ -1736,6 +1736,7 @@
           {
             "name": "namespaceUrn",
             "in": "path",
+            "description": "Assign the import to one of your namespaces using its urn.",
             "required": true,
             "schema": {
               "type": "string"
@@ -1791,6 +1792,7 @@
           {
             "name": "importId",
             "in": "path",
+            "description": "The unique ID of the import. You can only enter one of your own imports.",
             "required": true,
             "schema": {
               "type": "string"
@@ -1828,6 +1830,7 @@
           {
             "name": "importId",
             "in": "path",
+            "description": "The unique ID of the import. You can only enter one of your own imports.",
             "required": true,
             "schema": {
               "type": "string"
@@ -1867,6 +1870,7 @@
           {
             "name": "importId",
             "in": "path",
+            "description": "The unique ID of the import. You can only enter one of your own imports.",
             "required": true,
             "schema": {
               "type": "string"
@@ -1875,6 +1879,7 @@
           {
             "name": "hideSubElements",
             "in": "path",
+            "description": "Hide all elements that are included in one or multiple dataElementGroup(s)/record(s). Default is false.",
             "required": false,
             "schema": {
               "type": "boolean",
@@ -1884,6 +1889,7 @@
           {
             "name": "onlyConverted",
             "in": "path",
+            "description": "Return only elements that are converted to drafts. Default is false.",
             "required": false,
             "schema": {
               "type": "boolean",
@@ -1924,6 +1930,7 @@
           {
             "name": "importId",
             "in": "path",
+            "description": "The unique ID of the import. You can only enter one of your own imports.",
             "required": true,
             "schema": {
               "type": "string"
@@ -1932,6 +1939,7 @@
           {
             "name": "stagedElementId",
             "in": "path",
+            "description": "The unique ID of the stagedElement. Note that this element should be a part of the specified import.",
             "required": true,
             "schema": {
               "type": "string"
@@ -1971,6 +1979,7 @@
           {
             "name": "importId",
             "in": "path",
+            "description": "The unique ID of the import. You can only choose one of your own imports.",
             "required": true,
             "schema": {
               "type": "string"
@@ -1979,6 +1988,7 @@
           {
             "name": "stagedElementId",
             "in": "path",
+            "description": "The unique ID of the stagedElement. Note that this element should be a part of the specified import.",
             "required": true,
             "schema": {
               "type": "string"
@@ -1987,6 +1997,7 @@
           {
             "name": "onlyConverted",
             "in": "path",
+            "description": "Return only elements that are converted to drafts. Default is false.",
             "required": false,
             "schema": {
               "type": "string",
@@ -2027,6 +2038,7 @@
           {
             "name": "importId",
             "in": "path",
+            "description": "The unique ID of the import. You can only choose one of your own imports.",
             "required": true,
             "schema": {
               "type": "string"
