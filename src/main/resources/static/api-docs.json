@@ -1705,11 +1705,14 @@
         "operationId": "List-all-imports",
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success.",
             "content": {
               "*/*": {
                 "schema": {
-                  "type": "string"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ImportInfo"
+                  }
                 }
               }
             }
@@ -1760,15 +1763,25 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
+          "202": {
+            "description": "Success.",
+            "headers": {
+              "Location": {
                 "schema": {
                   "type": "string"
-                }
+                },
+                "description": "The full path to your processed import."
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized. Only users with WRITE or ADMIN accessLevel can import to the specified namespace."
+          },
+          "400": {
+            "description": "Bad Request. The provided import ID does not exist."
+          },
+          "422": {
+            "description": "Unprocessable Entity. DEHub is unable to process the provided file, check the response message for more info."
           }
         },
         "security": [
@@ -1800,15 +1813,17 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+          "204": {
+            "description": "Success."
+          },
+          "403": {
+            "description": "Forbidden. Access to this resource is not permitted."
+          },
+          "404": {
+            "description": "Not Found. The provided import ID does not exist."
+          },
+          "401": {
+            "description": "Unauthorized."
           }
         },
         "security": [
@@ -1839,14 +1854,23 @@
         ],
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success.",
             "content": {
               "*/*": {
                 "schema": {
-                  "type": "string"
+                  "$ref": "#/components/schemas/ImportInfo"
                 }
               }
             }
+          },
+          "403": {
+            "description": "Forbidden. Access to this resource is not permitted."
+          },
+          "404": {
+            "description": "Not Found. The provided import ID does not exist."
+          },
+          "401": {
+            "description": "Unauthorized."
           }
         },
         "security": [
@@ -1899,14 +1923,26 @@
         ],
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success.",
             "content": {
               "*/*": {
                 "schema": {
-                  "type": "string"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StagedElement"
+                  }
                 }
               }
             }
+          },
+          "403": {
+            "description": "Forbidden. Access to this resource is not permitted."
+          },
+          "404": {
+            "description": "Not Found. The provided import ID does not exist."
+          },
+          "401": {
+            "description": "Unauthorized."
           }
         },
         "security": [
@@ -1948,14 +1984,23 @@
         ],
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success.",
             "content": {
               "*/*": {
                 "schema": {
-                  "type": "string"
+                  "$ref": "#/components/schemas/StagedElement"
                 }
               }
             }
+          },
+          "403": {
+            "description": "Forbidden. Access to this resource is not permitted."
+          },
+          "404": {
+            "description": "Not Found. The provided import ID does not exist."
+          },
+          "401": {
+            "description": "Unauthorized."
           }
         },
         "security": [
@@ -2007,14 +2052,26 @@
         ],
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success.",
             "content": {
               "*/*": {
                 "schema": {
-                  "type": "string"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StagedElement"
+                  }
                 }
               }
             }
+          },
+          "403": {
+            "description": "Forbidden. Access to this resource is not permitted."
+          },
+          "404": {
+            "description": "Not Found. The provided import ID does not exist."
+          },
+          "401": {
+            "description": "Unauthorized."
           }
         },
         "security": [
@@ -2047,14 +2104,10 @@
         ],
         "responses": {
           "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+            "description": "Success."
+          },
+          "401": {
+            "description": "Unauthorized."
           }
         },
         "requestBody": {
@@ -2378,6 +2431,56 @@
   },
   "components": {
     "schemas": {
+      "ProcessStatus": {
+        "type": "string",
+        "enum": ["PROCESSING", "ABORTED", "COMPLETED"]
+      },
+      "ElementType": {
+        "type": "string",
+        "enum": ["DATAELEMENTGROUP", "RECORD", "DATAELEMENT", "CATALOG", "CODE", "NAMESPACE", "ENUMERATED_VALUE_DOMAIN", "DESCRIBED_VALUE_DOMAIN", "DEFINED_VALUE_DOMAIN", "CATALOG_VALUE_DOMAIN", "PERMISSIBLE_VALUE"]
+      },
+      "StagedElement": {
+        "type": "object",
+        "properties": {
+          "stagedElementId": {
+            "type": "string"
+          },
+          "elementUrn": {
+            "type": "string"
+          },
+          "elementType": {
+            "$ref": "#/components/schemas/ElementType"
+          },
+          "designation": {
+            "type": "string"
+          }
+        }
+      },
+      "ImportInfo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "namespaceUrn": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ProcessStatus"
+          },
+          "timestamp": {
+            "type": "string"
+          },
+          "staged": {
+            "type": "number",
+            "format": "double"
+          },
+          "converted": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
       "ExportInfo": {
         "type": "object",
         "properties": {
