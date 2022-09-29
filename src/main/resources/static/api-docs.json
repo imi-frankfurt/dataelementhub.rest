@@ -5,7 +5,7 @@
     "contact": {
       "name": "Institut für Medizininformatik",
       "url": "http://www.imi-frankfurt.de",
-      "email": "vengadeswaran@med.uni-frankfurt.de"
+      "email": "info@dataelementhub.de"
     },
     "description": "REST API Documentation!\n\n  Github repositories:\n\n<https://github.com/mig-frankfurt/dataelementhub.dal>\n\n<https://github.com/mig-frankfurt/dataelementhub.model>\n\n<https://github.com/mig-frankfurt/dataelementhub.rest>\n\n<https://github.com/mig-frankfurt/dataelementhub.gui>\n\nContact:\n\n",
     "version": "1.0.0",
