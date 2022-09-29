@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.3.0] - 2022-mm-dd
 ### Added
-- namespace adimns can invite users to their namespace(s) and manage the access scopes [[#15](https://github.com/mig-frankfurt/dataelementhub.rest/issues/15)]
+- namespace admins can invite users to their namespace(s) and manage the access scopes [[#15](https://github.com/mig-frankfurt/dataelementhub.rest/issues/15)]
   - this allows other people to see hidden namespaces or to create elements in other peoples namespaces (depending on the granted access level)
 - export feature [[#17](https://github.com/mig-frankfurt/dataelementhub.rest/issues/17)]
   - allow users to export namespaces (or separate elements) to JSON or XML files
