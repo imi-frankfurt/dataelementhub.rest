@@ -2173,7 +2173,7 @@
         "operationId": "Get-all-Exports",
         "responses": {
           "200": {
-            "description": "OK.",
+            "description": "Success.",
             "content": {
               "*/*": {
                 "schema": {
@@ -2226,7 +2226,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK. The export process is completed.",
+            "description": "Success. The export process is completed.",
             "headers": {
               "Content-Disposition": {
                 "schema": {
