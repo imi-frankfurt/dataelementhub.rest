@@ -2320,15 +2320,33 @@
         ],
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success.",
             "content": {
               "*/*": {
                 "schema": {
-                  "type": "string"
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "format": "application/json",
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/DataElement"
+                      },
+                      {
+                        "$ref": "#/components/schemas/DataElementGroup"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Record"
+                      }
+                    ]
+                  }
                 }
               }
             }
-          }
+          },
+            "422": {
+              "description": "Unprocessable Entity. DEHub is unable to process at least one of the provided element parts."
+            }
         },
         "security": [
           {
