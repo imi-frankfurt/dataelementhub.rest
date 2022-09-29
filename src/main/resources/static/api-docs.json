@@ -2138,11 +2138,22 @@
           }
         },
         "responses": {
-          "202": {
-            "description": "default response"
+          "200": {
+            "description": "Success.",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "The full path to your generated export file."
+              }
+            }
           },
-          "406": {
-            "description": "Invalid Accept Header"
+          "400": {
+            "description": "Bad Request. Export from more than one namespace is forbidden.",
+          },
+          "501": {
+            "description": "Not Implemented. Export can only be processed in JSON or XML format.",
           }
         },
         "security": [
@@ -2162,11 +2173,14 @@
         "operationId": "Get-all-Exports",
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "OK.",
             "content": {
               "*/*": {
                 "schema": {
-                  "type": "string"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExportInfo"
+                  }
                 }
               }
             }
@@ -2211,24 +2225,26 @@
           }
         ],
         "responses": {
-          "default": {
-            "x-is-file": true,
-            "description": "default response",
-            "content": {
-              "application/octet-stream": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              }
-            }
-          },
           "200": {
-            "description": "default response",
+            "description": "OK. The export process is completed.",
+            "headers": {
+              "Content-Disposition": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "The name of your export file."
+              }
+            },
             "content": {
               "*/*": {
               }
             }
+          },
+          "202": {
+            "description": "Accepted. The export ID is valid and the process is still running in the background.",
+          },
+          "404": {
+            "description": "Not Found. The provided export ID does not exist or the export is older than 7 days and it can not be downloaded anymore.",
           }
         },
         "security": [
@@ -2344,6 +2360,27 @@
   },
   "components": {
     "schemas": {
+      "ExportInfo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "mediaType": {
+            "type": "object"
+          },
+          "status": {
+            "type": "string"
+          },
+          "progress": {
+            "type": "number",
+            "format": "float"
+          },
+          "timestamp": {
+            "type": "string"
+          }
+        }
+      },
       "ConceptAssociation": {
         "type": "object",
         "properties": {
