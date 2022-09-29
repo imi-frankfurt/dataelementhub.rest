@@ -2240,6 +2240,7 @@
           {
             "name": "query",
             "in": "path",
+            "description": "The search query string.",
             "required": true,
             "schema": {
               "type": "string"
@@ -2248,6 +2249,7 @@
           {
             "name": "type",
             "in": "path",
+            "description": "The array of element types to include in the response. If omitted, the response will include all available element types.",
             "required": false,
             "schema": {
               "type": "array",
@@ -2262,6 +2264,7 @@
           {
             "name": "status",
             "in": "path",
+            "description": "The array of status to include in the response. If omitted, the response will include all available status.",
             "required": false,
             "schema": {
               "type": "array",
@@ -2274,6 +2277,7 @@
           {
             "name": "section",
             "in": "path",
+            "description": "The array of element sections to include in the response. If omitted, the response will include all available element sections.",
             "required": false,
             "schema": {
               "type": "array",
