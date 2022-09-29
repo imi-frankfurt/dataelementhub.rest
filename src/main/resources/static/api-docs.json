@@ -17,7 +17,7 @@
   "tags": [
     {
       "name": "Export",
-      "description": "You can export your metadata in XMl or JSON format with a single request, via our most optimized export endpoint with integrated data validation mechanism. The exported metadata--which will be provided as a .zip file--can include data elements, data element groups, records, value domains or whole namespaces.\n After an export is requested, it will build in the background. The eventual .zip can then be downloaded for up to 7 days."
+      "description": "You can export your metadata in XMl or JSON format with a single request, via our most optimized export endpoint with integrated data validation mechanism. The exported metadata--which will be provided as a .zip file--can include data elements, data element groups, records, value domains or whole namespaces.\n After an export is requested, it will build in the background. The eventual .zip can then be downloaded for up to 7 days. \n The two-step export flow consists of:\n\n1. Export request to start the process in the background.\n2. Download the generated export file when the process is completed."
     },
     {
       "name": "Search",
