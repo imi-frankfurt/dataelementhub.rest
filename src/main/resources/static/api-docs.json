@@ -41,16 +41,17 @@
     }
   ],
   "paths": {
-    "/v1/namespaces/{namespaceId}/release": {
+    "/v1/namespaces/{namespaceIdentifier}/release": {
       "patch": {
         "tags": [
           "Namespace"
         ],
-        "summary": "Release Namespace by id.",
-        "operationId": "Release-Namespace-by-id",
+        "summary": "Release a namespace.",
+        "operationId": "Release-Namespace-by-identifier",
         "parameters": [
           {
-            "name": "namespaceId",
+            "name": "namespaceIdentifier",
+            "description": "The identifier of the scoped identifier of the namespace.",
             "in": "path",
             "required": true,
             "schema": {
@@ -59,15 +60,14 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+          "204": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "There was a problem with your request."
+          },
+          "404": {
+            "description": "The namespace identifier does not exist or you do not have the required permission to release it."
           }
         },
         "security": [
@@ -80,27 +80,44 @@
         ]
       }
     },
-    "/v1/namespaces/?scope={scope}": {
+    "/v1/namespaces": {
       "get": {
         "tags": [
           "Namespace"
         ],
-        "summary": "Get all Namespaces with specified scope.",
-        "operationId": "Get-all-Namespaces-with-specified-scope",
+        "summary": "Get all Namespaces",
+        "operationId": "Get-all-Namespaces",
         "parameters": [
           {
             "name": "scope",
-            "in": "path",
-            "required": true,
+            "description": "Limit the list of namespaces to those you have a certain access level on",
+            "in": "query",
+            "required": false,
             "schema": {
               "type": "string",
               "enum": ["read", "write", "admin"]
             }
+          },
+          {
+            "name": "Accept",
+            "description": "Define whether you want a detailed response (default) or a condensed response (listview)",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["application/vnd+mig.mdr.listview+json", "application/vnd+de.dataelementhub.detailview+json"]
+            }
+          },
+          {
+            "name": "Accept-Language",
+            "description": "Define the languages you want to receive the definitions in (if available)",
+            "in": "header",
+            "required": false
           }
         ],
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success",
             "content": {
               "*/*": {
                 "schema": {
@@ -120,16 +137,17 @@
         ]
       }
     },
-    "/v1/namespaces/{namespaceId}/members?elementType={elementType}": {
+    "/v1/namespaces/{namespaceIdentifier}/members": {
       "get": {
         "tags": [
           "Namespace"
         ],
-        "summary": "Get Namespace Members.",
+        "summary": "Get the members of a namespace.",
         "operationId": "Get-Namespace-Members",
         "parameters": [
           {
-            "name": "namespaceId",
+            "name": "namespaceIdentifier",
+            "description": "The identifier of the scoped identifier of the namespace.",
             "in": "path",
             "required": true,
             "schema": {
@@ -137,27 +155,26 @@
             }
           },
           {
-            "in": "header",
             "name": "Accept-Language",
-            "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "example": "de-DE"
+            "description": "Define the languages you want to receive the definitions in (if available)",
+            "in": "header",
+            "required": false
           },
           {
-            "in": "header",
             "name": "Accept",
-            "schema": {
-              "type": "string"
-            },
+            "description": "Define whether you want a detailed response (default) or a condensed response (listview)",
+            "in": "header",
             "required": false,
-            "example": "application/vnd+de.dataelementhub.listview+json"
+            "schema": {
+              "type": "string",
+              "enum": ["application/vnd+mig.mdr.listview+json", "application/vnd+de.dataelementhub.detailview+json"]
+            }
           },
           {
             "name": "elementType",
-            "in": "path",
-            "required": true,
+            "description": "Define which kind of elements you would like to retrieve. If omitted, all kinds of elements will be sent.",
+            "in": "query",
+            "required": false,
             "schema": {
               "type": "array",
               "items": {
@@ -169,8 +186,9 @@
             }
           },
           {
-            "in": "query",
             "name": "hideSubElements",
+            "description": "When true, only members that are NOT part of another structure (dataelementgroup/record) are returned.",
+            "in": "query",
             "schema": {
               "type": "boolean",
               "required": false,
@@ -180,7 +198,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Default response",
+            "description": "Success",
             "content": {
               "*/*": {
                 "schema": {
@@ -190,24 +208,10 @@
             }
           },
           "404": {
-            "description": "No such element found",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+            "description": "The namespace was not found"
           },
           "401": {
-            "description": "Unauthorized",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+            "description": "You have no read access on this namespace."
           }
         },
         "security": [
@@ -230,6 +234,7 @@
         "parameters": [
           {
             "name": "namespaceIdentifier",
+            "description": "The identifier of the scoped identifier of the namespace.",
             "in": "path",
             "required": true,
             "schema": {
@@ -239,17 +244,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Access is forbidden",
+            "description": "Success",
             "content": {
               "*/*": {
                 "schema": {
@@ -259,24 +254,13 @@
             }
           },
           "401": {
-            "description": "Unauthorized",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+            "description": "Unauthorized - you need to provide an access token"
+          },
+          "403": {
+            "description": "Access is forbidden - you do not have sufficient rights to read the user list (must be namespace admin)"
           },
           "404": {
-            "description": "No such element found.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+            "description": "No such element found."
           }
         },
         "security": [
@@ -297,6 +281,7 @@
         "parameters": [
           {
             "name": "namespaceIdentifier",
+            "description": "The identifier of the scoped identifier of the namespace.",
             "in": "path",
             "required": true,
             "schema": {
@@ -329,54 +314,19 @@
         },
         "responses": {
           "204": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Access is forbidden",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "No such element found.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+            "description": "Success"
           },
           "400": {
-            "description": "Bad request.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+            "description": "Bad request."
+          },
+          "401": {
+            "description": "Unauthorized - you need to provide an access token"
+          },
+          "403": {
+            "description": "Access is forbidden - you do not have sufficient rights to update the user list (must be namespace admin)"
+          },
+          "404": {
+            "description": "No such element found."
           }
         },
         "security": [
@@ -399,6 +349,7 @@
         "parameters": [
           {
             "name": "namespaceIdentifier",
+            "description": "The identifier of the scoped identifier of the namespace.",
             "in": "path",
             "required": true,
             "schema": {
@@ -407,6 +358,7 @@
           },
           {
             "name": "userAuthId",
+            "description": "The keycloak id of the user to remove access from.",
             "in": "path",
             "required": true,
             "schema": {
@@ -416,54 +368,19 @@
         ],
         "responses": {
           "204": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Access is forbidden",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "No such element found.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+            "description": "Success"
           },
           "400": {
-            "description": "Bad request.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+            "description": "Bad request."
+          },
+          "401": {
+            "description": "Unauthorized - you need to provide an access token"
+          },
+          "403": {
+            "description": "Access is forbidden - you do not have sufficient rights to delete user access (must be namespace admin)"
+          },
+          "404": {
+            "description": "Namespace id not found or user id not found."
           }
         },
         "security": [
@@ -476,7 +393,7 @@
         ]
       }
     },
-    "/v1/namespaces/{namespaceId}": {
+    "/v1/namespaces/{namespaceIdentifier}": {
       "get": {
         "tags": [
           "Namespace"
@@ -485,7 +402,8 @@
         "operationId": "Get-Namespace-by-id",
         "parameters": [
           {
-            "name": "namespaceId",
+            "name": "namespaceIdentifier",
+            "description": "The identifier of the scoped identifier of the namespace.",
             "in": "path",
             "required": true,
             "schema": {
@@ -503,7 +421,7 @@
         ],
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success",
             "content": {
               "*/*": {
                 "schema": {
@@ -530,7 +448,8 @@
         "operationId": "Update-namespace",
         "parameters": [
           {
-            "name": "namespaceId",
+            "name": "namespaceIdentifier",
+            "description": "The identifier of the scoped identifier of the namespace.",
             "in": "path",
             "required": true,
             "schema": {
@@ -571,15 +490,17 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+          "204": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request. If an illegal status change shall be done"
+          },
+          "403": {
+            "description": "You do not have sufficient access rights on the namespace"
+          },
+          "404": {
+            "description": "The namespace was not found"
           }
         },
         "security": [
@@ -599,7 +520,7 @@
         "operationId": "Delete-Namespace-by-id",
         "parameters": [
           {
-            "name": "namespaceId",
+            "name": "namespaceIdentifier",
             "in": "path",
             "required": true,
             "schema": {
@@ -608,15 +529,17 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+          "204": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "An error has occurred"
+          },
+          "404": {
+            "description": "The namespace was not found"
+          },
+          "409": {
+            "description": "The namespace is already marked as deleted"
           }
         },
         "security": [
@@ -665,15 +588,22 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "application/json": {
+          "201": {
+            "description": "Success",
+            "headers": {
+              "Location": {
                 "schema": {
                   "type": "string"
-                }
+                },
+                "description": "The full path to your newly created namespace."
               }
             }
+          },
+          "403": {
+            "description": "You do not have sufficient access rights to create a namespace"
+          },
+          "422": {
+            "description": "The namespace you provided contains errors."
           }
         },
         "security": [
@@ -2631,7 +2561,7 @@
               "PERMISSIBLE_VALUE"
             ]
           },
-          "namespaceId": {
+          "namespaceIdentifier": {
             "type": "integer",
             "format": "int32"
           },
