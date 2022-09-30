@@ -16,16 +16,28 @@
   },
   "tags": [
     {
+      "name": "Namespace",
+      "description": "Namespaces are organizational units that contain sets of dataelements, dataelementgroups and/or records. Create and modify your own namespace with the endpoints here."
+    },
+    {
+      "name": "Element",
+      "description": "The endpoints here allow to create, read, update and delete any kind of dataelements that can be stored in the DEHub - dataelements, dataelementgroups, records, value domains and permitted values."
+    },
+    {
+      "name": "Element Relations",
+      "description": "Elements can be related to other elements - either in the same instance or in other DEHub instances. Those relations can be defined, read and modified via those endpoints."
+    },
+    {
       "name": "Export",
       "description": "You can export your metadata in XMl or JSON format with a single request, via our most optimized export endpoint with integrated data validation mechanism. The exported metadata--which will be provided as a .zip file--can include data elements, data element groups, records, value domains or whole namespaces.\n After an export is requested, it will build in the background. The eventual .zip can then be downloaded for up to 7 days. \n The two-step export flow consists of:\n\n1. Export request to start the process in the background.\n2. Download the generated export file when the process is completed."
     },
     {
       "name": "Search",
-      "description": "You can search for DEHUB elements and filter the results based on element type, element status, specified element parts and much more."
+      "description": "You can search for DEHub elements and filter the results based on element type, element status, specified element parts and much more."
     },
     {
       "name": "Import",
-      "description": "DEHub enables you to bring along your existing metaData and import it into one of your namespaces. We provide a structured workflow to migrate your metaData over, including all details and relations. This allow you to store, edit and extend your metaData at the same place.\n The import to DEHub is a two-step process:\n\n1. Provide XML/JSON file and start the import process. This stores all elements in the staging area.\n2. Convert your imported elements to drafts and assign them to one of your namespaces."
+      "description": "DEHub enables you to bring along your existing metadata and import it into one of your namespaces. We provide a structured workflow to migrate your metadata over, including all details and relations. This allow you to store, edit and extend your metadata at the same place.\n The import to DEHub is a two-step process:\n\n1. Provide XML/JSON file and start the import process. This stores all elements in the staging area.\n2. Convert your imported elements to drafts and assign them to one of your namespaces."
     }
   ],
   "paths": {
