@@ -626,6 +626,7 @@
         "parameters": [
           {
             "name": "urn",
+            "description": "The URN of the element that shall be released.",
             "in": "path",
             "required": true,
             "schema": {
@@ -634,15 +635,17 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+          "204": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "An error has occurred"
+          },
+          "404": {
+            "description": "The element was not found"
+          },
+          "422": {
+            "description": "The element can not be released because either the element is outdated or the namespace it is in is not released, its value domain is not yet released or, if it is a dataelementgroup or a record, it contains members that are not released."
           }
         },
         "security": [
@@ -665,6 +668,7 @@
         "parameters": [
           {
             "name": "urn",
+            "description": "The URN of the dataelementgroup or record whose members shall be updated",
             "in": "path",
             "required": true,
             "schema": {
@@ -673,45 +677,25 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
+          "204": {
+            "description": "Success",
+            "headers": {
+              "Location": {
                 "schema": {
                   "type": "string"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Element not Found",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "User has no write access to namespace",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
+                },
+                "description": "The full path to your updated element."
               }
             }
           },
           "400": {
-            "description": "Element Type is not supported. Only dataElementGroup and record are accepted!",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+            "description": "Element Type is not supported. Only dataelementgroup and record are accepted"
+          },
+          "403": {
+            "description": "User has no write access to the namespace"
+          },
+          "404": {
+            "description": "The element was not found"
           }
         },
         "security": [
@@ -734,6 +718,7 @@
         "parameters": [
           {
             "name": "urn",
+            "description": "The URN of the element to retrieve",
             "in": "path",
             "required": true,
             "schema": {
@@ -741,15 +726,15 @@
             }
           },
           {
-            "in": "header",
             "name": "Accept-Language",
-            "required": false,
-            "example": "de-DE"
+            "description": "Define the languages you want to receive the definitions in (if available)",
+            "in": "header",
+            "required": false
           }
         ],
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success",
             "content": {
               "*/*": {
                 "schema": {
@@ -757,6 +742,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "The element was not found"
           }
         },
         "security": [
@@ -777,6 +765,7 @@
         "parameters": [
           {
             "name": "urn",
+            "description": "The URN of the element to update",
             "in": "path",
             "required": true,
             "schema": {
@@ -785,7 +774,7 @@
           }
         ],
         "requestBody": {
-          "description": "default response",
+          "description": "The element to update in JSON format",
           "content": {
             "application/json": {
               "schema": {
@@ -798,6 +787,12 @@
                   },
                   {
                     "$ref": "#/components/schemas/Record"
+                  },
+                  {
+                    "$ref": "#/components/schemas/PermittedValue"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ValueDomain"
                   }
                 ]
               },
@@ -860,8 +855,8 @@
                     },
                     "definitions": [
                       {
-                        "designation": "people",
-                        "definition": "smartphone",
+                        "designation": "Stammdaten",
+                        "definition": "Stammdaten eines Patienten",
                         "language": "de"
                       }
                     ],
@@ -884,15 +879,15 @@
                     },
                     "definitions": [
                       {
-                        "designation": "people",
-                        "definition": "smartphone",
+                        "designation": "Blutdruck",
+                        "definition": "Blutdruckwerte des Patienten",
                         "language": "de"
                       }
                     ],
                     "members": [],
                     "slots": [
                       {
-                        "name": "slot_DEG",
+                        "name": "slot_REC",
                         "value": "slot_value"
                       }
                     ]
@@ -903,15 +898,34 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
+          "204": {
+            "description": "Success",
+            "headers": {
+              "Location": {
                 "schema": {
                   "type": "string"
-                }
+                },
+                "description": "The full path to your updated element"
               }
             }
+          },
+          "400": {
+            "description": "Your request makes no sense - e.g. trying to change status from released to draft."
+          },
+          "403": {
+            "description": "You do not have the necessary access rights to this element"
+          },
+          "404": {
+            "description": "The element was not found"
+          },
+          "406": {
+            "description": "Updating validation is currently not supported."
+          },
+          "422": {
+            "description": "Your request can not be fulfilled, e.g. because you are trying to set a namespace to released, but it contains unreleased elements."
+          },
+          "501": {
+            "description": "Updating released value domains is currently not supported."
           }
         },
         "security": [
@@ -932,6 +946,7 @@
         "parameters": [
           {
             "name": "urn",
+            "description": "The URN of the element that shall be deleted",
             "in": "path",
             "required": true,
             "schema": {
@@ -940,15 +955,14 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+          "204": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "An error occurred."
+          },
+          "404": {
+            "description": "The element was not found"
           }
         },
         "security": [
@@ -971,16 +985,23 @@
         "parameters": [
           {
             "name": "urn",
+            "description": "The URN of the dataelement whose value domain shall be loaded",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "Accept-Language",
+            "description": "Define the languages you want to receive the definitions in (if available)",
+            "in": "header",
+            "required": false
           }
         ],
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success",
             "content": {
               "*/*": {
                 "schema": {
@@ -988,6 +1009,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Element not found"
           }
         },
         "security": [
@@ -1010,6 +1034,7 @@
         "parameters": [
           {
             "name": "urn",
+            "description": "The URN of the dataelement whose definitions shall be loaded",
             "in": "path",
             "required": true,
             "schema": {
@@ -1019,7 +1044,7 @@
         ],
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success",
             "content": {
               "*/*": {
                 "schema": {
@@ -1027,6 +1052,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Element not found"
           }
         },
         "security": [
@@ -1049,6 +1077,7 @@
         "parameters": [
           {
             "name": "urn",
+            "description": "The URN of the dataelement whose slots shall be loaded",
             "in": "path",
             "required": true,
             "schema": {
@@ -1058,7 +1087,7 @@
         ],
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success",
             "content": {
               "*/*": {
                 "schema": {
@@ -1066,6 +1095,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Element not found"
           }
         },
         "security": [
@@ -1088,6 +1120,7 @@
         "parameters": [
           {
             "name": "urn",
+            "description": "The URN of the dataelement whose identification shall be loaded",
             "in": "path",
             "required": true,
             "schema": {
@@ -1097,7 +1130,7 @@
         ],
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success",
             "content": {
               "*/*": {
                 "schema": {
@@ -1105,6 +1138,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Element not found"
           }
         },
         "security": [
@@ -1127,6 +1163,7 @@
         "parameters": [
           {
             "name": "urn",
+            "description": "The URN of the dataelement whose concept associations shall be loaded",
             "in": "path",
             "required": true,
             "schema": {
@@ -1136,7 +1173,7 @@
         ],
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success",
             "content": {
               "*/*": {
                 "schema": {
@@ -1144,6 +1181,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Element not found"
           }
         },
         "security": [
@@ -1166,6 +1206,7 @@
         "parameters": [
           {
             "name": "urn",
+            "description": "The URN of the dataelement whose element relations shall be loaded",
             "in": "path",
             "required": true,
             "schema": {
@@ -1175,7 +1216,7 @@
         ],
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
@@ -1183,6 +1224,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Element not found"
           }
         },
         "security": [
@@ -1216,6 +1260,12 @@
                   },
                   {
                     "$ref": "#/components/schemas/Record"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ValueDomain"
+                  },
+                  {
+                    "$ref": "#/components/schemas/PermittedValue"
                   }
                 ]
               },
@@ -1357,14 +1407,24 @@
         },
         "responses": {
           "201": {
-            "description": "CREATED",
-            "content": {
-              "application/json": {
+            "description": "Element was successfully created",
+            "headers": {
+              "Location": {
                 "schema": {
                   "type": "string"
-                }
+                },
+                "description": "The full path to your newly created element."
               }
             }
+          },
+          "400": {
+            "description": "The value domain information you passed is invalid"
+          },
+          "403": {
+            "description": "You do not have write access on the namespace you try to create an element in"
+          },
+          "422": {
+            "description": "Your submitted json data is invalid"
           }
         },
         "security": [
@@ -1387,6 +1447,7 @@
         "parameters": [
           {
             "name": "urn",
+            "description": "The URN of the element whose paths shall be loaded",
             "in": "path",
             "required": true,
             "schema": {
@@ -1396,7 +1457,7 @@
         ],
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
@@ -1404,6 +1465,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "The element was not found"
           }
         },
         "security": [
@@ -1426,16 +1490,33 @@
         "parameters": [
           {
             "name": "urn",
+            "description": "The URN of the dataelementgroup or record whose members shall be loaded",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "Accept",
+            "description": "Define whether you want a detailed response (default) or a condensed response (listview)",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["application/vnd+mig.mdr.listview+json", "application/vnd+de.dataelementhub.detailview+json"]
+            }
+          },
+          {
+            "name": "Accept-Language",
+            "description": "Define the languages you want to receive the definitions in (if available)",
+            "in": "header",
+            "required": false
           }
         ],
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
@@ -1443,6 +1524,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Element not found"
           }
         },
         "security": [
