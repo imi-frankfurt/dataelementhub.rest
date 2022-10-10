@@ -1549,6 +1549,7 @@
         "parameters": [
           {
             "name": "type",
+            "description": "Specify one or more element types to retrieve. If none is specified, all relations are returned",
             "in": "query",
             "required": false,
             "schema": {
@@ -1563,7 +1564,7 @@
         ],
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
@@ -1571,6 +1572,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "You submitted one or more unknown relation types."
           }
         },
         "security": [
@@ -1589,7 +1593,7 @@
         "summary": "Delete Element Relation.",
         "operationId": "Delete-Element-Relation",
         "requestBody": {
-          "description": "default response",
+          "description": "An ElementRelation to delete",
           "content": {
             "application/json": {
               "schema": {
@@ -1597,7 +1601,7 @@
               },
               "examples": {
                 "ElementRelations": {
-                  "description": "Update Element Relation.",
+                  "description": "Delete Element Relation.",
                   "value": {
                     "leftUrn": "urn:1:dataelement:1:1",
                     "leftSource": 1,
@@ -1612,8 +1616,10 @@
         },
         "responses": {
           "204": {
-            "description": "Element relations successfully deleted",
-            "content": { }
+            "description": "Element relation successfully deleted"
+          },
+          "400": {
+            "description": "Element relation could not be deleted. Either it was not found or you do not have the right to do so."
           }
         },
         "security": [
@@ -1632,7 +1638,7 @@
         "summary": "Create Element Relations.",
         "operationId": "Create-Element-Relations",
         "requestBody": {
-          "description": "default response",
+          "description": "One or more ElementRelations",
           "content": {
             "application/json": {
               "schema": {
@@ -1657,12 +1663,10 @@
         },
         "responses": {
           "204": {
-            "description": "Element relations successfully created",
-            "content": {}
+            "description": "Element relations successfully created"
           },
           "400": {
-            "description": "An error occurred trying to post element relations",
-            "content": {}
+            "description": "An error occurred trying to post element relations"
           }
         },
         "security": [
@@ -1681,7 +1685,7 @@
         "summary": "Update Element Relation.",
         "operationId": "Update-Element-Relation",
         "requestBody": {
-          "description": "default response",
+          "description": "An ElementRelation",
           "content": {
             "application/json": {
               "schema": {
@@ -1704,12 +1708,10 @@
         },
         "responses": {
           "204": {
-            "description": "Updating element relations was successful",
-            "content": { }
+            "description": "Updating element relations was successful"
           },
           "400": {
-            "description": "An error occurred trying to update element relations",
-            "content": { }
+            "description": "An error occurred trying to update element relations"
           }
         },
         "security": [
