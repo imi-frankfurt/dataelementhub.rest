@@ -135,6 +135,68 @@
             "basicAuth": []
           }
         ]
+      },
+      "post": {
+        "tags": [
+          "Namespace"
+        ],
+        "summary": "Create namespace.",
+        "operationId": "create-namespace",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              },
+              "examples": {
+                "NAMESPACE": {
+                  "description": "NAMESPACE",
+                  "value": {
+                    "identification": {
+                      "elementType": "NAMESPACE",
+                      "hideNamespace": false,
+                      "status": "RELEASED"
+                    },
+                    "definitions": [
+                      {
+                        "designation": "Namespace designation",
+                        "definition": "Namespace definition",
+                        "language": "en"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "The full path to your newly created namespace."
+              }
+            }
+          },
+          "403": {
+            "description": "You do not have sufficient access rights to create a namespace"
+          },
+          "422": {
+            "description": "The namespace you provided contains errors."
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
       }
     },
     "/v1/namespaces/{namespaceIdentifier}/members": {
@@ -540,70 +602,6 @@
           },
           "409": {
             "description": "The namespace is already marked as deleted"
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
-          },
-          {
-            "basicAuth": []
-          }
-        ]
-      }
-    },
-    "/v1/namespaces": {
-      "post": {
-        "tags": [
-          "Namespace"
-        ],
-        "summary": "Create namespace.",
-        "operationId": "create-namespace",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "string"
-              },
-              "examples": {
-                "NAMESPACE": {
-                  "description": "NAMESPACE",
-                  "value": {
-                    "identification": {
-                      "elementType": "NAMESPACE",
-                      "hideNamespace": false,
-                      "status": "RELEASED"
-                    },
-                    "definitions": [
-                      {
-                        "designation": "Namespace designation",
-                        "definition": "Namespace definition",
-                        "language": "en"
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Success",
-            "headers": {
-              "Location": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "The full path to your newly created namespace."
-              }
-            }
-          },
-          "403": {
-            "description": "You do not have sufficient access rights to create a namespace"
-          },
-          "422": {
-            "description": "The namespace you provided contains errors."
           }
         },
         "security": [
