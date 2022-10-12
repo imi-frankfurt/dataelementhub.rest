@@ -5,7 +5,7 @@
     "contact": {
       "name": "Institut für Medizininformatik",
       "url": "http://www.imi-frankfurt.de",
-      "email": "vengadeswaran@med.uni-frankfurt.de"
+      "email": "info@dataelementhub.de"
     },
     "description": "REST API Documentation!\n\n  Github repositories:\n\n<https://github.com/mig-frankfurt/dataelementhub.dal>\n\n<https://github.com/mig-frankfurt/dataelementhub.model>\n\n<https://github.com/mig-frankfurt/dataelementhub.rest>\n\n<https://github.com/mig-frankfurt/dataelementhub.gui>\n\nContact:\n\n",
     "version": "1.0.0",
@@ -14,17 +14,44 @@
       "name": "License: AGPLv3"
     }
   },
+  "tags": [
+    {
+      "name": "Namespace",
+      "description": "Namespaces are organizational units that contain sets of dataelements, dataelementgroups and/or records. Create and modify your own namespace with the endpoints here."
+    },
+    {
+      "name": "Element",
+      "description": "The endpoints here allow to create, read, update and delete any kind of dataelements that can be stored in the DEHub - dataelements, dataelementgroups, records, value domains and permitted values."
+    },
+    {
+      "name": "Element Relations",
+      "description": "Elements can be related to other elements - either in the same instance or in other DEHub instances. Those relations can be defined, read and modified via those endpoints."
+    },
+    {
+      "name": "Export",
+      "description": "You can export your metadata in XMl or JSON format with a single request, via our most optimized export endpoint with integrated data validation mechanism. The exported metadata--which will be provided as a .zip file--can include data elements, data element groups, records, value domains or whole namespaces.\n After an export is requested, it will build in the background. The eventual .zip can then be downloaded for up to 7 days. \n The two-step export flow consists of:\n\n1. Export request to start the process in the background.\n2. Download the generated export file when the process is completed."
+    },
+    {
+      "name": "Search",
+      "description": "You can search for DEHub elements and filter the results based on element type, element status, specified element parts and much more."
+    },
+    {
+      "name": "Import",
+      "description": "DEHub enables you to bring along your existing metadata and import it into one of your namespaces. We provide a structured workflow to migrate your metadata over, including all details and relations. This allow you to store, edit and extend your metadata at the same place.\n The import to DEHub is a two-step process:\n\n1. Provide XML/JSON file and start the import process. This stores all elements in the staging area.\n2. Convert your imported elements to drafts and assign them to one of your namespaces."
+    }
+  ],
   "paths": {
-    "/v1/namespaces/{namespaceId}/release": {
+    "/v1/namespaces/{namespaceIdentifier}/release": {
       "patch": {
         "tags": [
           "Namespace"
         ],
-        "summary": "Release Namespace by id.",
-        "operationId": "Release-Namespace-by-id",
+        "summary": "Release a namespace.",
+        "operationId": "Release-Namespace-by-identifier",
         "parameters": [
           {
-            "name": "namespaceId",
+            "name": "namespaceIdentifier",
+            "description": "The identifier of the scoped identifier of the namespace.",
             "in": "path",
             "required": true,
             "schema": {
@@ -33,15 +60,14 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+          "204": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "There was a problem with your request."
+          },
+          "404": {
+            "description": "The namespace identifier does not exist or you do not have the required permission to release it."
           }
         },
         "security": [
@@ -54,27 +80,44 @@
         ]
       }
     },
-    "/v1/namespaces/?scope={scope}": {
+    "/v1/namespaces": {
       "get": {
         "tags": [
           "Namespace"
         ],
-        "summary": "Get all Namespaces with specified scope.",
-        "operationId": "Get-all-Namespaces-with-specified-scope",
+        "summary": "Get all Namespaces",
+        "operationId": "Get-all-Namespaces",
         "parameters": [
           {
             "name": "scope",
-            "in": "path",
-            "required": true,
+            "description": "Limit the list of namespaces to those you have a certain access level on",
+            "in": "query",
+            "required": false,
             "schema": {
               "type": "string",
               "enum": ["read", "write", "admin"]
             }
+          },
+          {
+            "name": "Accept",
+            "description": "Define whether you want a detailed response (default) or a condensed response (listview)",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["application/vnd+mig.mdr.listview+json", "application/vnd+de.dataelementhub.detailview+json"]
+            }
+          },
+          {
+            "name": "Accept-Language",
+            "description": "Define the languages you want to receive the definitions in (if available)",
+            "in": "header",
+            "required": false
           }
         ],
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success",
             "content": {
               "*/*": {
                 "schema": {
@@ -92,18 +135,81 @@
             "basicAuth": []
           }
         ]
+      },
+      "post": {
+        "tags": [
+          "Namespace"
+        ],
+        "summary": "Create namespace.",
+        "operationId": "create-namespace",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              },
+              "examples": {
+                "NAMESPACE": {
+                  "description": "NAMESPACE",
+                  "value": {
+                    "identification": {
+                      "elementType": "NAMESPACE",
+                      "hideNamespace": false,
+                      "status": "RELEASED"
+                    },
+                    "definitions": [
+                      {
+                        "designation": "Namespace designation",
+                        "definition": "Namespace definition",
+                        "language": "en"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "The full path to your newly created namespace."
+              }
+            }
+          },
+          "403": {
+            "description": "You do not have sufficient access rights to create a namespace"
+          },
+          "422": {
+            "description": "The namespace you provided contains errors."
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "basicAuth": []
+          }
+        ]
       }
     },
-    "/v1/namespaces/{namespaceId}/members?elementType={elementType}": {
+    "/v1/namespaces/{namespaceIdentifier}/members": {
       "get": {
         "tags": [
           "Namespace"
         ],
-        "summary": "Get Namespace Members.",
+        "summary": "Get the members of a namespace.",
         "operationId": "Get-Namespace-Members",
         "parameters": [
           {
-            "name": "namespaceId",
+            "name": "namespaceIdentifier",
+            "description": "The identifier of the scoped identifier of the namespace.",
             "in": "path",
             "required": true,
             "schema": {
@@ -111,27 +217,26 @@
             }
           },
           {
-            "in": "header",
             "name": "Accept-Language",
-            "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "example": "de-DE"
+            "description": "Define the languages you want to receive the definitions in (if available)",
+            "in": "header",
+            "required": false
           },
           {
-            "in": "header",
             "name": "Accept",
-            "schema": {
-              "type": "string"
-            },
+            "description": "Define whether you want a detailed response (default) or a condensed response (listview)",
+            "in": "header",
             "required": false,
-            "example": "application/vnd+de.dataelementhub.listview+json"
+            "schema": {
+              "type": "string",
+              "enum": ["application/vnd+mig.mdr.listview+json", "application/vnd+de.dataelementhub.detailview+json"]
+            }
           },
           {
             "name": "elementType",
-            "in": "path",
-            "required": true,
+            "description": "Define which kind of elements you would like to retrieve. If omitted, all kinds of elements will be sent.",
+            "in": "query",
+            "required": false,
             "schema": {
               "type": "array",
               "items": {
@@ -143,8 +248,9 @@
             }
           },
           {
-            "in": "query",
             "name": "hideSubElements",
+            "description": "When true, only members that are NOT part of another structure (dataelementgroup/record) are returned.",
+            "in": "query",
             "schema": {
               "type": "boolean",
               "required": false,
@@ -154,7 +260,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Default response",
+            "description": "Success",
             "content": {
               "*/*": {
                 "schema": {
@@ -164,24 +270,10 @@
             }
           },
           "404": {
-            "description": "No such element found",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+            "description": "The namespace was not found"
           },
           "401": {
-            "description": "Unauthorized",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+            "description": "You have no read access on this namespace."
           }
         },
         "security": [
@@ -204,6 +296,7 @@
         "parameters": [
           {
             "name": "namespaceIdentifier",
+            "description": "The identifier of the scoped identifier of the namespace.",
             "in": "path",
             "required": true,
             "schema": {
@@ -213,17 +306,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Access is forbidden",
+            "description": "Success",
             "content": {
               "*/*": {
                 "schema": {
@@ -233,24 +316,13 @@
             }
           },
           "401": {
-            "description": "Unauthorized",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+            "description": "Unauthorized - you need to provide an access token"
+          },
+          "403": {
+            "description": "Access is forbidden - you do not have sufficient rights to read the user list (must be namespace admin)"
           },
           "404": {
-            "description": "No such element found.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+            "description": "No such element found."
           }
         },
         "security": [
@@ -271,6 +343,7 @@
         "parameters": [
           {
             "name": "namespaceIdentifier",
+            "description": "The identifier of the scoped identifier of the namespace.",
             "in": "path",
             "required": true,
             "schema": {
@@ -303,54 +376,19 @@
         },
         "responses": {
           "204": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Access is forbidden",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "No such element found.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+            "description": "Success"
           },
           "400": {
-            "description": "Bad request.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+            "description": "Bad request."
+          },
+          "401": {
+            "description": "Unauthorized - you need to provide an access token"
+          },
+          "403": {
+            "description": "Access is forbidden - you do not have sufficient rights to update the user list (must be namespace admin)"
+          },
+          "404": {
+            "description": "No such element found."
           }
         },
         "security": [
@@ -373,6 +411,7 @@
         "parameters": [
           {
             "name": "namespaceIdentifier",
+            "description": "The identifier of the scoped identifier of the namespace.",
             "in": "path",
             "required": true,
             "schema": {
@@ -381,6 +420,7 @@
           },
           {
             "name": "userAuthId",
+            "description": "The keycloak id of the user to remove access from.",
             "in": "path",
             "required": true,
             "schema": {
@@ -390,54 +430,19 @@
         ],
         "responses": {
           "204": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Access is forbidden",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "No such element found.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+            "description": "Success"
           },
           "400": {
-            "description": "Bad request.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+            "description": "Bad request."
+          },
+          "401": {
+            "description": "Unauthorized - you need to provide an access token"
+          },
+          "403": {
+            "description": "Access is forbidden - you do not have sufficient rights to delete user access (must be namespace admin)"
+          },
+          "404": {
+            "description": "Namespace id not found or user id not found."
           }
         },
         "security": [
@@ -450,7 +455,7 @@
         ]
       }
     },
-    "/v1/namespaces/{namespaceId}": {
+    "/v1/namespaces/{namespaceIdentifier}": {
       "get": {
         "tags": [
           "Namespace"
@@ -459,7 +464,8 @@
         "operationId": "Get-Namespace-by-id",
         "parameters": [
           {
-            "name": "namespaceId",
+            "name": "namespaceIdentifier",
+            "description": "The identifier of the scoped identifier of the namespace.",
             "in": "path",
             "required": true,
             "schema": {
@@ -477,7 +483,7 @@
         ],
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success",
             "content": {
               "*/*": {
                 "schema": {
@@ -504,7 +510,8 @@
         "operationId": "Update-namespace",
         "parameters": [
           {
-            "name": "namespaceId",
+            "name": "namespaceIdentifier",
+            "description": "The identifier of the scoped identifier of the namespace.",
             "in": "path",
             "required": true,
             "schema": {
@@ -545,15 +552,17 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+          "204": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request. If an illegal status change shall be done"
+          },
+          "403": {
+            "description": "You do not have sufficient access rights on the namespace"
+          },
+          "404": {
+            "description": "The namespace was not found"
           }
         },
         "security": [
@@ -573,7 +582,7 @@
         "operationId": "Delete-Namespace-by-id",
         "parameters": [
           {
-            "name": "namespaceId",
+            "name": "namespaceIdentifier",
             "in": "path",
             "required": true,
             "schema": {
@@ -582,72 +591,17 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
+          "204": {
+            "description": "Success"
           },
-          {
-            "basicAuth": []
-          }
-        ]
-      }
-    },
-    "/v1/namespaces": {
-      "post": {
-        "tags": [
-          "Namespace"
-        ],
-        "summary": "Create namespace.",
-        "operationId": "create-namespace",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "string"
-              },
-              "examples": {
-                "NAMESPACE": {
-                  "description": "NAMESPACE",
-                  "value": {
-                    "identification": {
-                      "elementType": "NAMESPACE",
-                      "hideNamespace": false,
-                      "status": "RELEASED"
-                    },
-                    "definitions": [
-                      {
-                        "designation": "Namespace designation",
-                        "definition": "Namespace definition",
-                        "language": "en"
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+          "400": {
+            "description": "An error has occurred"
+          },
+          "404": {
+            "description": "The namespace was not found"
+          },
+          "409": {
+            "description": "The namespace is already marked as deleted"
           }
         },
         "security": [
@@ -670,6 +624,7 @@
         "parameters": [
           {
             "name": "urn",
+            "description": "The URN of the element that shall be released.",
             "in": "path",
             "required": true,
             "schema": {
@@ -678,15 +633,17 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+          "204": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "An error has occurred"
+          },
+          "404": {
+            "description": "The element was not found"
+          },
+          "422": {
+            "description": "The element can not be released because either the element is outdated or the namespace it is in is not released, its value domain is not yet released or, if it is a dataelementgroup or a record, it contains members that are not released."
           }
         },
         "security": [
@@ -709,6 +666,7 @@
         "parameters": [
           {
             "name": "urn",
+            "description": "The URN of the dataelementgroup or record whose members shall be updated",
             "in": "path",
             "required": true,
             "schema": {
@@ -717,45 +675,25 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
+          "204": {
+            "description": "Success",
+            "headers": {
+              "Location": {
                 "schema": {
                   "type": "string"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Element not Found",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "User has no write access to namespace",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
+                },
+                "description": "The full path to your updated element."
               }
             }
           },
           "400": {
-            "description": "Element Type is not supported. Only dataElementGroup and record are accepted!",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+            "description": "Element Type is not supported. Only dataelementgroup and record are accepted"
+          },
+          "403": {
+            "description": "User has no write access to the namespace"
+          },
+          "404": {
+            "description": "The element was not found"
           }
         },
         "security": [
@@ -778,6 +716,7 @@
         "parameters": [
           {
             "name": "urn",
+            "description": "The URN of the element to retrieve",
             "in": "path",
             "required": true,
             "schema": {
@@ -785,15 +724,15 @@
             }
           },
           {
-            "in": "header",
             "name": "Accept-Language",
-            "required": false,
-            "example": "de-DE"
+            "description": "Define the languages you want to receive the definitions in (if available)",
+            "in": "header",
+            "required": false
           }
         ],
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success",
             "content": {
               "*/*": {
                 "schema": {
@@ -801,6 +740,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "The element was not found"
           }
         },
         "security": [
@@ -821,6 +763,7 @@
         "parameters": [
           {
             "name": "urn",
+            "description": "The URN of the element to update",
             "in": "path",
             "required": true,
             "schema": {
@@ -829,7 +772,7 @@
           }
         ],
         "requestBody": {
-          "description": "default response",
+          "description": "The element to update in JSON format",
           "content": {
             "application/json": {
               "schema": {
@@ -842,6 +785,12 @@
                   },
                   {
                     "$ref": "#/components/schemas/Record"
+                  },
+                  {
+                    "$ref": "#/components/schemas/PermittedValue"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ValueDomain"
                   }
                 ]
               },
@@ -904,8 +853,8 @@
                     },
                     "definitions": [
                       {
-                        "designation": "people",
-                        "definition": "smartphone",
+                        "designation": "Stammdaten",
+                        "definition": "Stammdaten eines Patienten",
                         "language": "de"
                       }
                     ],
@@ -928,15 +877,15 @@
                     },
                     "definitions": [
                       {
-                        "designation": "people",
-                        "definition": "smartphone",
+                        "designation": "Blutdruck",
+                        "definition": "Blutdruckwerte des Patienten",
                         "language": "de"
                       }
                     ],
                     "members": [],
                     "slots": [
                       {
-                        "name": "slot_DEG",
+                        "name": "slot_REC",
                         "value": "slot_value"
                       }
                     ]
@@ -947,15 +896,34 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
+          "204": {
+            "description": "Success",
+            "headers": {
+              "Location": {
                 "schema": {
                   "type": "string"
-                }
+                },
+                "description": "The full path to your updated element"
               }
             }
+          },
+          "400": {
+            "description": "Your request makes no sense - e.g. trying to change status from released to draft."
+          },
+          "403": {
+            "description": "You do not have the necessary access rights to this element"
+          },
+          "404": {
+            "description": "The element was not found"
+          },
+          "406": {
+            "description": "Updating validation is currently not supported."
+          },
+          "422": {
+            "description": "Your request can not be fulfilled, e.g. because you are trying to set a namespace to released, but it contains unreleased elements."
+          },
+          "501": {
+            "description": "Updating released value domains is currently not supported."
           }
         },
         "security": [
@@ -976,6 +944,7 @@
         "parameters": [
           {
             "name": "urn",
+            "description": "The URN of the element that shall be deleted",
             "in": "path",
             "required": true,
             "schema": {
@@ -984,15 +953,14 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+          "204": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "An error occurred."
+          },
+          "404": {
+            "description": "The element was not found"
           }
         },
         "security": [
@@ -1015,16 +983,23 @@
         "parameters": [
           {
             "name": "urn",
+            "description": "The URN of the dataelement whose value domain shall be loaded",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "Accept-Language",
+            "description": "Define the languages you want to receive the definitions in (if available)",
+            "in": "header",
+            "required": false
           }
         ],
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success",
             "content": {
               "*/*": {
                 "schema": {
@@ -1032,6 +1007,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Element not found"
           }
         },
         "security": [
@@ -1054,6 +1032,7 @@
         "parameters": [
           {
             "name": "urn",
+            "description": "The URN of the dataelement whose definitions shall be loaded",
             "in": "path",
             "required": true,
             "schema": {
@@ -1063,7 +1042,7 @@
         ],
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success",
             "content": {
               "*/*": {
                 "schema": {
@@ -1071,6 +1050,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Element not found"
           }
         },
         "security": [
@@ -1093,6 +1075,7 @@
         "parameters": [
           {
             "name": "urn",
+            "description": "The URN of the dataelement whose slots shall be loaded",
             "in": "path",
             "required": true,
             "schema": {
@@ -1102,7 +1085,7 @@
         ],
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success",
             "content": {
               "*/*": {
                 "schema": {
@@ -1110,6 +1093,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Element not found"
           }
         },
         "security": [
@@ -1132,6 +1118,7 @@
         "parameters": [
           {
             "name": "urn",
+            "description": "The URN of the dataelement whose identification shall be loaded",
             "in": "path",
             "required": true,
             "schema": {
@@ -1141,7 +1128,7 @@
         ],
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success",
             "content": {
               "*/*": {
                 "schema": {
@@ -1149,6 +1136,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Element not found"
           }
         },
         "security": [
@@ -1171,6 +1161,7 @@
         "parameters": [
           {
             "name": "urn",
+            "description": "The URN of the dataelement whose concept associations shall be loaded",
             "in": "path",
             "required": true,
             "schema": {
@@ -1180,7 +1171,7 @@
         ],
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success",
             "content": {
               "*/*": {
                 "schema": {
@@ -1188,6 +1179,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Element not found"
           }
         },
         "security": [
@@ -1210,6 +1204,7 @@
         "parameters": [
           {
             "name": "urn",
+            "description": "The URN of the dataelement whose element relations shall be loaded",
             "in": "path",
             "required": true,
             "schema": {
@@ -1219,7 +1214,7 @@
         ],
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
@@ -1227,6 +1222,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Element not found"
           }
         },
         "security": [
@@ -1260,6 +1258,12 @@
                   },
                   {
                     "$ref": "#/components/schemas/Record"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ValueDomain"
+                  },
+                  {
+                    "$ref": "#/components/schemas/PermittedValue"
                   }
                 ]
               },
@@ -1401,14 +1405,24 @@
         },
         "responses": {
           "201": {
-            "description": "CREATED",
-            "content": {
-              "application/json": {
+            "description": "Element was successfully created",
+            "headers": {
+              "Location": {
                 "schema": {
                   "type": "string"
-                }
+                },
+                "description": "The full path to your newly created element."
               }
             }
+          },
+          "400": {
+            "description": "The value domain information you passed is invalid"
+          },
+          "403": {
+            "description": "You do not have write access on the namespace you try to create an element in"
+          },
+          "422": {
+            "description": "Your submitted json data is invalid"
           }
         },
         "security": [
@@ -1431,6 +1445,7 @@
         "parameters": [
           {
             "name": "urn",
+            "description": "The URN of the element whose paths shall be loaded",
             "in": "path",
             "required": true,
             "schema": {
@@ -1440,7 +1455,7 @@
         ],
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
@@ -1448,6 +1463,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "The element was not found"
           }
         },
         "security": [
@@ -1470,16 +1488,33 @@
         "parameters": [
           {
             "name": "urn",
+            "description": "The URN of the dataelementgroup or record whose members shall be loaded",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "Accept",
+            "description": "Define whether you want a detailed response (default) or a condensed response (listview)",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["application/vnd+mig.mdr.listview+json", "application/vnd+de.dataelementhub.detailview+json"]
+            }
+          },
+          {
+            "name": "Accept-Language",
+            "description": "Define the languages you want to receive the definitions in (if available)",
+            "in": "header",
+            "required": false
           }
         ],
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
@@ -1487,6 +1522,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Element not found"
           }
         },
         "security": [
@@ -1509,6 +1547,7 @@
         "parameters": [
           {
             "name": "type",
+            "description": "Specify one or more element types to retrieve. If none is specified, all relations are returned",
             "in": "query",
             "required": false,
             "schema": {
@@ -1523,7 +1562,7 @@
         ],
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
@@ -1531,6 +1570,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "You submitted one or more unknown relation types."
           }
         },
         "security": [
@@ -1549,7 +1591,7 @@
         "summary": "Delete Element Relation.",
         "operationId": "Delete-Element-Relation",
         "requestBody": {
-          "description": "default response",
+          "description": "An ElementRelation to delete",
           "content": {
             "application/json": {
               "schema": {
@@ -1557,7 +1599,7 @@
               },
               "examples": {
                 "ElementRelations": {
-                  "description": "Update Element Relation.",
+                  "description": "Delete Element Relation.",
                   "value": {
                     "leftUrn": "urn:1:dataelement:1:1",
                     "leftSource": 1,
@@ -1572,8 +1614,10 @@
         },
         "responses": {
           "204": {
-            "description": "Element relations successfully deleted",
-            "content": { }
+            "description": "Element relation successfully deleted"
+          },
+          "400": {
+            "description": "Element relation could not be deleted. Either it was not found or you do not have the right to do so."
           }
         },
         "security": [
@@ -1592,7 +1636,7 @@
         "summary": "Create Element Relations.",
         "operationId": "Create-Element-Relations",
         "requestBody": {
-          "description": "default response",
+          "description": "One or more ElementRelations",
           "content": {
             "application/json": {
               "schema": {
@@ -1617,12 +1661,10 @@
         },
         "responses": {
           "204": {
-            "description": "Element relations successfully created",
-            "content": {}
+            "description": "Element relations successfully created"
           },
           "400": {
-            "description": "An error occurred trying to post element relations",
-            "content": {}
+            "description": "An error occurred trying to post element relations"
           }
         },
         "security": [
@@ -1641,7 +1683,7 @@
         "summary": "Update Element Relation.",
         "operationId": "Update-Element-Relation",
         "requestBody": {
-          "description": "default response",
+          "description": "An ElementRelation",
           "content": {
             "application/json": {
               "schema": {
@@ -1664,12 +1706,10 @@
         },
         "responses": {
           "204": {
-            "description": "Updating element relations was successful",
-            "content": { }
+            "description": "Updating element relations was successful"
           },
           "400": {
-            "description": "An error occurred trying to update element relations",
-            "content": { }
+            "description": "An error occurred trying to update element relations"
           }
         },
         "security": [
@@ -1687,15 +1727,18 @@
         "tags": [
           "Import"
         ],
-        "summary": "List all imports.",
+        "summary": "Retrieves the details of all available imports, including import status, timestamp and the percentage amount of staged/converted elements in each import.",
         "operationId": "List-all-imports",
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success.",
             "content": {
               "*/*": {
                 "schema": {
-                  "type": "string"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ImportInfo"
+                  }
                 }
               }
             }
@@ -1716,12 +1759,13 @@
         "tags": [
           "Import"
         ],
-        "summary": "Import stagedElements into DEHUB.",
+        "summary": "Start the asynchronous import process. This is the first half of the two-step import flow, which stores all imported elements into the staging area.",
         "operationId": "Import-stagedElements-into-DEHUB",
         "parameters": [
           {
             "name": "namespaceUrn",
             "in": "path",
+            "description": "Assign the import to one of your namespaces using its urn.",
             "required": true,
             "schema": {
               "type": "string"
@@ -1745,15 +1789,25 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
+          "202": {
+            "description": "Success.",
+            "headers": {
+              "Location": {
                 "schema": {
                   "type": "string"
-                }
+                },
+                "description": "The full path to your processed import."
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized. Only users with WRITE or ADMIN accessLevel can import to the specified namespace."
+          },
+          "400": {
+            "description": "Bad Request. The provided import ID does not exist."
+          },
+          "422": {
+            "description": "Unprocessable Entity. DEHub is unable to process the provided file, check the response message for more info."
           }
         },
         "security": [
@@ -1771,12 +1825,13 @@
         "tags": [
           "Import"
         ],
-        "summary": "Delete an import by Id.",
+        "summary": "Delete an existing import by Id. Deleting an import means all staged element from this import can not be converted to drafts anymore. Already converted elements are not affected.",
         "operationId": "Delete-an-import-by-Id",
         "parameters": [
           {
             "name": "importId",
             "in": "path",
+            "description": "The unique ID of the import. You can only enter one of your own imports.",
             "required": true,
             "schema": {
               "type": "string"
@@ -1784,15 +1839,17 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+          "204": {
+            "description": "Success."
+          },
+          "403": {
+            "description": "Forbidden. Access to this resource is not permitted."
+          },
+          "404": {
+            "description": "Not Found. The provided import ID does not exist."
+          },
+          "401": {
+            "description": "Unauthorized."
           }
         },
         "security": [
@@ -1808,12 +1865,13 @@
         "tags": [
           "Import"
         ],
-        "summary": "Get import info by Id.",
+        "summary": "Get import info by Id, including namespaceUrn, import status, timestamp and the percentage amount of staged/converted elements in this particular import.",
         "operationId": "Get-import-info-by-Id",
         "parameters": [
           {
             "name": "importId",
             "in": "path",
+            "description": "The unique ID of the import. You can only enter one of your own imports.",
             "required": true,
             "schema": {
               "type": "string"
@@ -1822,14 +1880,23 @@
         ],
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success.",
             "content": {
               "*/*": {
                 "schema": {
-                  "type": "string"
+                  "$ref": "#/components/schemas/ImportInfo"
                 }
               }
             }
+          },
+          "403": {
+            "description": "Forbidden. Access to this resource is not permitted."
+          },
+          "404": {
+            "description": "Not Found. The provided import ID does not exist."
+          },
+          "401": {
+            "description": "Unauthorized."
           }
         },
         "security": [
@@ -1847,12 +1914,13 @@
         "tags": [
           "Import"
         ],
-        "summary": "Get all import members.",
+        "summary": "Return a JSON response containing all members of the specified import. The response can be filtered based on the conversion status (STAGED/CONVERTED) and based on the structure in the namespace (e.g. hide an element if it is a part of a dataElementGroup or a record)",
         "operationId": "Get-all-import-members",
         "parameters": [
           {
             "name": "importId",
             "in": "path",
+            "description": "The unique ID of the import. You can only enter one of your own imports.",
             "required": true,
             "schema": {
               "type": "string"
@@ -1861,6 +1929,7 @@
           {
             "name": "hideSubElements",
             "in": "path",
+            "description": "Hide all elements that are included in one or multiple dataElementGroup(s)/record(s). Default is false.",
             "required": false,
             "schema": {
               "type": "boolean",
@@ -1870,6 +1939,7 @@
           {
             "name": "onlyConverted",
             "in": "path",
+            "description": "Return only elements that are converted to drafts. Default is false.",
             "required": false,
             "schema": {
               "type": "boolean",
@@ -1879,14 +1949,26 @@
         ],
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success.",
             "content": {
               "*/*": {
                 "schema": {
-                  "type": "string"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StagedElement"
+                  }
                 }
               }
             }
+          },
+          "403": {
+            "description": "Forbidden. Access to this resource is not permitted."
+          },
+          "404": {
+            "description": "Not Found. The provided import ID does not exist."
+          },
+          "401": {
+            "description": "Unauthorized."
           }
         },
         "security": [
@@ -1904,12 +1986,13 @@
         "tags": [
           "Import"
         ],
-        "summary": "Get stagedElement from a specified import by Id.",
+        "summary": "Get an imported element from the staging area. This endpoint requires import ID and element urn.",
         "operationId": "Get-stagedElement-from-a-specified-import-by-Id",
         "parameters": [
           {
             "name": "importId",
             "in": "path",
+            "description": "The unique ID of the import. You can only enter one of your own imports.",
             "required": true,
             "schema": {
               "type": "string"
@@ -1918,6 +2001,7 @@
           {
             "name": "stagedElementId",
             "in": "path",
+            "description": "The unique ID of the stagedElement. Note that this element should be a part of the specified import.",
             "required": true,
             "schema": {
               "type": "string"
@@ -1926,14 +2010,23 @@
         ],
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success.",
             "content": {
               "*/*": {
                 "schema": {
-                  "type": "string"
+                  "$ref": "#/components/schemas/StagedElement"
                 }
               }
             }
+          },
+          "403": {
+            "description": "Forbidden. Access to this resource is not permitted."
+          },
+          "404": {
+            "description": "Not Found. The provided import ID does not exist."
+          },
+          "401": {
+            "description": "Unauthorized."
           }
         },
         "security": [
@@ -1951,12 +2044,13 @@
         "tags": [
           "Import"
         ],
-        "summary": "Get stagedElement members from a specified import by Id.",
+        "summary": "Returns a JSON response containing all members of an imported element. The response can be filtered based on the conversion status (e.g. return only converted members).",
         "operationId": "Get-stagedElement-members-from-a-specified-import-by-Id",
         "parameters": [
           {
             "name": "importId",
             "in": "path",
+            "description": "The unique ID of the import. You can only choose one of your own imports.",
             "required": true,
             "schema": {
               "type": "string"
@@ -1965,6 +2059,7 @@
           {
             "name": "stagedElementId",
             "in": "path",
+            "description": "The unique ID of the stagedElement. Note that this element should be a part of the specified import.",
             "required": true,
             "schema": {
               "type": "string"
@@ -1973,6 +2068,7 @@
           {
             "name": "onlyConverted",
             "in": "path",
+            "description": "Return only elements that are converted to drafts. Default is false.",
             "required": false,
             "schema": {
               "type": "string",
@@ -1982,14 +2078,26 @@
         ],
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success.",
             "content": {
               "*/*": {
                 "schema": {
-                  "type": "string"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StagedElement"
+                  }
                 }
               }
             }
+          },
+          "403": {
+            "description": "Forbidden. Access to this resource is not permitted."
+          },
+          "404": {
+            "description": "Not Found. The provided import ID does not exist."
+          },
+          "401": {
+            "description": "Unauthorized."
           }
         },
         "security": [
@@ -2007,12 +2115,13 @@
         "tags": [
           "Import"
         ],
-        "summary": "Get stagedElement from a specified import to draft.",
+        "summary": "Convert one or more imported elements from the staging area to drafts.",
         "operationId": "Get-stagedElement-from-a-specified-import-to-draft",
         "parameters": [
           {
             "name": "importId",
             "in": "path",
+            "description": "The unique ID of the import. You can only choose one of your own imports.",
             "required": true,
             "schema": {
               "type": "string"
@@ -2021,14 +2130,10 @@
         ],
         "responses": {
           "200": {
-            "description": "default response",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+            "description": "Success."
+          },
+          "401": {
+            "description": "Unauthorized."
           }
         },
         "requestBody": {
@@ -2064,12 +2169,13 @@
         "tags": [
           "Export"
         ],
-        "summary": "Export DEHUB Elements in JSON or XML format.",
+        "summary": "Start the asynchronous export process of existing DEHUB elements. This is the first half of the two-step export flow, which provide you eventually with export file in JSON or XML format.",
         "operationId": "Export-DEHUB-Elements-in-JSON-or-XML-format",
         "parameters": [
           {
             "name": "format",
             "in": "query",
+            "description": "Export the elements in this file format (e.g. choose XML to generate XML export file).",
             "required": false,
             "schema": {
               "type": "string",
@@ -2080,6 +2186,7 @@
           {
             "name": "fullExport",
             "in": "query",
+            "description": "Full export contains all available element revisions, even if they are OUTDATED (e.g. pass false to export only RELEASED elements)",
             "required": false,
             "schema": {
               "type": "boolean",
@@ -2110,11 +2217,22 @@
           }
         },
         "responses": {
-          "202": {
-            "description": "default response"
+          "200": {
+            "description": "Success.",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "The full path to your generated export file."
+              }
+            }
           },
-          "406": {
-            "description": "Invalid Accept Header"
+          "400": {
+            "description": "Bad Request. Export from more than one namespace is forbidden."
+          },
+          "501": {
+            "description": "Not Implemented. Export can only be processed in JSON or XML format."
           }
         },
         "security": [
@@ -2130,15 +2248,18 @@
         "tags": [
           "Export"
         ],
-        "summary": "Get all Exports.",
+        "summary": "Retrieves the details of all available exports, including export id, status and timestamp",
         "operationId": "Get-all-Exports",
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success.",
             "content": {
               "*/*": {
                 "schema": {
-                  "type": "string"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExportInfo"
+                  }
                 }
               }
             }
@@ -2159,12 +2280,13 @@
         "tags": [
           "Export"
         ],
-        "summary": "Get export file/exported elements if done otherwise get export status.",
+        "summary": "Retrieves the details of an export that has previously been started by ID. If the export process is finished this endpoint will provide the final export file (XML/JSON). This is the second half of the two-step export flow, where you have to start the export process first.",
         "operationId": "Check-Export-Status-and-return-export-file-if-done",
         "parameters": [
           {
             "name": "exportId",
             "in": "path",
+            "description": "Only return details/exportFile for the given exportID.",
             "required": true,
             "schema": {
               "type": "string"
@@ -2173,6 +2295,7 @@
           {
             "name": "onlyUrns",
             "in": "path",
+            "description": "Return complete elements or just element urns (e.g. pass true to return only element urns).",
             "required": true,
             "schema": {
               "type": "boolean",
@@ -2181,24 +2304,26 @@
           }
         ],
         "responses": {
-          "default": {
-            "x-is-file": true,
-            "description": "default response",
-            "content": {
-              "application/octet-stream": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              }
-            }
-          },
           "200": {
-            "description": "default response",
+            "description": "Success. The export process is completed.",
+            "headers": {
+              "Content-Disposition": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "The name of your export file."
+              }
+            },
             "content": {
               "*/*": {
               }
             }
+          },
+          "202": {
+            "description": "Accepted. The export ID is valid and the process is still running in the background."
+          },
+          "404": {
+            "description": "Not Found. The provided export ID does not exist or the export is older than 7 days and it can not be downloaded anymore."
           }
         },
         "security": [
@@ -2216,12 +2341,13 @@
         "tags": [
           "Search"
         ],
-        "summary": "Search for an Element.",
+        "summary": "Returns a JSON response containing details for elements that match the query parameters, without limitations for query length.",
         "operationId": "Search-for-an-Element",
         "parameters": [
           {
             "name": "query",
             "in": "path",
+            "description": "The search query string.",
             "required": true,
             "schema": {
               "type": "string"
@@ -2230,6 +2356,7 @@
           {
             "name": "type",
             "in": "path",
+            "description": "The array of element types to include in the response. If omitted, the response will include all available element types.",
             "required": false,
             "schema": {
               "type": "array",
@@ -2244,6 +2371,7 @@
           {
             "name": "status",
             "in": "path",
+            "description": "The array of status to include in the response. If omitted, the response will include all available status.",
             "required": false,
             "schema": {
               "type": "array",
@@ -2256,6 +2384,7 @@
           {
             "name": "section",
             "in": "path",
+            "description": "The array of element sections to include in the response. If omitted, the response will include all available element sections.",
             "required": false,
             "schema": {
               "type": "array",
@@ -2270,15 +2399,33 @@
         ],
         "responses": {
           "200": {
-            "description": "default response",
+            "description": "Success.",
             "content": {
               "*/*": {
                 "schema": {
-                  "type": "string"
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "format": "application/json",
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/DataElement"
+                      },
+                      {
+                        "$ref": "#/components/schemas/DataElementGroup"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Record"
+                      }
+                    ]
+                  }
                 }
               }
             }
-          }
+          },
+            "422": {
+              "description": "Unprocessable Entity. DEHub is unable to process at least one of the provided element parts."
+            }
         },
         "security": [
           {
@@ -2310,6 +2457,77 @@
   },
   "components": {
     "schemas": {
+      "ProcessStatus": {
+        "type": "string",
+        "enum": ["PROCESSING", "ABORTED", "COMPLETED"]
+      },
+      "ElementType": {
+        "type": "string",
+        "enum": ["DATAELEMENTGROUP", "RECORD", "DATAELEMENT", "CATALOG", "CODE", "NAMESPACE", "ENUMERATED_VALUE_DOMAIN", "DESCRIBED_VALUE_DOMAIN", "DEFINED_VALUE_DOMAIN", "CATALOG_VALUE_DOMAIN", "PERMISSIBLE_VALUE"]
+      },
+      "StagedElement": {
+        "type": "object",
+        "properties": {
+          "stagedElementId": {
+            "type": "string"
+          },
+          "elementUrn": {
+            "type": "string"
+          },
+          "elementType": {
+            "$ref": "#/components/schemas/ElementType"
+          },
+          "designation": {
+            "type": "string"
+          }
+        }
+      },
+      "ImportInfo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "namespaceUrn": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ProcessStatus"
+          },
+          "timestamp": {
+            "type": "string"
+          },
+          "staged": {
+            "type": "number",
+            "format": "double"
+          },
+          "converted": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "ExportInfo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "mediaType": {
+            "type": "object"
+          },
+          "status": {
+            "type": "string"
+          },
+          "progress": {
+            "type": "number",
+            "format": "float"
+          },
+          "timestamp": {
+            "type": "string"
+          }
+        }
+      },
       "ConceptAssociation": {
         "type": "object",
         "properties": {
@@ -2427,7 +2645,7 @@
               "PERMISSIBLE_VALUE"
             ]
           },
-          "namespaceId": {
+          "namespaceIdentifier": {
             "type": "integer",
             "format": "int32"
           },
