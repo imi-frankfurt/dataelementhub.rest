@@ -1,7 +1,9 @@
 package de.dataelementhub.rest.controller.v1;
 
-import de.dataelementhub.dal.ResourceManager;
+import static de.dataelementhub.rest.controller.v1.ApiVersion.API_VERSION;
+
 import de.dataelementhub.dal.jooq.enums.Status;
+import de.dataelementhub.dal.jooq.tables.pojos.DehubUser;
 import de.dataelementhub.dal.jooq.tables.pojos.ScopedIdentifier;
 import de.dataelementhub.model.Deserializer;
 import de.dataelementhub.model.MediaType;
@@ -13,24 +15,25 @@ import de.dataelementhub.model.dto.element.section.Identification;
 import de.dataelementhub.model.dto.element.section.Member;
 import de.dataelementhub.model.dto.element.section.Slot;
 import de.dataelementhub.model.dto.listviews.DataElementGroupMember;
+import de.dataelementhub.model.dto.listviews.SimplifiedElementIdentification;
+import de.dataelementhub.model.handler.UserHandler;
 import de.dataelementhub.model.handler.element.ElementHandler;
 import de.dataelementhub.model.handler.element.section.IdentificationHandler;
 import de.dataelementhub.model.service.ElementService;
 import de.dataelementhub.model.service.JsonValidationService;
 import de.dataelementhub.rest.DataElementHubRestApplication;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import org.jooq.CloseableDSLContext;
+import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -44,18 +47,30 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+/**
+ * Element Controller.
+ */
+@Transactional
 @RestController
-@RequestMapping("/v1/element")
+@RequestMapping("/" + API_VERSION + "/element")
 public class ElementController {
 
   private ElementService elementService;
   private JsonValidationService jsonValidationService;
 
+  private static final String elementPath = "/" + API_VERSION + "/element/{urn}";
+
+  private final DSLContext ctx;
+
+  /**
+   * Constructor for the ElementController class.
+   */
   @Autowired
   public ElementController(ElementService elementService,
-      JsonValidationService jsonValidationService) {
+      JsonValidationService jsonValidationService, DSLContext ctx) {
     this.elementService = elementService;
     this.jsonValidationService = jsonValidationService;
+    this.ctx = ctx;
   }
 
 
@@ -71,8 +86,9 @@ public class ElementController {
     try {
       jsonValidationService.validate(content);
       Element element = Deserializer.getElement(content);
-      ScopedIdentifier scopedIdentifier = elementService
-          .create(DataElementHubRestApplication.getCurrentUser().getId(), element);
+      ScopedIdentifier scopedIdentifier = elementService.create(ctx,
+          UserHandler.getUserByIdentity(ctx, DataElementHubRestApplication.getCurrentUserName())
+              .getId(), element);
 
       UriComponents uriComponents;
       if (host != null && scheme != null) {
@@ -80,11 +96,11 @@ public class ElementController {
             uriComponentsBuilder.path("/v1/element/{urn}")
                 .host(host)
                 .scheme(scheme)
-                .buildAndExpand(IdentificationHandler.toUrn(scopedIdentifier));
+                .buildAndExpand(IdentificationHandler.toUrn(ctx, scopedIdentifier));
       } else {
         uriComponents =
             uriComponentsBuilder.path("/v1/element/{urn}")
-                .buildAndExpand(IdentificationHandler.toUrn(scopedIdentifier));
+                .buildAndExpand(IdentificationHandler.toUrn(ctx, scopedIdentifier));
       }
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.setLocation(uriComponents.toUri());
@@ -92,7 +108,7 @@ public class ElementController {
     } catch (IllegalAccessException e) {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     } catch (NoSuchElementException e) {
-      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (IllegalArgumentException | IllegalStateException | IOException e) {
       return new ResponseEntity<>(e.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
     }
@@ -106,9 +122,10 @@ public class ElementController {
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity read(@PathVariable(value = "urn") String urn,
       @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String languages) {
-    try {
-      Element element = elementService
-          .read(DataElementHubRestApplication.getCurrentUser().getId(), urn);
+    try  {
+      Element element = elementService.read(ctx,
+          UserHandler.getUserByIdentity(ctx, DataElementHubRestApplication.getCurrentUserName())
+              .getId(), urn);
       if (languages != null) {
         element.applyLanguageFilter(languages);
       }
@@ -127,44 +144,40 @@ public class ElementController {
       UriComponentsBuilder uriComponentsBuilder,
       @RequestHeader(value = HttpHeaders.HOST, required = false) String host,
       @RequestHeader(value = "x-forwarded-proto", required = false) String scheme) {
-    Identification oldIdentification = IdentificationHandler.fromUrn(oldUrn);
-    if (oldIdentification == null) {
-      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-
-    Element element;
-    try {
-      element = Deserializer.getElement(content);
-
-      if (oldIdentification.getStatus() == Status.RELEASED && (
-          element.getIdentification().getStatus() == Status.STAGED
-              || element.getIdentification().getStatus() == Status.DRAFT)) {
-        return new ResponseEntity<>("Status change from released to draft or staged not allowed.",
-            HttpStatus.BAD_REQUEST);
+    try  {
+      Identification oldIdentification = IdentificationHandler.fromUrn(ctx, oldUrn);
+      if (oldIdentification == null) {
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
       }
-    } catch (IllegalArgumentException e) {
-      // Identification was not set - so it remains unchanged. Reuse the old identifier.
-      element = Deserializer.getElement(content, oldIdentification);
-    }
 
-    Identification newIdentification = element.getIdentification();
-    element.setIdentification(oldIdentification);
-    element.getIdentification().setStatus(newIdentification.getStatus());
+      Element element;
+      try {
+        element = Deserializer.getElement(content);
 
-    // Check namespace status
-    try (CloseableDSLContext ctx = ResourceManager.getDslContext()) {
+        if (oldIdentification.getStatus() == Status.RELEASED
+            && element.getIdentification().getStatus() == Status.DRAFT) {
+          return new ResponseEntity<>("Status change from released to draft not allowed.",
+              HttpStatus.BAD_REQUEST);
+        }
+      } catch (IllegalArgumentException e) {
+        // Identification was not set - so it remains unchanged. Reuse the old identifier.
+        element = Deserializer.getElement(content, oldIdentification);
+      }
+
+      Identification newIdentification = element.getIdentification();
+      element.setIdentification(oldIdentification);
+      element.getIdentification().setStatus(newIdentification.getStatus());
+
+
       // check if namespace status and element status are compatible
-      if (ElementHandler.statusMismatch(ctx, DataElementHubRestApplication.getCurrentUser().getId(),
-          element)) {
+      DehubUser dehubUser = UserHandler.getUserByIdentity(ctx,
+          DataElementHubRestApplication.getCurrentUserName());
+      if (ElementHandler.statusMismatch(ctx, dehubUser.getId(), element)) {
         return new ResponseEntity<>("Unreleased namespaces can't contain released elements",
             HttpStatus.UNPROCESSABLE_ENTITY);
       }
-    }
-
-    try {
       jsonValidationService.validate(content);
-      Identification identification = elementService
-          .update(DataElementHubRestApplication.getCurrentUser().getId(), element);
+      Identification identification = elementService.update(ctx, dehubUser.getId(), element);
 
       UriComponents uriComponents;
       if (host != null && scheme != null) {
@@ -198,8 +211,10 @@ public class ElementController {
   @DeleteMapping("/{urn}")
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity delete(@PathVariable(value = "urn") String urn) {
-    try {
-      elementService.delete(DataElementHubRestApplication.getCurrentUser().getId(), urn);
+    try  {
+      elementService.delete(ctx,
+          UserHandler.getUserByIdentity(ctx, DataElementHubRestApplication.getCurrentUserName())
+              .getId(), urn);
       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     } catch (IllegalArgumentException e) {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -215,8 +230,10 @@ public class ElementController {
   @PatchMapping("/{urn}/release")
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity release(@PathVariable(value = "urn") String urn) {
-    try {
-      elementService.release(DataElementHubRestApplication.getCurrentUser().getId(), urn);
+    try  {
+      elementService.release(ctx,
+          UserHandler.getUserByIdentity(ctx, DataElementHubRestApplication.getCurrentUserName())
+              .getId(), urn);
       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     } catch (IllegalArgumentException e) {
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -235,9 +252,10 @@ public class ElementController {
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity getValueDomain(@PathVariable(value = "urn") String urn,
       @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String languages) {
-    try {
-      Element element = elementService
-          .readValueDomain(DataElementHubRestApplication.getCurrentUser().getId(), urn);
+    try  {
+      Element element = elementService.readValueDomain(ctx,
+          UserHandler.getUserByIdentity(ctx, DataElementHubRestApplication.getCurrentUserName())
+              .getId(), urn);
       if (languages != null) {
         element.applyLanguageFilter(languages);
       }
@@ -253,9 +271,10 @@ public class ElementController {
   @GetMapping("/{urn}/definitions")
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity getDefinitions(@PathVariable(value = "urn") String urn) {
-    try {
-      List<Definition> definitions = elementService
-          .readDefinitions(DataElementHubRestApplication.getCurrentUser().getId(), urn);
+    try  {
+      List<Definition> definitions = elementService.readDefinitions(ctx,
+          UserHandler.getUserByIdentity(ctx, DataElementHubRestApplication.getCurrentUserName())
+              .getId(), urn);
       return new ResponseEntity<>(definitions, HttpStatus.OK);
     } catch (NoSuchElementException nse) {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -268,9 +287,10 @@ public class ElementController {
   @GetMapping("/{urn}/slots")
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity getSlots(@PathVariable(value = "urn") String urn) {
-    try {
-      List<Slot> slots = elementService
-          .readSlots(DataElementHubRestApplication.getCurrentUser().getId(), urn);
+    try  {
+      List<Slot> slots = elementService.readSlots(ctx,
+          UserHandler.getUserByIdentity(ctx, DataElementHubRestApplication.getCurrentUserName())
+              .getId(), urn);
       return new ResponseEntity<>(slots, HttpStatus.OK);
     } catch (NoSuchElementException nse) {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -283,9 +303,10 @@ public class ElementController {
   @GetMapping("/{urn}/identification")
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity getIdentification(@PathVariable(value = "urn") String urn) {
-    try {
-      Identification identification = elementService
-          .readIdentification(DataElementHubRestApplication.getCurrentUser().getId(), urn);
+    try  {
+      Identification identification = elementService.readIdentification(ctx,
+          UserHandler.getUserByIdentity(ctx, DataElementHubRestApplication.getCurrentUserName())
+              .getId(), urn);
       return new ResponseEntity<>(identification, HttpStatus.OK);
     } catch (NoSuchElementException nse) {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -299,8 +320,9 @@ public class ElementController {
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity getConceptAssociations(@PathVariable(value = "urn") String urn) {
     try {
-      List<ConceptAssociation> conceptAssociations = elementService
-          .readConceptAssociations(DataElementHubRestApplication.getCurrentUser().getId(), urn);
+      List<ConceptAssociation> conceptAssociations = elementService.readConceptAssociations(ctx,
+          UserHandler.getUserByIdentity(ctx, DataElementHubRestApplication.getCurrentUserName())
+              .getId(), urn);
       return new ResponseEntity<>(conceptAssociations, HttpStatus.OK);
     } catch (NoSuchElementException nse) {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -315,8 +337,9 @@ public class ElementController {
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public ResponseEntity getRelations(@PathVariable(value = "urn") String urn) {
     try {
-      List<ElementRelation> relations = elementService
-          .readRelations(DataElementHubRestApplication.getCurrentUser().getId(), urn);
+      List<ElementRelation> relations = elementService.readRelations(ctx,
+          UserHandler.getUserByIdentity(ctx, DataElementHubRestApplication.getCurrentUserName())
+              .getId(), urn);
       return new ResponseEntity<>(relations, HttpStatus.OK);
     } catch (NoSuchElementException nse) {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -334,16 +357,15 @@ public class ElementController {
       @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String languages,
       @RequestHeader(value = HttpHeaders.ACCEPT, required = false) String responseType) {
     try {
-      List<Member> members =
-          elementService.readMembers(
-              DataElementHubRestApplication.getCurrentUser().getId(), urn);
+      DehubUser dehubUser = UserHandler.getUserByIdentity(ctx,
+          DataElementHubRestApplication.getCurrentUserName());
+      List<Member> members = elementService.readMembers(ctx, dehubUser.getId(), urn);
 
       if (responseType != null && responseType
           .equalsIgnoreCase(MediaType.JSON_LIST_VIEW.getLiteral())) {
         List<DataElementGroupMember> dataElementGroupMembers = new ArrayList<>();
         members.forEach(m -> {
-          Element element = elementService
-              .read(DataElementHubRestApplication.getCurrentUser().getId(), m.getElementUrn());
+          Element element = elementService.read(ctx, dehubUser.getId(), m.getElementUrn());
           element.applyLanguageFilter(languages);
           dataElementGroupMembers.add(new DataElementGroupMember(element));
         });
@@ -353,6 +375,52 @@ public class ElementController {
       }
     } catch (NoSuchElementException e) {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+  }
+
+  /**
+   * Update dataElementGroup or record members.
+   * If at least one member has new version return the new element location
+   * otherwise return the old one.
+   */
+  @PostMapping("/{urn}/updateMembers")
+  @Order(SecurityProperties.BASIC_AUTH_ORDER)
+  public ResponseEntity updateMembers(@PathVariable(value = "urn") String urn,
+      UriComponentsBuilder uriComponentsBuilder) {
+    try  {
+      String newUrn = elementService.updateMembers(ctx,
+          UserHandler.getUserByIdentity(ctx, DataElementHubRestApplication.getCurrentUserName())
+              .getId(), urn);
+      UriComponents uriComponents;
+      uriComponents =
+          uriComponentsBuilder.path(elementPath).buildAndExpand(newUrn);
+      HttpHeaders httpHeaders = new HttpHeaders();
+      httpHeaders.setLocation(uriComponents.toUri());
+      return new ResponseEntity<>(httpHeaders, HttpStatus.NO_CONTENT);
+    } catch (NoSuchElementException nse) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    } catch (IllegalAccessException e) {
+      return new ResponseEntity<>(e, HttpStatus.FORBIDDEN);
+    } catch (IllegalArgumentException e) {
+      return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  /**
+   * Get all available paths for a given element.
+   */
+  @GetMapping("/{urn}/paths")
+  @Order(SecurityProperties.BASIC_AUTH_ORDER)
+  public ResponseEntity getElementPaths(@PathVariable(value = "urn") String urn,
+      @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String languages) {
+    try  {
+      int userId = UserHandler.getUserByIdentity(ctx,
+          DataElementHubRestApplication.getCurrentUserName()).getId();
+      List<List<SimplifiedElementIdentification>> elementPaths =
+          elementService.getElementPaths(ctx, userId, urn, languages);
+      return new ResponseEntity<>(elementPaths, HttpStatus.OK);
+    } catch (NoSuchElementException nse) {
+      return new ResponseEntity<>(nse.getMessage(), HttpStatus.NOT_FOUND);
     }
   }
 }

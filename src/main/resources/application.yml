@@ -1,3 +1,10 @@
+dehub:
+  keycloakClient: ${KEYCLOAK_CLIENT:dehub}
+  export:
+    exportDirectory: ${EXPORT_DIR:/var/exports}
+    expirationPeriodInDays: ${EXPORT_EXPIRATION_PERIOD_IN_DAYS:7}
+    expiredExportsCheckRate: ${EXPIRED_EXPORTS_CHECK_RATE_IN_MILLISECONDS:3600000} // default = 1 hour
+
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
@@ -10,10 +17,13 @@ spring:
         jwt:
           issuer-uri: ${ISSUER_URI}
           jwk-set-uri: ${JWK_SET_URI}
+  flyway:
+    locations: "classpath:de/dataelementhub/db/migration"
 
 springdoc:
   swagger-ui:
     url: /api-docs.json
+    deep-linking: true
 
 server:
   port: 8090
