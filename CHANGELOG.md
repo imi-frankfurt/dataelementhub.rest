@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.3.0] - 2022-mm-dd
+## [1.3.0] - 2022-11-03
 ### Added
 - namespace admins can invite users to their namespace(s) and manage the access scopes [[#15](https://github.com/mig-frankfurt/dataelementhub.rest/issues/15)]
   - this allows other people to see hidden namespaces or to create elements in other peoples namespaces (depending on the granted access level)
@@ -26,7 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - the jooq dsl context is now autowired instead of getting it from dehub-dal
 ### Fixed
 - No longer allow users without the respective keycloak role to create namespaces [[#34](https://github.com/mig-frankfurt/dataelementhub.rest/issues/34)]
-
+### Security
+- Update spring boot to 2.7.5
 
 ## [1.2.2] - 2021-12-14
 ### Security
