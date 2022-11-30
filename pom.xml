@@ -8,7 +8,7 @@
 		<version>11.3.0</version>
 	</parent>
 	<artifactId>dehub-rest</artifactId>
-	<version>1.3.0</version>
+	<version>1.3.1</version>
 	<name>DataElementHub REST Application</name>
 
   <properties>
