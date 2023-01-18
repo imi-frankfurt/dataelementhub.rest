@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.FileSystemResource;
@@ -61,14 +60,6 @@ public class ExportController {
     this.ctx = ctx;
   }
 
-  @Value("${export.exportDirectory}")
-  public String defaultExportDirectory;
-
-  @Value("${dehub.export.expirationPeriodInDays}")
-  private int expirationPeriodInDays;
-
-  public String exportDirectory = getExportDirectory();
-
 
   /**
    * Return an overview of all exports.
@@ -78,7 +69,8 @@ public class ExportController {
   public ResponseEntity<List<ExportInfo>> allExports() {
     Integer userId = UserHandler.getUserByIdentity(ctx,
         DataElementHubRestApplication.getCurrentUserName()).getId();
-    List<ExportInfo> exportDescriptions = exportService.allExports(userId, exportDirectory);
+    List<ExportInfo> exportDescriptions = exportService
+        .allExports(userId, exportService.getExportDirectory());
     return new ResponseEntity<>(exportDescriptions, HttpStatus.OK);
   }
 
@@ -110,7 +102,7 @@ public class ExportController {
         .toString().replaceAll("[ \\.\\-\\:]", "_");
     exportService
         .exportService(ctx, exportRequest, userId, exportMediaType,
-            fullExport, timestamp, exportDirectory);
+            fullExport, timestamp, exportService.getExportDirectory());
     UriComponents uriComponents = uriComponentsBuilder.path(
             File.separator + ApiVersion.API_VERSION
                 + File.separator + "export"
@@ -134,14 +126,15 @@ public class ExportController {
       throws Exception {
     Integer userId = UserHandler.getUserByIdentity(ctx,
         DataElementHubRestApplication.getCurrentUserName()).getId();
-    ExportInfo exportInfo = exportService.exportInfo(exportId, userId, exportDirectory);
+    ExportInfo exportInfo = exportService
+        .exportInfo(exportId, userId, exportService.getExportDirectory());
     StringBuilder stringBuilder = new StringBuilder();
     FileSystemResource fileSystemResource;
     switch (exportInfo.getStatus()) {
       case "NOT DEFINED":
         return new ResponseEntity<>(exportInfo.toString(), HttpStatus.NOT_FOUND);
       case "DONE":
-        stringBuilder.append(exportDirectory).append(File.separatorChar);
+        stringBuilder.append(exportService.getExportDirectory()).append(File.separatorChar);
         stringBuilder.append(userId).append(File.separatorChar);
         stringBuilder.append(exportId).append("-");
         stringBuilder.append(exportInfo.getMediaType().getSubtype()).append("-");
@@ -158,7 +151,7 @@ public class ExportController {
             .body(fileSystemResource);
       case "EXPIRED":
         if (onlyUrns) {
-          stringBuilder.append(exportDirectory).append(File.separatorChar);
+          stringBuilder.append(exportService.getExportDirectory()).append(File.separatorChar);
           stringBuilder.append(userId).append(File.separatorChar);
           stringBuilder.append(exportId).append("-");
           stringBuilder.append(exportInfo.getMediaType().getSubtype()).append("-");
@@ -171,14 +164,14 @@ public class ExportController {
               .body(fileSystemResource);
         } else {
           return new ResponseEntity<>("This Export has expired on: " + exportInfo
-              .getTimestamp().toLocalDateTime().plusDays(expirationPeriodInDays),
+              .getTimestamp().toLocalDateTime().plusDays(exportService.getExpirationPeriodInDays()),
               HttpStatus.NOT_FOUND);
         }
       case "PROCESSING":
         return new ResponseEntity<>(exportInfo.toString(), HttpStatus.ACCEPTED);
       default:
         throw new Exception(String.valueOf(exportService
-            .exportInfo(exportId, userId, exportDirectory)));
+            .exportInfo(exportId, userId, exportService.getExportDirectory())));
     }
   }
 
@@ -189,13 +182,13 @@ public class ExportController {
   @Scheduled(fixedRateString = "${dehub.export.expiredExportsCheckRate}")
   @PostConstruct
   public void deleteExpiredExports() throws IOException {
-    Files.createDirectories(Paths.get(exportDirectory));
+    Files.createDirectories(Paths.get(exportService.getExportDirectory()));
     final Instant retentionFilePeriod = ZonedDateTime.now()
-        .minusDays(expirationPeriodInDays).toInstant();
+        .minusDays(exportService.getExpirationPeriodInDays()).toInstant();
     final AtomicInteger countDeletedFiles = new AtomicInteger();
     List<String> parentDirs = new ArrayList<>();
     Files.find(
-            Paths.get(exportDirectory),
+            Paths.get(exportService.getExportDirectory()),
             6,
         (path, basicFileAttrs) ->
             basicFileAttrs.creationTime().toInstant().isBefore(retentionFilePeriod)
@@ -220,14 +213,4 @@ public class ExportController {
     countDeletedFiles.get();
   }
 
-  /**
-   * Get export directory.
-   */
-  public String getExportDirectory() {
-    if (defaultExportDirectory == null) {
-      return System.getProperty("java.io.tmpdir")
-          + "/exports".replace('/', File.separatorChar);
-    }
-    return defaultExportDirectory;
-  }
 }
