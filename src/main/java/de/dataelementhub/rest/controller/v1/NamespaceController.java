@@ -154,7 +154,7 @@ public class NamespaceController {
       return new ResponseEntity<>(httpHeaders, HttpStatus.CREATED);
     } catch (IllegalAccessException e) {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-    } catch (IOException e) {
+    } catch (IOException | IllegalArgumentException e) {
       return new ResponseEntity<>(e.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
     }
   }
@@ -267,11 +267,11 @@ public class NamespaceController {
       return new ResponseEntity<>(httpHeaders, HttpStatus.NO_CONTENT);
     } catch (IllegalAccessException e) {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-    } catch (UnsupportedOperationException | IllegalArgumentException e) {
+    } catch (UnsupportedOperationException e) {
       return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
     } catch (NoSuchMethodException e) {
       return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-    } catch (IOException | IllegalStateException e) {
+    } catch (IOException | IllegalArgumentException | IllegalStateException e) {
       return new ResponseEntity<>(e.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
     } catch (NoSuchElementException nse) {
       return new ResponseEntity<>(
