@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.2] - 2023-01-18
+### Fixed
+- Environment variables are not working in the controller classes [[#86](https://github.com/imi-frankfurt/dataelementhub.rest/issues/86)]
+  - This bug was the reason why the environment variable exportDirectory was not working
+- Prevent multiple definitions of the same language when creating namespaces [[#88](https://github.com/imi-frankfurt/dataelementhub.rest/issues/88)]
+  - It should not be possible to store more than one definition per language and namespace
+
 ## [1.3.1] - 2022-11-30
 ### Security
 - Updated dependencies for dehub-model, dehub-dal, postgresql and spring security to include the latest security fixes in those libraries.
