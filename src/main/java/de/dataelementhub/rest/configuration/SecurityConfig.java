@@ -30,18 +30,21 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
   @Value("${dehub.keycloakClient}")
   private String keycloakClient;
 
-  @Autowired
-  private DSLContext ctx;
+  private final DSLContext ctx;
+
+  public SecurityConfig(DSLContext ctx) {
+    this.ctx = ctx;
+  }
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
-    http.authorizeRequests().antMatchers(HttpMethod.GET, "/**")
+    http.authorizeHttpRequests().requestMatchers(HttpMethod.GET, "/**")
         .permitAll()
-        .and().authorizeRequests().antMatchers(HttpMethod.OPTIONS, "/**")
+        .and().authorizeHttpRequests().requestMatchers(HttpMethod.OPTIONS, "/**")
         .permitAll()
-        .and().authorizeRequests().antMatchers(HttpMethod.HEAD, "/**")
+        .and().authorizeHttpRequests().requestMatchers(HttpMethod.HEAD, "/**")
         .permitAll()
-        .and().authorizeRequests().anyRequest().fullyAuthenticated()
+        .and().authorizeHttpRequests().anyRequest().fullyAuthenticated()
         .and().oauth2ResourceServer(
             oauth2ResourceServer -> oauth2ResourceServer.jwt(
                 jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())
