@@ -1,0 +1,15 @@
+steps:
+  - name: Maven build PR version
+    image: maven:3-eclipse-temurin-17
+    volumes:
+      - /srv/woodpecker/.m2/settings.xml:/root/.m2/settings.xml:ro
+    environment:
+      CI_MAVEN_USER:
+        from_secret: ci_maven_user
+      CI_MAVEN_PW:
+        from_secret: ci_maven_pw
+    commands:
+      - mvn clean install -U -Pvalidate -DskipTests=true -Dmaven.javadoc.skip=true -V
+
+when:
+  - event: pull_request

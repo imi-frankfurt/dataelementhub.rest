@@ -6,6 +6,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+/**
+ * Config.
+ */
 @Configuration
 @ComponentScan("de.dataelementhub.model")
 public class Config implements WebMvcConfigurer {
