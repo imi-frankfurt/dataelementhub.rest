@@ -44,7 +44,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RequestMapping("/v1/import")
 public class ImportController {
 
-  public String importDirectory = System.getProperty("java.io.tmpdir") + "/uploads"
+  public String   importDirectory = System.getProperty("java.io.tmpdir") + "/uploads"
       .replace('/', File.separatorChar);
 
   private final ImportService importService;

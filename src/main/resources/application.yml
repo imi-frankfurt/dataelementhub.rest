@@ -27,3 +27,14 @@ springdoc:
 
 server:
   port: 8090
+
+loinc:
+  regentief-api:
+    username: ${LOINC_USERNAME}
+    password: ${LOINC_PASSWORD}
+umls:
+  apiKey: ${UMLS_APIKEY}
+
+logging:
+  level:
+    root: debug

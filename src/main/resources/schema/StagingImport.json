@@ -390,7 +390,7 @@
                 "type": "object",
                 "properties": {
                   "identification": {
-                    "$ref": "#/"
+                    "$ref": "#/properties/ns2.dehub_data_transfer/properties/stagedElement/properties/identification"
                   },
                   "definitions": {
                     "$ref": "#/properties/ns2.dehub_data_transfer/properties/stagedElement/properties/definitions"
