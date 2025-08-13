@@ -1,0 +1,23 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: dehubpasswort
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data:z
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      default:
+        ipv4_address: 192.168.150.2
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 192.168.150.0/24
+
+volumes:
+  db:
