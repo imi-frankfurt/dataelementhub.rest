@@ -7,8 +7,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static de.dataelementhub.rest.controller.v1.ApiVersion.API_VERSION;
+
 @RestController
-@RequestMapping("/v1/snomed")
+@RequestMapping(API_VERSION +"/snomed")
 public class SnomedController {
 
     private final SnomedService snomedService;
