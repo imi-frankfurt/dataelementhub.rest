@@ -1,0 +1,28 @@
+steps:
+  - name: Check for snapshot version
+    image: maven:3-eclipse-temurin-8
+    volumes:
+      - /srv/woodpecker/.m2/settings.xml:/root/.m2/settings.xml:ro
+    environment:
+      CI_MAVEN_USER:
+        from_secret: ci_maven_user
+      CI_MAVEN_PW:
+        from_secret: ci_maven_pw
+    commands:
+      - if echo $(mvn -q -Dexec.executable=echo -Dexec.args='$${project.version}' --non-recursive exec:exec) | grep -i "SNAPSHOT"; then touch SNAPSHOT; fi
+
+  - name: Maven deploy snapshot
+    image: maven:3-eclipse-temurin-8
+    volumes:
+      - /srv/woodpecker/.m2/settings.xml:/root/.m2/settings.xml:ro
+    environment:
+      CI_MAVEN_USER:
+        from_secret: ci_maven_user
+      CI_MAVEN_PW:
+        from_secret: ci_maven_pw
+    commands:
+      - if [ -f SNAPSHOT ]; then mvn clean deploy -U -Pvalidate -Pmig-maven-repo -DskipTests=true -Dmaven.javadoc.skip=true -V; fi
+
+when:
+  - event: [ push, manual ]
+    branch: develop

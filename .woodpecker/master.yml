@@ -1,0 +1,44 @@
+steps:
+  - name: Maven deploy
+    image: maven:3-eclipse-temurin-17
+    volumes:
+      - /srv/woodpecker/.m2/settings.xml:/root/.m2/settings.xml:ro
+    environment:
+      CI_MAVEN_USER:
+        from_secret: ci_maven_user
+      CI_MAVEN_PW:
+        from_secret: ci_maven_pw
+    commands:
+      - mvn clean deploy -Pvalidate -Pmig-maven-repo -DskipTests=true -Dmaven.javadoc.skip=true -V
+    when:
+      - event: [ push ]
+
+  - name: Maven package
+    image: maven:3-eclipse-temurin-17
+    volumes:
+      - /srv/woodpecker/.m2/settings.xml:/root/.m2/settings.xml:ro
+    environment:
+      CI_MAVEN_USER:
+        from_secret: ci_maven_user
+      CI_MAVEN_PW:
+        from_secret: ci_maven_pw
+    commands:
+      - mvn clean package -Pvalidate -Pmig-maven-repo -DskipTests=true -Dmaven.javadoc.skip=true -V
+    when:
+      - event: [ manual ]
+
+  - name: upload Maven SBOM
+    image: curlimages/curl-base
+    environment:
+      CI_DTRACK_APIKEY:
+        from_secret: ci_dtrack_apikey
+    commands:
+      - export VERSION=$$(grep '^version=.*$' target/maven-archiver/pom.properties | awk -F'[=]' '{print $$2}')
+      - "curl -v --request POST --url https://api.dtrack.dev.imi-frankfurt.de/api/v1/bom --header 'Content-Type: multipart/form-data' --header \"X-Api-Key: $CI_DTRACK_APIKEY\" --form autoCreate=true --form projectName='DEHub REST' --form projectVersion=$VERSION --form bom=@target/dehub-rest-$VERSION-bom.xml"
+    when:
+      - event: [ push, manual ]
+        branch: master
+
+when:
+  - event: [ push, manual ]
+    branch: master
